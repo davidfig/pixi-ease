@@ -1,8 +1,8 @@
 {
   "name": "pixi-ease",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "pixi.js animation library using easing functions",
-  "main": "index.js",
+  "main": "src/animate.js",
   "scripts": {
     "test": "budo example/code.js:index.js --live --dir example",
     "build": "browserify docs/code.js -o docs/index.js",
