@@ -7,7 +7,7 @@ pixi.js animation library using easing functions
 
 ## Live Example
 https://davidfig.github.io/pixi-ease/
-
+    
 ## Simple Usage
 
     const PIXI = require('pixi.js')
@@ -61,17 +61,8 @@ function update(elapsed)
 ### src/angle.js
 ```
 
-/**
- * @file src/angle.js
- * @author David Figatner
- * @license MIT
- * @copyright YOPEY YOPEY LLC 2016
- * {@link https://github.com/davidfig/animate}
- */
-
-
 /** animate object's {x, y} using an angle */
-class angle extends wait
+module.exports = class angle extends wait
 {
     /**
      * @param {object} object to animate
@@ -85,17 +76,8 @@ class angle extends wait
 ### src/face.js
 ```
 
-/**
- * @file src/face.js
- * @author David Figatner
- * @license MIT
- * @copyright YOPEY YOPEY LLC 2016
- * {@link https://github.com/davidfig/animate}
- */
-
-
 /** Rotates an object to face the target */
-class face extends wait
+module.exports = class face extends wait
 {
     /**
      * @param {object} object
@@ -110,53 +92,31 @@ class face extends wait
 ```
 
 /**
- * @file load.js
- * @author David Figatner
- * @license MIT
- * @copyright YOPEY YOPEY LLC 2016
- * {@link https://github.com/davidfig/animate}
- */
-
-
-/**
  * restart an animation = requires a saved state
- * @param {object} object(s) to animate (cannot be saved)
+ * @param {object} object(s) to animate
  */
-
+module.exports = function load(object, load)
 ```
 ### src/movie.js
 ```
 
 /**
- * @file to.js
- * @author David Figatner
- * @license MIT
- * @copyright YOPEY YOPEY LLC 2016
- * {@link https://github.com/davidfig/animate}
- */
-
-
-/**
  * animate a movie of textures
- * @examples
- *
- *    // animate sprite to (20, 20) over 1s using easeInOuTsine, and then reverse the animation
- *    new Animate.movie(sprite, [texture1, texture2, texture3], 500);
  */
-class movie extends wait
+module.exports = class movie extends wait
 
     /**
      * @param {object} object to animate
      * @param {array} textures - parameters to animate, e.g.: {alpha: 5, scale: {x, 5} rotation: Math.PI}
-     * @param {number} [duration=0] - time to run (use 0 for infinite duration--should only be used with customized easing functions)
+     * @param {number} [duration=0] time to run (use 0 for infinite duration--should only be used with customized easing functions)
      * @param {object} [options]
      * @param {number} [options.wait=0] n milliseconds before starting animation (can also be used to pause animation for a length of time)
      * @param {boolean} [options.pause] start the animation paused
-     * @param {(boolean|number)} [options.repeat] true: repeat animation forever; n: repeat animation n times
-     * @param {(boolean|number)} [options.reverse] true: reverse animation (if combined with repeat, then pulse); n: reverse animation n times
-     * @param {(boolean|number)} [options.continue] true: continue animation with new starting values; n: continue animation n times
-     * @param {Function} [options.load] loads an animation using a .save() object; note the * parameters below cannot be loaded and must be re-set
-     * @param {Function} [options.ease] function from easing.js (see http://easings.net for examples)*
+     * @param {(boolean|number)} [options.repeat] true: repeat animation forever n: repeat animation n times
+     * @param {(boolean|number)} [options.reverse] true: reverse animation (if combined with repeat, then pulse) n: reverse animation n times
+     * @param {(boolean|number)} [options.continue] true: continue animation with new starting values n: continue animation n times
+     * @param {Function} [options.load] loads an animation using a .save() object note the * parameters below cannot be loaded and must be re-set
+     * @param {Function} [options.ease] function from easing.js (see http://easings.net for examples)
      * @emits {done} animation expires
      * @emits {cancel} animation is cancelled
      * @emits {wait} each update during a wait
@@ -171,18 +131,9 @@ class movie extends wait
 ```
 
 /**
- * @file animate.js
- * @author David Figatner
- * @license MIT
- * @copyright YOPEY YOPEY LLC 2016
- * {@link https://github.com/davidfig/animate}
- */
-
-
-/**
  * shakes an object or list of objects
  */
-class shake extends wait
+module.exports = class shake extends wait
 
     /**
      * @param {object|array} object or list of objects to shake
@@ -195,17 +146,8 @@ class shake extends wait
 ### src/target.js
 ```
 
-/**
- * @file src/target.js
- * @author David Figatner
- * @license MIT
- * @copyright YOPEY YOPEY LLC 2016
- * {@link https://github.com/davidfig/animate}
- */
-
-
 /** move an object to a target's location */
-class target extends wait
+module.exports = class target extends wait
 {
     /**
      * move to a target
@@ -220,17 +162,8 @@ class target extends wait
 ### src/tint.js
 ```
 
-/**
- * @file tint.js
- * @author David Figatner
- * @license MIT
- * @copyright YOPEY YOPEY LLC 2016
- * {@link https://github.com/davidfig/animate}
- */
-
-
 /** changes the tint of an object */
-class tint extends wait
+module.exports = class tint extends wait
 {
     /**
      * @param {PIXI.DisplayObject|PIXI.DisplayObject[]} object
@@ -244,25 +177,16 @@ class tint extends wait
 ```
 
 /**
- * @file to.js
- * @author David Figatner
- * @license MIT
- * @copyright YOPEY YOPEY LLC 2016
- * {@link https://github.com/davidfig/animate}
- */
-
-
-/**
  * animate any numeric parameter of an object or array of objects
  * @examples
  *
  *    // animate sprite to (20, 20) over 1s using easeInOuTsine, and then reverse the animation
- *    new Animate.to(sprite, {x: 20, y: 20}, 1000, {reverse: true, ease: Easing.easeInOutSine});
+ *    new Animate.to(sprite, {x: 20, y: 20}, 1000, {reverse: true, ease: Easing.easeInOutSine})
  *
  *    // animate list of sprites to a scale over 10s after waiting 1s
- *    new Animate.to([sprite1, sprite2, sprite3], {scale: {x: 0.25, y: 0.25}}, 10000, {wait: 1000});
+ *    new Animate.to([sprite1, sprite2, sprite3], {scale: {x: 0.25, y: 0.25}}, 10000, {wait: 1000})
  */
-class to extends wait
+module.exports = class to extends wait
 
     /**
      * @param {object} object to animate
@@ -271,11 +195,11 @@ class to extends wait
      * @param {object} [options]
      * @param {number} [options.wait=0] n milliseconds before starting animation (can also be used to pause animation for a length of time)
      * @param {boolean} [options.pause] start the animation paused
-     * @param {(boolean|number)} [options.repeat] true: repeat animation forever; n: repeat animation n times
-     * @param {(boolean|number)} [options.reverse] true: reverse animation (if combined with repeat, then pulse); n: reverse animation n times
-     * @param {(boolean|number)} [options.continue] true: continue animation with new starting values; n: continue animation n times
+     * @param {(boolean|number)} [options.repeat] true: repeat animation forever n: repeat animation n times
+     * @param {(boolean|number)} [options.reverse] true: reverse animation (if combined with repeat, then pulse) n: reverse animation n times
+     * @param {(boolean|number)} [options.continue] true: continue animation with new starting values n: continue animation n times
      * @param {boolean} [options.orphan] delete animation if .parent of object (or first object in list) is null
-     * @param {Function} [options.load] loads an animation using an .save() object; note the * parameters below cannot be loaded and must be re-set
+     * @param {Function} [options.load] loads an animation using an .save() object note the * parameters below cannot be loaded and must be re-set
      * @param {Function} [options.ease] function from easing.js (see http://easings.net for examples)*
      * @emits {done} animation expires
      * @emits {cancel} animation is cancelled
@@ -289,15 +213,6 @@ class to extends wait
 ```
 ### src/wait.js
 ```
-
-/**
- * @file wait.js
- * @author David Figatner
- * @license MIT
- * @copyright YOPEY YOPEY LLC 2017
- * {@link https://github.com/davidfig/animate}
- */
-
 
     /**
      * @param {object|object[]} object or list of objects to animate
@@ -321,5 +236,3 @@ class to extends wait
      */
     constructor(object, options)
 ```
-MIT License  
-(c) 2017 [YOPEY YOPEY LLC](https://yopeyopey.com/) by [David Figatner](https://twitter.com/yopey_yopey/)
