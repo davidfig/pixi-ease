@@ -1,11 +1,3 @@
-/**
- * @file wait.js
- * @author David Figatner
- * @license MIT
- * @copyright YOPEY YOPEY LLC 2017
- * {@link https://github.com/davidfig/animate}
- */
-
 const Easing = require('penner')
 const EventEmitter = require('eventemitter3')
 

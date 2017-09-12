@@ -1,15 +1,7 @@
-/**
- * @file src/angle.js
- * @author David Figatner
- * @license MIT
- * @copyright YOPEY YOPEY LLC 2016
- * {@link https://github.com/davidfig/animate}
- */
-
-const wait = require('./wait');
+const wait = require('./wait')
 
 /** animate object's {x, y} using an angle */
-class angle extends wait
+module.exports = class angle extends wait
 {
     /**
      * @param {object} object to animate
@@ -20,18 +12,18 @@ class angle extends wait
      */
     constructor(object, angle, speed, duration, options)
     {
-        options = options || {};
-        super(object, options);
-        this.type = 'Angle';
+        options = options || {}
+        super(object, options)
+        this.type = 'Angle'
         if (options.load)
         {
-            this.load(options.load);
+            this.load(options.load)
         }
         else
         {
-            this.angle = angle;
-            this.speed = speed;
-            this.duration = duration || 0;
+            this.angle = angle
+            this.speed = speed
+            this.duration = duration || 0
         }
     }
 
@@ -39,37 +31,35 @@ class angle extends wait
     {
         if (this.options.cancel)
         {
-            return null;
+            return null
         }
-        const save = super.save();
-        save.angle = this.angle;
-        save.speed = this.speed;
-        return save;
+        const save = super.save()
+        save.angle = this.angle
+        save.speed = this.speed
+        return save
     }
 
     load(load)
     {
-        super.load(load);
-        this.angle = load.angle;
-        this.speed = load.speed;
+        super.load(load)
+        this.angle = load.angle
+        this.speed = load.speed
     }
 
     get angle()
     {
-        return this._angle;
+        return this._angle
     }
     set angle(value)
     {
-        this._angle = value;
-        this.sin = Math.sin(this._angle);
-        this.cos = Math.cos(this._angle);
+        this._angle = value
+        this.sin = Math.sin(this._angle)
+        this.cos = Math.cos(this._angle)
     }
 
     calculate(elapsed)
     {
-        this.object.x += this.cos * elapsed * this.speed;
-        this.object.y += this.sin * elapsed * this.speed;
+        this.object.x += this.cos * elapsed * this.speed
+        this.object.y += this.sin * elapsed * this.speed
     }
 }
-
-module.exports = angle;

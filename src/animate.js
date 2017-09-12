@@ -1,11 +1,3 @@
-/**
- * @file src/animate.js
- * @author David Figatner
- * @license MIT
- * @copyright YOPEY YOPEY LLC 2017
- * {@link https://github.com/davidfig/animate}
- */
-
 const _list = []
 const _defaults = { ease: 'linear' }
 let _ticker
@@ -68,7 +60,7 @@ function ticker()
 }
 
 /**
- * update function
+ * update function only needed if options.ticker is not provided
  * @param {number} elapsed time since last tick
  * @returns {number} of active animations
  */

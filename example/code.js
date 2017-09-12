@@ -46,8 +46,8 @@ let count = 0
 const number = new Animate.to(null, null, 1000, { repeat: true })
 number.on('loop', () => Debug.one('This should change every 1s (' + count++ + ')'))
 
-let rotate
 // pacman walking animation
+let rotate
 function nextTarget()
 {
     let target = {x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight}
@@ -67,8 +67,9 @@ function onDoneTarget()
 let target = nextTarget()
 animates[7] = new Animate.target(_pacman, target, 0.15, {keepAlive: true})
 animates[7].on('done', onDoneTarget)
+
 // pointer facing pacman
-var facing = pointer(100, 0x00ffff)
+var facing = pointer(100, 0x00ffff, 0.5)
 facing.position.set(600, 400)
 animates[6] = new Animate.face(facing, _pacman, 0.00075, {keepAlive: true})
 
@@ -104,7 +105,7 @@ require('./highlight.js')
 
 function pixi()
 {
-    _app = new PIXI.Application({ width: window.innerWidth, height: window.innerHeight })
+    _app = new PIXI.Application({ transparent: true, width: window.innerWidth, height: window.innerHeight })
     document.body.appendChild(_app.view)
     _red = triangle(100, 0xff0000)
     _red.position.set(50, 50)
@@ -133,11 +134,11 @@ function triangle(size, color)
     return g
 }
 
-function pointer(size, color)
+function pointer(size, color, alpha)
 {
     var g = new PIXI.Graphics()
     _app.stage.addChild(g)
-    g.beginFill(color)
+    g.beginFill(color, alpha)
     g.drawCircle(0, 0, size / 2)
     g.endFill()
     g.lineStyle(10, color)

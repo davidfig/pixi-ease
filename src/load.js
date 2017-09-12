@@ -1,11 +1,3 @@
-/**
- * @file load.js
- * @author David Figatner
- * @license MIT
- * @copyright YOPEY YOPEY LLC 2016
- * {@link https://github.com/davidfig/animate}
- */
-
 const wait = require('./wait')
 const to = require('./to')
 const tint = require('./tint')
@@ -17,9 +9,8 @@ const movie = require('./movie')
 
 /**
  * restart an animation = requires a saved state
- * @param {object} object(s) to animate (cannot be saved)
+ * @param {object} object(s) to animate
  */
-
 module.exports = function load(object, load)
 {
     if (!load)
