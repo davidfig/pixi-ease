@@ -36,7 +36,6 @@ https://davidfig.github.io/pixi-ease/
 ## API
 ### src/animate.js
 ```
-
 /**
  * initialize (may be called more than once to change options without changing animation list but don't pass Ticker more than once)
  * @param {object} [options]
@@ -60,7 +59,6 @@ function update(elapsed)
 ```
 ### src/angle.js
 ```
-
 /** animate object's {x, y} using an angle */
 module.exports = class angle extends wait
 {
@@ -75,7 +73,6 @@ module.exports = class angle extends wait
 ```
 ### src/face.js
 ```
-
 /** Rotates an object to face the target */
 module.exports = class face extends wait
 {
@@ -90,7 +87,6 @@ module.exports = class face extends wait
 ```
 ### src/load.js
 ```
-
 /**
  * restart an animation = requires a saved state
  * @param {object} object(s) to animate
@@ -99,7 +95,6 @@ module.exports = function load(object, load)
 ```
 ### src/movie.js
 ```
-
 /**
  * animate a movie of textures
  */
@@ -129,7 +124,6 @@ module.exports = class movie extends wait
 ```
 ### src/shake.js
 ```
-
 /**
  * shakes an object or list of objects
  */
@@ -145,7 +139,6 @@ module.exports = class shake extends wait
 ```
 ### src/target.js
 ```
-
 /** move an object to a target's location */
 module.exports = class target extends wait
 {
@@ -161,7 +154,6 @@ module.exports = class target extends wait
 ```
 ### src/tint.js
 ```
-
 /** changes the tint of an object */
 module.exports = class tint extends wait
 {
@@ -175,7 +167,6 @@ module.exports = class tint extends wait
 ```
 ### src/to.js
 ```
-
 /**
  * animate any numeric parameter of an object or array of objects
  * @examples
@@ -213,7 +204,6 @@ module.exports = class to extends wait
 ```
 ### src/wait.js
 ```
-
     /**
      * @param {object|object[]} object or list of objects to animate
      * @param {object} [options]
@@ -236,3 +226,6 @@ module.exports = class to extends wait
      */
     constructor(object, options)
 ```
+## License 
+MIT License  
+(c) 2017 [YOPEY YOPEY LLC](https://yopeyopey.com/) by [David Figatner](https://twitter.com/yopey_yopey/)
