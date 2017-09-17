@@ -4,7 +4,7 @@
     "description": "pixi.js animation library using easing functions",
     "main": "src/animate.js",
     "scripts": {
-        "test": "budo example/code.js:index.js --live --dir example",
+        "test": "budo docs/code.js:index.js --live --dir docs",
         "build": "browserify docs/code.js -o docs/index.js",
         "docs": "markdown-api README.md src/animate.js src/**/*.js --header",
         "test-docs": "budo --dir docs",
