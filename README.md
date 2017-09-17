@@ -216,6 +216,7 @@ module.exports = class to extends wait
      * @param {boolean} [options.orphan] delete animation if .parent of object (or first object in list) is null
      * @param {Function} [options.load] loads an animation using an .save() object note the * parameters below cannot be loaded and must be re-set
      * @param {Function|string} [options.ease] function (or penner function name) from easing.js (see http://easings.net for examples)*
+     * @param {boolean} [options.noAdd] don't manage the animation through the main Ease loop (updates must be called manually)
      * @emits {done} animation expires
      * @emits {cancel} animation is cancelled
      * @emits {wait} each update during a wait

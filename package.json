@@ -1,34 +1,34 @@
 {
-  "name": "pixi-ease",
-  "version": "0.1.2",
-  "description": "pixi.js animation library using easing functions",
-  "main": "src/animate.js",
-  "scripts": {
-    "test": "budo example/code.js:index.js --live --dir example",
-    "build": "browserify docs/code.js -o docs/index.js",
-    "docs": "markdown-api README.md src/animate.js src/**/*.js --header",
-    "test-docs": "budo --dir docs",
-    "prepublish": "npm run build && npm run docs"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/davidfig/pixi-ease.git"
-  },
-  "author": "david figatner",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/davidfig/pixi-ease/issues"
-  },
-  "homepage": "https://github.com/davidfig/pixi-ease#readme",
-  "dependencies": {
-    "eventemitter3": "^2.0.3",
-    "penner": "^0.1.3",
-    "yy-angle": "^1.0.1",
-    "yy-color": "^1.0.0"
-  },
-  "devDependencies": {
-    "highlight.js": "^9.12.0",
-    "pixi.js": "^4.5.5",
-    "yy-debug": "^1.0.8"
-  }
+    "name": "pixi-ease",
+    "version": "0.2.0",
+    "description": "pixi.js animation library using easing functions",
+    "main": "src/animate.js",
+    "scripts": {
+        "test": "budo example/code.js:index.js --live --dir example",
+        "build": "browserify docs/code.js -o docs/index.js",
+        "docs": "markdown-api README.md src/animate.js src/**/*.js --header",
+        "test-docs": "budo --dir docs",
+        "prepare": "npm run build && npm run docs"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+ssh://git@github.com/davidfig/pixi-ease.git"
+    },
+    "author": "david figatner",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/davidfig/pixi-ease/issues"
+    },
+    "homepage": "https://github.com/davidfig/pixi-ease#readme",
+    "dependencies": {
+        "eventemitter3": "^2.0.3",
+        "penner": "^0.1.3",
+        "yy-angle": "^1.0.1",
+        "yy-color": "^1.0.0"
+    },
+    "devDependencies": {
+        "highlight.js": "^9.12.0",
+        "pixi.js": "^4.5.5",
+        "yy-debug": "^1.0.8"
+    }
 }
