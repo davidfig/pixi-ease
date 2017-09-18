@@ -15,7 +15,10 @@ Animate.init({ease: 'easeInOutSine', ticker: _app.ticker})
 
 // red triangle fades, moves, and scales repeats and reverses forever
 animates[0] = new Animate.to(_red, {alpha: 0.1, x: 500, y: 500, scale: {x: 5, y: 5}}, 1000,
-    {repeat: true, reverse: true, ease: 'easeInOutSine'})
+    {repeat: true, reverse: true, ease: 'easeInOutSine', noAdd: true})
+
+// manually add red triangle to ticker (as a test of options.noAdd: true)
+_app.ticker.add(() => animates[0].update(1000 / 60))
 
 // green triangle moves, rotates, and fades when done
 const green = new Animate.to(_green, { x: 50, y: 400, rotation: 2 * Math.PI }, 2500, { reverse: true, ease: 'easeInSine' })
@@ -58884,6 +58887,7 @@ let _ticker
  */
 function init(options)
 {
+    options = options || {}
     _defaults.ease = options.ease || _defaults.ease
     if (options.ticker)
     {

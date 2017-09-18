@@ -10,6 +10,7 @@ let _ticker
  */
 function init(options)
 {
+    options = options || {}
     _defaults.ease = options.ease || _defaults.ease
     if (options.ticker)
     {
