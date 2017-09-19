@@ -15,7 +15,6 @@ module.exports = class wait extends EventEmitter
      * @param {boolean} [options.orphan] delete animation if .parent of object (or first object in list) is null
      * @param {Function} [options.load] loads an animation using an .save() object note the * parameters below cannot be loaded and must be re-set
      * @param {Function|string} [options.ease] function (or penner function name) from easing.js (see http://easings.net for examples)*
-     * @param {boolean} [options.noAdd] don't manage the animation through the main Ease loop (updates must be called manually)
      * @emits {done} animation expires
      * @emits {cancel} animation is cancelled
      * @emits {wait} each update during a wait
@@ -27,7 +26,6 @@ module.exports = class wait extends EventEmitter
     constructor(object, options)
     {
         super()
-        const Animate = require('./animate')
         this.object = object
         this.options = options || {}
         this.type = 'Wait'
@@ -39,17 +37,13 @@ module.exports = class wait extends EventEmitter
         {
             this.time = 0
         }
-        if (!this.options.ease && Animate.defaults.ease)
-        {
-            this.options.ease = Animate.defaults.ease
-        }
         if (this.options.ease && typeof this.options.ease !== 'function')
         {
-            this.options.ease = Easing[options.ease] || Animate.defaults.easing
+            this.options.ease = Easing[this.options.ease]
         }
-        if (!this.options.noAdd)
+        if (!this.options.ease)
         {
-            Animate.add(this)
+            this.options.ease = Easing['linear']
         }
     }
 

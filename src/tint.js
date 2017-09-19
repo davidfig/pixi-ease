@@ -6,8 +6,8 @@ module.exports = class tint extends wait
 {
     /**
      * @param {PIXI.DisplayObject|PIXI.DisplayObject[]} object
-     * @param {number} tint
-     * @param {number} [duration=0] in milliseconds, if 0, repeat forever
+     * @param {number|number[]} tint
+     * @param {number} [duration] in milliseconds
      * @param {object} [options] @see {@link Wait}
      */
     constructor(object, tint, duration, options)
@@ -25,6 +25,10 @@ module.exports = class tint extends wait
         if (options.load)
         {
             this.load(options.load)
+        }
+        else if (Array.isArray(tint))
+        {
+            this.tints = [this.object.tint, ...tint]
         }
         else
         {
@@ -52,27 +56,67 @@ module.exports = class tint extends wait
         this.to = load.to
     }
 
-    calculate(/* elapsed */)
+    calculate()
     {
         const percent = this.ease(this.time, 0, 1, this.duration)
-        const color = Color.blend(percent, this.start, this.to)
-        if (this.list)
+        if (this.tints)
         {
-            for (let object of this.list)
+            const each = 1 / (this.tints.length - 1)
+            let per = each
+            for (let i = 1; i < this.tints.length; i++)
             {
-                object.tint = color
+                if (percent <= per)
+                {
+                    const color = Color.blend(1 - (per - percent) / each, this.tints[i - 1], this.tints[i])
+                    if (this.list)
+                    {
+                        for (let object of this.list)
+                        {
+                            object.tint = color
+                        }
+                    }
+                    else
+                    {
+                        this.object.tint = color
+                    }
+                    break;
+                }
+                per += each
             }
         }
         else
         {
-            this.object.tint = color
+            const color = Color.blend(percent, this.start, this.to)
+            if (this.list)
+            {
+                for (let object of this.list)
+                {
+                    object.tint = color
+                }
+            }
+            else
+            {
+                this.object.tint = color
+            }
         }
     }
 
     reverse()
     {
-        const swap = this.to
-        this.to = this.start
-        this.start = swap
+        if (this.tints)
+        {
+            const tints = []
+            for (let i = this.tints.length - 1; i >= 0; i--)
+            {
+                tints.push(this.tints[i])
+            }
+            this.tints = tints
+        }
+        else
+        {
+            const swap = this.to
+            this.to = this.start
+            this.start = swap
+        }
     }
 }

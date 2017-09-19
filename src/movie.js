@@ -7,7 +7,7 @@ module.exports = class movie extends wait
 {
     /**
      * @param {object} object to animate
-     * @param {array} textures - parameters to animate, e.g.: {alpha: 5, scale: {x, 5} rotation: Math.PI}
+     * @param {PIXI.Texture[]} textures
      * @param {number} [duration=0] time to run (use 0 for infinite duration--should only be used with customized easing functions)
      * @param {object} [options]
      * @param {number} [options.wait=0] n milliseconds before starting animation (can also be used to pause animation for a length of time)

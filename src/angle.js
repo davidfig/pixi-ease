@@ -62,4 +62,9 @@ module.exports = class angle extends wait
         this.object.x += this.cos * elapsed * this.speed
         this.object.y += this.sin * elapsed * this.speed
     }
+
+    reverse()
+    {
+        this.angle += Math.PI
+    }
 }
