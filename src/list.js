@@ -3,12 +3,16 @@ module.exports = class List
     constructor()
     {
         this.list = []
-        if (arguments.list)
+        if (arguments.length)
         {
-            this.add(arguments)
+            this.add(...arguments)
         }
     }
 
+    /**
+     * Add animation(s) to animation list
+     * @param {object|object[]...} any animation class
+     */
     add()
     {
         for (let arg of arguments)

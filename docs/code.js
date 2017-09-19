@@ -1,29 +1,34 @@
 const PIXI = require('pixi.js')
 const Random = require('yy-random')
 
-const Animate = require('..')
+const Ease = require('..')
 
 const TIME = 1000
 
 let size, last = performance.now()
 const app = pixi()
 const textures = load()
-const list = new Animate.list()
 
-const target = list.add(new Animate.to(block(), { x: window.innerWidth - size / 2 }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true }))
-list.add(new Animate.face(block(), target.object, 0.01, { keepAlive: true }))
-list.add(new Animate.target(block(), target.object, 0.1, { keepAlive: true }))
-list.add(new Animate.to(block(), { rotation: Math.PI * 2 }, TIME, { ease: 'easeInOutQuad', reverse: true, repeat: true }))
-list.add(new Animate.tint(block(), 0x888888, TIME, { repeat: true, reverse: true }))
-list.add(new Animate.tint(block(), [0x00ff00, 0xff0000, 0x0000ff], TIME * 10, { repeat: true, reverse: true }))
-list.add(new Animate.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true }))
-list.add(new Animate.shake(block(), 5))
-list.add(new Animate.movie(block(), textures, TIME, { repeat: true, reverse: true }))
+const list = new Ease.list(
+    new Ease.shake(block(), 5),
+    new Ease.movie(block(), textures, TIME, { repeat: true, reverse: true })
+)
 
+const target = list.add(new Ease.to(block(), { x: window.innerWidth - size / 2 }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true }))
+list.add(
+    new Ease.face(block(), target.object, 0.01, { keepAlive: true }),
+    new Ease.target(block(), target.object, 0.1, { keepAlive: true }),
+    new Ease.to(block(), { rotation: Math.PI * 2 }, TIME, { ease: 'easeInOutQuad', reverse: true, repeat: true }),
+    new Ease.tint(block(), 0x888888, TIME, { repeat: true, reverse: true }),
+    new Ease.tint(block(), [0x00ff00, 0xff0000, 0x0000ff], TIME * 10, { repeat: true, reverse: true }),
+    new Ease.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true })
+)
+
+const max = 1000 / 60
 function update()
 {
     const now = performance.now()
-    const elapsed = now - last
+    const elapsed = now - last > max ? max : now - last
     last = now
     list.update(elapsed)
     requestAnimationFrame(update)
