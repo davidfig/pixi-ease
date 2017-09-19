@@ -13,25 +13,37 @@ https://davidfig.github.io/pixi-ease/
     const PIXI = require('pixi.js')
     const Ease = require('pixi-ease')
 
-    // initialize pixi.js and create a square sprite
+    // initialize pixi.js
     const app = new PIXI.Application()
     document.body.appendChild(app.view)
+
+    // create a square sprite
     const square = app.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
     square.position.set(400, 300)
     square.tint = 0x0000ff
     square.width = square.height = 20
 
-    // initial ease with a default easing function and attach to PIXI's default ticker
-    Ease.init({ ease: 'easeInOutSine', ticker: PIXI.ticker.shared })
+    // create container for animations
+    const list = new Ease.list()
 
-    // change square's tint from blue to red over 2 seconds
-    new Ease.tint(square, 0xff0000, 2000)
+    // change square's tint from blue to red over 2 seconds; reverse and repeat
+    const tint = list.add(new Ease.tint(square, 0xff0000, 2000, { repeat: true, reverse: true }))
 
     // change square's location to (20, 55) over 2 seconds, and then return to the middle
-    const to = new Ease.to(square, { x: 20, y: 55 }, 2000, { reverse: true })
+    const to = list.add(new Ease.to(square, { x: 20, y: 55 }, 2000, { reverse: true }))
 
     // listen for done, then print to console
     to.on('done', () => console.log('Square has finished animating'))
+
+    const last = performance.now()
+    function update()
+    {
+        const now = performance.now()
+        list.update(now - last)
+        last = now        
+        requestAnimationFrame(update)
+    }
+    update()
 
 ## API
 ### src/angle.js
