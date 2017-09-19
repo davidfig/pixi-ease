@@ -34,29 +34,6 @@ https://davidfig.github.io/pixi-ease/
     to.on('done', () => console.log('Square has finished animating'))
 
 ## API
-### src/animate.js
-```
-/**
- * initialize (may be called more than once to change options without changing animation list but don't pass Ticker more than once)
- * @param {object} [options]
- * @param {PIXI.Ticker} [options.ticker] attaches to the PIXI.Ticker; if this is not provided, you need to call update() manually
- * @param {function|string} [options.ease=linear] default easing function
- */
-function init(options)
-
-/**
- * remove an animation
- * @param {object|array} animate - the animation (or array of animations) to remove - can be null
- */
-function remove(animate)
-
-/**
- * update function only needed if options.ticker is not provided
- * @param {number} elapsed time since last tick
- * @returns {number} of active animations
- */
-function update(elapsed)
-```
 ### src/angle.js
 ```
 /** animate object's {x, y} using an angle */
@@ -85,6 +62,20 @@ module.exports = class face extends wait
      */
     constructor(object, target, speed, options)
 ```
+### src/list.js
+```
+    /**
+     * remove animation(s)
+     * @param {object|array} animate - the animation (or array of animations) to remove; can be null
+     */
+    remove(animate)
+
+    /**
+     * @param {number} elapsed time since last tick
+     * @returns {number} of active animations
+     */
+    update(elapsed)
+```
 ### src/load.js
 ```
 /**
@@ -102,7 +93,7 @@ module.exports = class movie extends wait
 
     /**
      * @param {object} object to animate
-     * @param {array} textures - parameters to animate, e.g.: {alpha: 5, scale: {x, 5} rotation: Math.PI}
+     * @param {PIXI.Texture[]} textures
      * @param {number} [duration=0] time to run (use 0 for infinite duration--should only be used with customized easing functions)
      * @param {object} [options]
      * @param {number} [options.wait=0] n milliseconds before starting animation (can also be used to pause animation for a length of time)
@@ -159,8 +150,8 @@ module.exports = class tint extends wait
 {
     /**
      * @param {PIXI.DisplayObject|PIXI.DisplayObject[]} object
-     * @param {number} tint
-     * @param {number} [duration=0] in milliseconds, if 0, repeat forever
+     * @param {number|number[]} tint
+     * @param {number} [duration] in milliseconds
      * @param {object} [options] @see {@link Wait}
      */
     constructor(object, tint, duration, options)
@@ -216,7 +207,6 @@ module.exports = class to extends wait
      * @param {boolean} [options.orphan] delete animation if .parent of object (or first object in list) is null
      * @param {Function} [options.load] loads an animation using an .save() object note the * parameters below cannot be loaded and must be re-set
      * @param {Function|string} [options.ease] function (or penner function name) from easing.js (see http://easings.net for examples)*
-     * @param {boolean} [options.noAdd] don't manage the animation through the main Ease loop (updates must be called manually)
      * @emits {done} animation expires
      * @emits {cancel} animation is cancelled
      * @emits {wait} each update during a wait

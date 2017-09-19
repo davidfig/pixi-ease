@@ -1,259 +1,71 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 const PIXI = require('pixi.js')
-const Debug = require('yy-debug')
-const Animate = require('../src/animate')
+const Random = require('yy-random')
 
-// set up pixi and shapes
-let _app, _red, _green, _blue, _shaker, _pacman
-const theDots = [], animates = []
-pixi()
+const Animate = require('..')
 
-Debug.init()
+const TIME = 1000
 
-// intialize update loop for Animate with optional debug info
-Animate.init({ease: 'easeInOutSine', ticker: _app.ticker})
+let size, last = performance.now()
+const app = pixi()
+const textures = load()
+const list = new Animate.list()
 
-// red triangle fades, moves, and scales repeats and reverses forever
-animates[0] = new Animate.to(_red, {alpha: 0.1, x: 500, y: 500, scale: {x: 5, y: 5}}, 1000,
-    {repeat: true, reverse: true, ease: 'easeInOutSine', noAdd: true})
+const target = list.add(new Animate.to(block(), { x: window.innerWidth - size / 2 }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true }))
+list.add(new Animate.face(block(), target.object, 0.01, { keepAlive: true }))
+list.add(new Animate.target(block(), target.object, 0.1, { keepAlive: true }))
+list.add(new Animate.to(block(), { rotation: Math.PI * 2 }, TIME, { ease: 'easeInOutQuad', reverse: true, repeat: true }))
+list.add(new Animate.tint(block(), 0x888888, TIME, { repeat: true, reverse: true }))
+list.add(new Animate.tint(block(), [0x00ff00, 0xff0000, 0x0000ff], TIME * 10, { repeat: true, reverse: true }))
+list.add(new Animate.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true }))
+list.add(new Animate.shake(block(), 5))
+list.add(new Animate.movie(block(), textures, TIME, { repeat: true, reverse: true }))
 
-// manually add red triangle to ticker (as a test of options.noAdd: true)
-_app.ticker.add(() => animates[0].update(1000 / 60))
-
-// green triangle moves, rotates, and fades when done
-const green = new Animate.to(_green, { x: 50, y: 400, rotation: 2 * Math.PI }, 2500, { reverse: true, ease: 'easeInSine' })
-green.on('done', (object) => new Animate.to(object, { alpha: 0 }, 2000))
-
-// blue triangle spins forever
-animates[1] = new Animate.to(_blue, {rotation: -2 * Math.PI}, 1000, {continue: true})
-
-// circle changes = require(blue to red and reverse and repeats
-animates[2] = new Animate.tint(_shaker, 0xff0000, 2000, {repeat: true, reverse: true})
-
-// circle shakes forever, it starts after 1 second (also testing array of objects)
-animates[3] = new Animate.shake([_shaker], 5, 0, {wait: 1000})
-
-// animate a group that is not a container
-animates[4] = new Animate.to(theDots, {alpha: 0.1, scale: {x: 2, y: 2}}, 2000, {repeat: true, reverse: true, ease: 'easeInOutSine'})
-animates[8] = new Animate.tint(theDots, 0x00ff00, 1000, {repeat: true, reverse: true})
-
-// pacman mouth animation
-const pacman = new Animate.to(_pacman, {angle: 0.01}, 250, {repeat: true, reverse: true})
-pacman.on('each', () =>
-    _pacman.clear()
-        .moveTo(Math.cos(_pacman.angle) * _pacman.radius / 2, Math.sin(_pacman.angle) * _pacman.radius / 2)
-        .lineStyle(_pacman.radius, 0xffff00)
-        .arc(0, 0, _pacman.radius / 2, Math.PI * _pacman.angle, Math.PI * -_pacman.angle, false)
-)
-
-let count = 0
-const number = new Animate.to(null, null, 1000, { repeat: true })
-number.on('loop', () => Debug.one('This should change every 1s (' + count++ + ')'))
-
-// pacman walking animation
-let rotate
-function nextTarget()
+function update()
 {
-    let target = {x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight}
-
-    // rotate pacman around the short way to the target
-    Animate.remove(rotate)
-    rotate = new Animate.face(_pacman, target, 0.01)
-    return target
+    const now = performance.now()
+    const elapsed = now - last
+    last = now
+    list.update(elapsed)
+    requestAnimationFrame(update)
 }
-
-
-function onDoneTarget()
-{
-    target = nextTarget()
-    animates[7].target = target
-}
-let target = nextTarget()
-animates[7] = new Animate.target(_pacman, target, 0.15, {keepAlive: true})
-animates[7].on('done', onDoneTarget)
-
-// pointer facing pacman
-var facing = pointer(100, 0x00ffff, 0.5)
-facing.position.set(600, 400)
-animates[6] = new Animate.face(facing, _pacman, 0.00075, {keepAlive: true})
-
-// angle movement
-function onEachAngle()
-{
-    if (circleAngle.x > window.innerWidth || circleAngle.x < 0 || circleAngle.y > window.innerHeight || circleAngle.y < 0)
-    {
-        circleAngle.position.set(Math.random() * window.innerWidth, Math.random() * window.innerHeight)
-        animates[5].angle = Math.random() * Math.PI * 2
-    }
-}
-
-var circleAngle = _app.stage.addChild(PIXI.Sprite.fromImage('circle.png'))
-circleAngle.anchor.set(0.5)
-circleAngle.tint = 0xff00ff
-circleAngle.width = circleAngle.height = 50
-circleAngle.position.set(Math.random() * window.innerWidth, Math.random() * window.innerHeight)
-animates[5] = new Animate.angle(circleAngle, Math.random(), 0.1, 0)
-animates[5].on('each', onEachAngle)
-
-var faces = []
-for (let i = 1; i <= 7; i++)
-{
-    faces.push(PIXI.Texture.fromImage('faces/happy-' + i + '.png'))
-}
-var smile = new PIXI.Sprite(faces[0])
-smile.position.set(550, 50)
-_app.stage.addChild(smile)
-new Animate.movie(smile, faces, 1500, {repeat: true, reverse: true})
+update()
 
 require('./highlight.js')
 
 function pixi()
 {
-    _app = new PIXI.Application({ transparent: true, width: window.innerWidth, height: window.innerHeight })
-    document.body.appendChild(_app.view)
-    _red = triangle(100, 0xff0000)
-    _red.position.set(50, 50)
-    _green = triangle(50, 0x00ff00)
-    _green.position.set(300,300)
-    _blue = triangle(50, 0x0000ff)
-    _blue.position.set(500,100)
-    _shaker = PIXI.Sprite.fromImage('circle.png')
-    _app.stage.addChild(_shaker)
-    _shaker.tint = 0x0000ff
-    _shaker.position.set(200, 200)
-    dots(800, 250, 150, 10)
-    pacmanCreate(100, 100, 100, 100)
+    const app = new PIXI.Application({ transparent: true })
+    document.body.appendChild(app.view)
+    app.view.position = 'absolute'
+    app.renderer.resize(window.innerWidth, window.innerHeight)
+    size = Math.min(window.innerWidth, window.innerHeight) / 10
+    return app
 }
 
-function triangle(size, color)
+function load()
 {
-    var half = size / 2
-    var g = _app.stage.addChild(new PIXI.Graphics())
-    g.beginFill(color)
-    g.moveTo(0, -half)
-    g.lineTo(-half, half)
-    g.lineTo(half, half)
-    g.closePath()
-    g.endFill()
-    return g
-}
-
-function pointer(size, color, alpha)
-{
-    var g = new PIXI.Graphics()
-    _app.stage.addChild(g)
-    g.beginFill(color, alpha)
-    g.drawCircle(0, 0, size / 2)
-    g.endFill()
-    g.lineStyle(10, color)
-    g.moveTo(0, 0)
-    g.lineTo(size, 0)
-    g.closePath()
-    g.rotation = -Math.PI
-    return g
-}
-
-function dots(x, y, distance)
-{
-    for (let i = 0; i < 100; i++)
+    const textures = []
+    for (let i = 1; i <= 5; i++)
     {
-        let sprite = PIXI.Sprite.fromImage('circle.png')
-        sprite.anchor.set(0.5)
-        sprite.alpha = 0.5
-        sprite.tint = 0xff00ff
-        _app.stage.addChild(sprite)
-        theDots.push(sprite)
-        const angle = Math.random() * 2 * Math.PI
-        const dist = Math.random() * distance
-        sprite.x = x + Math.cos(angle) * dist
-        sprite.y = y + Math.sin(angle) * dist
+        textures.push(PIXI.Texture.fromImage('images/' + i + '.png'))
     }
+    return textures
 }
 
-function pacmanCreate(x, y, size)
+function block(tint)
 {
-    _pacman = _app.stage.addChild(new PIXI.Graphics())
-    _pacman.position.set(x, y)
-    _pacman.radius = size / 2
-    _pacman.angle = 0.3
+    const block = app.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
+    block.anchor.set(0.5)
+    block.width = block.height = size * 0.9
+    block.tint = typeof tint !== 'undefined' ? tint : Random.color()
+    block.x = size / 2
+    block.y = size / 2 + size * (app.stage.children.length - 1)
+    return block
 }
 
-// add a debug panel for instructions
-function instructions()
-{
-    function a(n)
-    {
-        return animates[n] ? '<span style="background: rgba(0,255,0,0.25)">save and cancel </span>' : '<span style="background: rgba(255,0,0,0.25)">load and resume </span>'
-    }
-    let s = ''
-    s += 'Press 1 to ' + a(0) + 'red triangle animation (.to)<br>'
-    s += 'Press 2 to ' + a(1) + 'blue triangle animation (.to)<br>'
-    s += 'Press 3 to ' + a(2) + 'red-to-blue circle animation (.tint)<br>'
-    s += 'Press 4 to ' + a(3) + 'shaking circle animation (.to)<br>'
-    s += 'Press 5 to ' + a(4) + 'lots of pink dots animation (.to with array)<br>'
-    s += 'Press 6 to ' + a(5) + 'pink circle animation (.angle)<br>'
-    s += 'Press 7 to ' + a(6) + 'pointer animation (.face)<br>'
-    s += 'Press 8 to ' + a(7) + 'pacman animation (.target)'
-
-    Debug.one(s, {panel: saveload})
-}
-const saveload = Debug.add('saveload', {side: 'leftbottom'})
-
-instructions()
-Debug.resize()
-
-const save = []
-
-document.body.addEventListener('keypress',
-    function(e)
-    {
-        const code = (typeof e.which === 'number') ? e.which : e.keyCode
-        if (code >= 49 && code < 49 + animates.length)
-        {
-            const i = code - 49
-            if (animates[i])
-            {
-                save[i] = animates[i].save()
-                Animate.remove(animates[i])
-                animates[i] = null
-            }
-            else
-            {
-                switch (i)
-                {
-                    case 0:
-                        animates[i] = Animate.load(_red, save[i])
-                        break
-                    case 1:
-                        animates[i] = Animate.load(_blue, save[i])
-                        break
-                    case 2:
-                        animates[i] = Animate.load(_shaker, save[i])
-                        break
-                    case 3:
-                        animates[i] = Animate.load([_shaker], save[i])
-                        break
-                    case 4:
-                        animates[i] = Animate.load(theDots, save[i])
-                        break
-                    case 5:
-                        animates[i] = Animate.load(circleAngle, save[i])
-                        animates[i].on('each', onEachAngle)
-                        break
-                    case 6:
-                        animates[i] = Animate.load([facing, _pacman], save[i])
-                        break
-                    case 7:
-                        animates[i] = Animate.load([_pacman, target], save[i], {onDone: onDoneTarget})
-                        break
-                }
-            }
-            instructions()
-        }
-        else Debug.log(code, {panel: saveload})
-    }
-)
-},{"../src/animate":376,"./highlight.js":2,"pixi.js":322,"yy-debug":373}],2:[function(require,module,exports){
+/* globals performance, requestAnimationFrame */
+},{"..":3,"./highlight.js":2,"pixi.js":322,"yy-random":373}],2:[function(require,module,exports){
 // shows the code in the demo
 window.onload = function()
 {
@@ -271,6 +83,23 @@ window.onload = function()
 // for eslint
 /* globals window, XMLHttpRequest, document */
 },{"highlight.js":8}],3:[function(require,module,exports){
+const list = require('./src/list')
+
+module.exports = {
+    list,
+    wait: require('./src/wait'),
+    to: require('./src/to'),
+    shake: require('./src/shake'),
+    tint: require('./src/tint'),
+    face: require('./src/face'),
+    angle: require('./src/angle'),
+    target: require('./src/target'),
+    movie: require('./src/movie'),
+    load: require('./src/load'),
+
+    default: new list()
+}
+},{"./src/angle":374,"./src/face":375,"./src/list":376,"./src/load":377,"./src/movie":378,"./src/shake":379,"./src/target":380,"./src/tint":381,"./src/to":382,"./src/wait":383}],4:[function(require,module,exports){
 /**
  * Bit twiddling hacks for JavaScript.
  *
@@ -476,109 +305,6 @@ exports.nextCombination = function(v) {
 }
 
 
-},{}],4:[function(require,module,exports){
-/**
- * Javascript: create click event for both mouse and touch
- * @example
- *
- * import clicked from 'clicked';
- * // or var clicked = require('clicked');
- *
- *  function handleClick()
- *  {
- *      console.log('I was clicked.');
- *  }
- *
- *  var div = document.getElementById('clickme');
- *  clicked(div, handleClick, {thresshold: 15});
- *
- */
-
-/**
- * @param {HTMLElement} element
- * @param {function} callback called after click: callback(event, options.args)
- * @param {object} [options]
- * @param {number} [options.thresshold=10] if touch moves threshhold-pixels then the touch-click is cancelled
- * @param {*} [options.args] arguments for callback function
- * @returns {object} object
- * @returns {function} object.disable() - disables clicked
- * @returns {function} object.enable() - enables clicked after disable() is called
- */
-function clicked(element, callback, options)
-{
-    function touchstart(e)
-    {
-        if (disabled)
-        {
-            return;
-        }
-        if (e.touches.length === 1)
-        {
-            lastX = e.changedTouches[0].screenX;
-            lastY = e.changedTouches[0].screenY;
-            down = true;
-        }
-    }
-
-    function pastThreshhold(x, y)
-    {
-        return Math.abs(lastX - x) > threshhold || Math.abs(lastY - y) > threshhold;
-    }
-
-    function touchmove(e)
-    {
-        if (!down || e.touches.length !== 1)
-        {
-            touchcancel();
-            return;
-        }
-        var x = e.changedTouches[0].screenX;
-        var y = e.changedTouches[0].screenY;
-        if (pastThreshhold(x, y))
-        {
-            touchcancel();
-        }
-    }
-
-    function touchcancel()
-    {
-        down = false;
-    }
-
-    function touchend(e)
-    {
-        if (down)
-        {
-            e.preventDefault();
-            callback(e, options.args);
-        }
-    }
-
-    function mouseclick(e)
-    {
-        if (!disabled)
-        {
-            callback(e, options.args);
-        }
-    }
-
-    options = options || {};
-    var down, lastX, lastY, disabled;
-    var threshhold = options.thresshold || 10;
-
-    element.addEventListener('click', mouseclick);
-    element.addEventListener('touchstart', touchstart, { passive: true });
-    element.addEventListener('touchmove', touchmove, { passive: true });
-    element.addEventListener('touchcancel', touchcancel);
-    element.addEventListener('touchend', touchend);
-
-    return {
-        disable: function () { disabled = true; },
-        enable: function () { disabled = false; }
-    };
-}
-
-module.exports = clicked;
 },{}],5:[function(require,module,exports){
 'use strict';
 
@@ -32054,7 +31780,7 @@ var SpriteMaskFilter = function (_Filter) {
 
 exports.default = SpriteMaskFilter;
 
-},{"../../../../math":237,"../Filter":253,"path":386}],257:[function(require,module,exports){
+},{"../../../../math":237,"../Filter":253,"path":385}],257:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -32624,7 +32350,7 @@ var FilterManager = function (_WebGLManager) {
 
 exports.default = FilterManager;
 
-},{"../../../Shader":211,"../../../math":237,"../filters/filterTransforms":255,"../utils/Quad":262,"../utils/RenderTarget":263,"./WebGLManager":260,"bit-twiddle":3}],258:[function(require,module,exports){
+},{"../../../Shader":211,"../../../math":237,"../filters/filterTransforms":255,"../utils/Quad":262,"../utils/RenderTarget":263,"./WebGLManager":260,"bit-twiddle":4}],258:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -35656,7 +35382,7 @@ exports.default = SpriteRenderer;
 
 _WebGLRenderer2.default.registerPlugin('sprite', SpriteRenderer);
 
-},{"../../renderers/webgl/WebGLRenderer":251,"../../renderers/webgl/utils/ObjectRenderer":261,"../../renderers/webgl/utils/checkMaxIfStatmentsInShader":264,"../../settings":268,"../../utils":291,"../../utils/createIndicesForQuads":289,"./BatchBuffer":272,"./generateMultiTextureShader":274,"bit-twiddle":3,"pixi-gl-core":196}],274:[function(require,module,exports){
+},{"../../renderers/webgl/WebGLRenderer":251,"../../renderers/webgl/utils/ObjectRenderer":261,"../../renderers/webgl/utils/checkMaxIfStatmentsInShader":264,"../../settings":268,"../../utils":291,"../../utils/createIndicesForQuads":289,"./BatchBuffer":272,"./generateMultiTextureShader":274,"bit-twiddle":4,"pixi-gl-core":196}],274:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -35719,7 +35445,7 @@ function generateSampleSrc(maxTextures) {
     return src;
 }
 
-},{"../../Shader":211,"path":386}],275:[function(require,module,exports){
+},{"../../Shader":211,"path":385}],275:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -38463,7 +38189,7 @@ var BaseTexture = function (_EventEmitter) {
 
 exports.default = BaseTexture;
 
-},{"../settings":268,"../utils":291,"../utils/determineCrossOrigin":290,"bit-twiddle":3,"eventemitter3":6}],280:[function(require,module,exports){
+},{"../settings":268,"../utils":291,"../utils/determineCrossOrigin":290,"bit-twiddle":4,"eventemitter3":6}],280:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -40814,7 +40540,7 @@ function determineCrossOrigin(url) {
     return '';
 }
 
-},{"url":392}],291:[function(require,module,exports){
+},{"url":391}],291:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -45382,7 +45108,7 @@ exports.default = TilingSpriteRenderer;
 
 core.WebGLRenderer.registerPlugin('tilingSprite', TilingSpriteRenderer);
 
-},{"../../core":232,"../../core/const":213,"path":386}],310:[function(require,module,exports){
+},{"../../core":232,"../../core/const":213,"path":385}],310:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -46545,7 +46271,7 @@ var ColorMatrixFilter = function (_core$Filter) {
 exports.default = ColorMatrixFilter;
 ColorMatrixFilter.prototype.grayscale = ColorMatrixFilter.prototype.greyscale;
 
-},{"../../core":232,"path":386}],317:[function(require,module,exports){
+},{"../../core":232,"path":385}],317:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -46655,7 +46381,7 @@ var DisplacementFilter = function (_core$Filter) {
 
 exports.default = DisplacementFilter;
 
-},{"../../core":232,"path":386}],318:[function(require,module,exports){
+},{"../../core":232,"path":385}],318:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -46709,7 +46435,7 @@ var FXAAFilter = function (_core$Filter) {
 
 exports.default = FXAAFilter;
 
-},{"../../core":232,"path":386}],319:[function(require,module,exports){
+},{"../../core":232,"path":385}],319:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -46885,7 +46611,7 @@ var NoiseFilter = function (_core$Filter) {
 
 exports.default = NoiseFilter;
 
-},{"../../core":232,"path":386}],321:[function(require,module,exports){
+},{"../../core":232,"path":385}],321:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -46935,7 +46661,7 @@ var VoidFilter = function (_core$Filter) {
 
 exports.default = VoidFilter;
 
-},{"../../core":232,"path":386}],322:[function(require,module,exports){
+},{"../../core":232,"path":385}],322:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -49555,7 +49281,7 @@ function parse(resource, texture) {
     resource.bitmapFont = _extras.BitmapText.registerFont(resource.data, texture);
 }
 
-},{"../core":232,"../extras":308,"path":386,"resource-loader":361}],330:[function(require,module,exports){
+},{"../core":232,"../extras":308,"path":385,"resource-loader":361}],330:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -49913,7 +49639,7 @@ function getResourcePath(resource, baseUrl) {
     return _url2.default.resolve(resource.url.replace(baseUrl, ''), resource.data.meta.image);
 }
 
-},{"../core":232,"resource-loader":361,"url":392}],333:[function(require,module,exports){
+},{"../core":232,"resource-loader":361,"url":391}],333:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -51560,7 +51286,7 @@ exports.default = MeshRenderer;
 
 core.WebGLRenderer.registerPlugin('mesh', MeshRenderer);
 
-},{"../../core":232,"../Mesh":334,"path":386,"pixi-gl-core":196}],341:[function(require,module,exports){
+},{"../../core":232,"../Mesh":334,"path":385,"pixi-gl-core":196}],341:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -56856,7 +56582,7 @@ if ((typeof module) == 'object' && module.exports) {
   Math    // math: package containing random, pow, and seedrandom
 );
 
-},{"crypto":385}],371:[function(require,module,exports){
+},{"crypto":384}],371:[function(require,module,exports){
 /*
     angle.js <https://github.com/davidfig/anglejs>
     Released under MIT license <https://github.com/davidfig/angle/blob/master/LICENSE>
@@ -57406,905 +57132,7 @@ class Color
 };
 
 module.exports = new Color();
-},{"yy-random":374}],373:[function(require,module,exports){
-/**
- * @file debug.js
- * @summary Debug panels for javascript
- * @author David Figatner
- * @license MIT
- * @copyright YOPEY YOPEY LLC 2016
- * {@link https://github.com/davidfig/debug}
- */
-
-const clicked = require('clicked');
-
-/**
- * @static
- */
-const Debug = {
-    defaultDiv: null,
-    sides: {
-        'leftTop': {isMinimized: localStorage.getItem('leftTop') === 'true', minimize: null, count: null, panels: [], minimized: [], dir: 'leftTop'},
-        'leftBottom': {isMinimized: localStorage.getItem('leftBottom') === 'true', minimize: null, count: null, panels: [], minimized: [], dir: 'leftBottom'},
-        'rightTop': {isMinimized: localStorage.getItem('rightTop') === 'true', minimize: null, count: null, panels: [], minimized: [], dir: 'rightTop'},
-        'rightBottom': {isMinimized: localStorage.getItem('rightBottom') === 'true', minimize: null, count: null, panels: [], minimized: [], dir: 'rightBottom'}
-    },
-
-    /**
-     * initialize the debug panels (must be called before adding panels)
-     * options may also include options for the default debug panel (see Debug.add() for a list of these options)
-     * @param {object} [options]
-     * @param {number} [options.padding=7] between parent panels
-     * @param {string} [options.color='rgba(150,150,150,0.5)'] - default CSS background color for panels
-     * @param {boolean} [options.noDefaultDiv] - turn off default panel
-     * @return {HTMLElement} div where panel was created
-     */
-    init: function(options)
-    {
-        options = options || {};
-        options.size = options.size || 0.25;
-        options.expandable = options.expandable || 0.5;
-        Debug.padding = options.panel || 7;
-        Debug.defaultColor = options.color || 'rgba(150,150,150,0.5)';
-        window.addEventListener('resize', Debug.resize);
-        window.addEventListener('error', Debug._error);
-        document.addEventListener('keypress', Debug._keypress);
-        Debug.body = document.createElement('div');
-        Debug.body.style.position = 'absolute';
-        Debug.body.id = 'yy-debug';
-        document.body.appendChild(Debug.body);
-        if (!options.noDefaultDiv)
-        {
-            return Debug.add('debug', options);
-        }
-    },
-
-    /**
-     * change side of an existing panel
-     * @param {HTMLElement} div - panel returned by Debug
-     * @param {string} side
-     */
-    changeSide: function(div, sideName)
-    {
-        // remove from old side
-        const panels = div.side.panels;
-        delete panels[div.name];
-        Debug._resizeSide(div.side);
-
-        // add to new side
-        const side = Debug._getSide({side: sideName});
-        Debug._minimizeCreate(side);
-        side.panels[div.name] = div;
-        div.side = side;
-        Debug._resizeSide(side);
-    },
-
-    /**
-     * remove a debug panel
-     * @param {object|string} div or name of panel
-     */
-    remove: function(name)
-    {
-        const div = (typeof name === 'string') ? Debug.get(name) : name;
-        const side = div.side;
-        delete side.panels[div.name];
-        Debug.body.removeChild(div);
-        localStorage.setItem(side.dir + '-' + div.name, false);
-        Debug._resizeSide(side);
-    },
-
-    /**
-     * add debug panel
-     * @param {string} name of panel
-     * @param {object} [options]
-     * @param {string} [options.side='rightBottom']  'rightBottom' (default), 'leftBottom', 'leftTop', 'rightTop'
-     * @param {number} [options.expandable=0] or percent size to expand
-     * @param {boolean} [options.default=false] if true then this panel replaces default for calls to debug and debugOne
-     * @param {number} [options.size=0] if > 0 then this is the percent size of panel
-     * @param {object} [style] - CSS styles for the panel
-     * @param {string} [text] - starting text
-     * @param {string} [parent] - attach to another panel (to the left or right, depending on the side of the panel)
-     * @return {HTMLElement} div where panel was created
-     */
-    add: function(name, options)
-    {
-        options = options || {};
-        const div = document.createElement('div');
-        Debug.body.appendChild(div);
-        div.name = name;
-        div.options = options;
-        if (!Debug.defaultDiv || options.default)
-        {
-            Debug.defaultDiv = div;
-        }
-        const side = Debug._getSide(options);
-        const s = div.style;
-        s.fontFamily = 'Helvetica Neue';
-        s.position = 'fixed';
-        if (Debug._isLeft(side))
-        {
-            s.left = 0;
-        }
-        else
-        {
-            s.right = 0;
-        }
-        if (options.style)
-        {
-            for (let key in options.style)
-            {
-                s[key] = options.style[key];
-            }
-        }
-        Debug._minimizeCreate(side);
-        div.side = side;
-        side.panels[name] = div;
-        Debug._style(div, side);
-        div.click = Debug._handleClick;
-        Debug._click(div);
-        if (options.text)
-        {
-            div.innerHTML = options.text;
-        }
-        if (localStorage.getItem(side.dir + '-' + name) === 'true')
-        {
-            side.minimized.push(div);
-        }
-        Debug.resize();
-        return div;
-    },
-
-    /**
-     * creates a meter (useful for FPS)
-     * @param {string} name of meter
-     * @param {object} [options]
-     * @param {string} [options.side=='leftBottom'] 'leftBottom', 'leftTop', 'rightBottom', 'rightTop'
-     * @param {number} [options.width=100] in pixels
-     * @param {number} [options.height=25] in pixels
-     * @return {HTMLElement} div where panel was created
-     */
-    addMeter: function(name, options)
-    {
-        options = options || {};
-        const div = document.createElement('canvas');
-        div.type = 'meter';
-        div.width = options.width || 100;
-        div.height = options.height || 25;
-        div.style.width = div.width + 'px';
-        div.style.height = div.height + 'px';
-        Debug.body.appendChild(div);
-        div.name = name;
-        div.options = options;
-        const side = Debug._getSide(options);
-        const s = div.style;
-        s.fontFamily = 'Helvetica Neue';
-        s.position = 'fixed';
-        if (Debug._isLeft(side))
-        {
-            s.left = 0;
-        }
-        else
-        {
-            s.right = 0;
-        }
-        Debug._minimizeCreate(side);
-        div.side = side;
-        side.panels[name] = div;
-        Debug._style(div, side);
-        div.click = Debug._handleClick;
-        Debug._click(div);
-        if (options.text)
-        {
-            div.innerHTML = options.text;
-        }
-        Debug.resize();
-        return div;
-    },
-
-    /**
-     * adds a line to the end of the meter and scrolls the meter as necessary
-     * must provide either an options.name or options.panel
-     * @param {number} percent - between -1 and +1
-     * @param {object} [options]
-     * @param {string} [options.name] of panel to add the line
-     * @param {object} [options.panel] - div of panel as returned by Debug.add()
-     */
-    meter: function(percent, options)
-    {
-        options = options || {};
-        const div = Debug._getDiv(options);
-        if (!div)
-        {
-            return;
-        }
-        const c = div.getContext('2d');
-        const data = c.getImageData(0, 0, div.width, div.height);
-        c.putImageData(data, -1, 0);
-        c.clearRect(div.width - 1, 0, div.width - 1, div.height);
-        const middle = Math.round(div.height / 2);
-        let height;
-        if (percent < 0)
-        {
-            c.fillStyle = 'red';
-            percent = Math.abs(percent);
-            height = (25 - middle) * -percent;
-            c.fillRect(div.width - 1, middle, div.width - 1, middle + height);
-        }
-        else
-        {
-            c.fillStyle = 'white';
-            height = middle * percent;
-            c.fillRect(div.width - 1, height, div.width - 1, middle - height);
-        }
-    },
-
-    /**
-     * adds a panel with a browser link
-     * note: this panel cannot be individually minimized
-     * @param {string} name
-     * @param {string} link
-     * @param {object} [options]
-     * @param {string} [options.side=='leftBottom'] 'leftBottom', 'leftTop', 'rightBottom', 'rightTop'
-     * @param {number} [options.width=100] in pixels
-     * @param {number} [options.height=25] in pixels
-     * @param {object} [options.style] - additional css styles to apply to link
-     * @return {HTMLElement} div where panel was created
-     */
-    addLink: function(name, link, options)
-    {
-        options = options || {};
-        var div = document.createElement('div');
-        Debug.body.appendChild(div);
-        div.type = 'link';
-        div.name = name;
-        div.innerHTML = '<a style="color: white" target="_blank" href="' + link + '">' + name + '</a>';
-        div.options = options;
-        var side = Debug._getSide(options);
-        var s = div.style;
-        s.fontFamily = 'Helvetica Neue';
-        s.position = 'fixed';
-        if (Debug._isLeft(side))
-        {
-            s.left = 0;
-        }
-        else
-        {
-            s.right = 0;
-        }
-        if (options.style)
-        {
-            for (var key in options.style)
-            {
-                s[key] = options.style[key];
-            }
-        }
-        Debug._minimizeCreate(side);
-        div.side = side;
-        side.panels[name] = div;
-        Debug._style(div, side);
-        div.click = Debug._handleClick;
-        Debug._click(div);
-        Debug.resize();
-        return div;
-    },
-
-    /**
-     * adds text to the end of in the panel and scrolls the panel
-     * @param {string[]|...string} text - may be an array or you can include multiple strings: text1, text2, text3, [options]
-     * @param {object} [options]
-     * @param {string} [options.color] background color for text (in CSS)
-     * @param {string} [options.name] of panel
-     * @param {boolean} [options.debug] invoke debugger from javascript
-     * @param {HTMLElement} [options.panel] returned from Debug.Add()
-     * @param {boolean} [options.console=false] print to console instead of panel (useful for fast updating messages)
-     */
-    log: function()
-    {
-        var decoded = Debug._decode(arguments);
-        var text = decoded.text;
-        var options = decoded.options || {};
-        if (options.console)
-        {
-            var result = '';
-            for (var i = 0; i < text.length; i++)
-            {
-                result += text[i] + ((i !== text.length -1) ? ', ' : '');
-            }
-            console.log(result);
-            return;
-        }
-        var div = Debug._getDiv(options);
-        if (!div)
-        {
-            return;
-        }
-        if (options.color)
-        {
-            div.style.backgroundColor = options.color === 'error' ? 'red' : options.color;
-        }
-        else
-        {
-            div.style.backgroundColor = Debug.defaultColor;
-        }
-        var result = '<p style="pointer-events: none">';
-        if (text.length === 0)
-        {
-            result += 'null';
-        }
-        else
-        {
-            for (var i = 0; i < text.length; i++)
-            {
-                result += text[i] + ((i !== text.length -1) ? ', ' : '');
-            }
-        }
-        result += '</p>';
-        div.innerHTML += result;
-        div.scrollTop = div.scrollHeight;
-        if (options.color === 'error')
-        {
-            Debug.defaultDiv.expanded = true;
-            Debug.resize();
-        }
-        if (options.debug)
-        {
-            debugger;
-        }
-    },
-
-    /**
-     * replaces all text in the panel
-     * @param {string[]|...string} text - may be an array or you can include multiple strings: text1, text2, text3, [options]
-     * @param {string} [options.name] of panel, defaults to defaultDiv
-     * @param {boolean} [options.debug] invoke debugger from javascript
-     * @param {HTMLElement} [options.panel] returned from Debug.Add()
-     */
-    one: function()
-    {
-        var decoded = Debug._decode(arguments);
-        var text = decoded.text || [];
-        var options = decoded.options || {};
-        var div = Debug._getDiv(options);
-        if (!div)
-        {
-            return;
-        }
-        if (options.color)
-        {
-            div.style.backgroundColor = options.color;
-        }
-        else
-        {
-            div.style.backgroundColor = Debug.defaultColor;
-        }
-        var html = '<span style="pointer-events: none">';
-        if (text.length === 0)
-        {
-            html += 'null';
-        }
-        else
-        {
-            for (var i = 0; i < text.length; i++)
-            {
-                html += text[i] + ((i !== text.length -1) ? ', ' : '');
-            }
-        }
-        html += '</span>';
-        div.innerHTML = html;
-        if (options.debug)
-        {
-            debugger;
-        }
-    },
-
-    /**
-     * adds a debug message showing who called the function
-     * @param {object} [options] (see Debug.debug)
-     */
-    caller: function(options)
-    {
-        if (arguments.callee.caller)
-        {
-            Debug.log('Called by: ' + arguments.callee.caller.arguments.callee.caller.name + ': ' + arguments.callee.caller.arguments.callee.caller.toString(), options);
-        }
-        else
-        {
-            Debug.log('Called by: top level', options);
-        }
-    },
-
-    /**
-     * returns a panel based on its name
-     * @param {string} name of panel
-     * @return {HTMLElement} panel or null if not found
-     */
-    get: function(name)
-    {
-        for (var side in Debug.sides)
-        {
-            if (Debug.sides[side].panels[name])
-            {
-                return Debug.sides[side].panels[name];
-            }
-        }
-        return null;
-    },
-
-    /**
-     * @param {string} dir to check
-     */
-    _checkResize: function(dir)
-    {
-        if (Debug.sides[dir].minimize)
-        {
-            Debug._resizeSide(Debug.sides[dir]);
-        }
-    },
-
-    /**
-     * resize all panels
-     */
-    resize: function()
-    {
-        Debug._checkResize('leftBottom');
-        Debug._checkResize('rightBottom');
-        Debug._checkResize('leftTop');
-        Debug._checkResize('rightTop');
-    },
-
-    /**
-     * converts side string to proper case and ordering for comparison
-     * @params {object} options - as provided to Debug.add...()
-     * @private
-     */
-    _getSide: function(options)
-    {
-        if (options.parent)
-        {
-            return options.parent.side;
-        }
-        const side = options.side;
-        if (!side)
-        {
-            return Debug.sides['rightBottom'];
-        }
-        const change = side.toUpperCase();
-        if (change === 'LEFTBOTTOM' || change === 'BOTTOMLEFT')
-        {
-            return Debug.sides['leftBottom'];
-        }
-        else if (change === 'RIGHTBOTTOM' || change === 'BOTTOMRIGHT')
-        {
-            return Debug.sides['rightBottom'];
-        }
-        else if (change === 'LEFTTOP' || change === 'TOPLEFT')
-        {
-            return Debug.sides['leftTop'];
-        }
-        else if (change === 'RIGHTTOP' || change === 'TOPRIGHT')
-        {
-            return Debug.sides['rightTop'];
-        }
-        else
-        {
-            return Debug.sides['rightBottom'];
-        }
-    },
-
-    /**
-     * returns correct div based on options
-     * @private
-     */
-    _getDiv: function(options)
-    {
-        var div;
-        if (!options.panel && !options.name)
-        {
-            div = Debug.defaultDiv;
-        }
-        else if (options.panel)
-        {
-            div = options.panel;
-        }
-        else
-        {
-            for (var name in Debug.sides)
-            {
-                var panel = Debug.sides[name].panels[options.name];
-                if (panel)
-                {
-                    div = panel;
-                    break;
-                }
-            }
-        }
-        if (!div)
-        {
-            div = Debug.defaultDiv;
-        }
-        return div;
-    },
-
-    /**
-     * decodes Debug.log or Debug.one parameters
-     * @param {Array} args
-     * @private
-     */
-    _decode: function(args)
-    {
-        var options, text = [], i;
-
-        // handle old style where first argument can be an array
-        if (Array.isArray(args[0]))
-        {
-            text = args[0];
-            i = 1;
-        }
-        else
-        {
-            i = 0;
-        }
-        for (; i < args.length; i++)
-        {
-            // last one may be options
-            if (i === args.length - 1)
-            {
-                if (typeof args[i] === 'object' && args[i] !== null && !Array.isArray(arguments[i]))
-                {
-                    options = args[i];
-                }
-                else
-                {
-                    text.push(args[i]);
-                }
-            }
-            else
-            {
-                text.push(args[i]);
-            }
-        }
-        return {text: text, options: options};
-    },
-
-    /**
-     * creates a default style for a div
-     * @param {HTMLElement} div
-     * @param {object} side
-     * @private
-     */
-    _style: function(div, side)
-    {
-        var s = div.style;
-        s.fontFamily = 'Helvetica Neue';
-        s.position = 'fixed';
-        s.background = Debug.defaultColor;
-        s.color = 'white';
-        s.margin = 0;
-        s.padding = '5px';
-        s.boxShadow = (Debug._isLeft(side) ? '' : '-') + '5px -5px 10px rgba(0,0,0,0.25)';
-        s.cursor = 'pointer';
-        s.wordWrap = 'break-word';
-        s.overflow = 'auto';
-        s.zIndex = 1000;
-    },
-
-    /**
-     * creates the minimize button when adding the first panel for that side
-     * @param {object} side
-     * @private
-     */
-    _minimizeCreate: function(side)
-    {
-        if (side.minimize)
-        {
-            return;
-        }
-        var div = document.createElement('div');
-        div.options = {};
-        Debug.body.appendChild(div);
-        var s = div.style;
-        div.side = side;
-        if (Debug._isLeft(side))
-        {
-            s.left = 0;
-        }
-        else
-        {
-            s.right = 0;
-        }
-        Debug._style(div, side);
-        s.backgroundColor = 'transparent';
-        s.boxShadow = null;
-        s.padding = 0;
-        side.minimize = div;
-        var minimize = document.createElement('span');
-        var count = document.createElement('span');
-        minimize.click = Debug._handleMinimize;
-        count.click = Debug._handleCount;
-        if (Debug._isLeft(side))
-        {
-            div.appendChild(minimize);
-            div.appendChild(count);
-            count.style.marginLeft = '20px';
-        }
-        else
-        {
-            div.appendChild(count);
-            div.appendChild(minimize);
-            count.style.marginRight = '20px';
-        }
-        count.style.background = minimize.style.background = Debug.defaultColor;
-        count.style.boxShadow = minimize.style.boxShadow = (Debug._isLeft ? '' : '-') + '5px -5px 10px rgba(0,0,0,0.25)';
-        minimize.innerHTML = side.isMinimized ? '+' : '&mdash;';
-        count.style.display = 'none';
-        side.count = count;
-        Debug._click(side.count, Debug._isLeft);
-        Debug._click(minimize, Debug._isLeft);
-    },
-
-    /**
-     * event listener for panels
-     * @param {HTMLElement} div
-     * @param {boolean} isLeft
-     * @private
-     */
-    _click: function(div, isLeft)
-    {
-        clicked(div, div.click);
-        div.style.pointerEvents = 'auto';
-        div.isLeft = isLeft;
-    },
-
-    /**
-     * minimizes panel
-     * @param {Event} e
-     * @private
-     */
-    _handleMinimize: function(e)
-    {
-        var div = e.currentTarget;
-        var side = div.offsetParent.side;
-        side.isMinimized = !side.isMinimized;
-        window.localStorage.setItem(side.dir, side.isMinimized);
-        div.innerHTML = side.isMinimized ? '+' : '&mdash;';
-        Debug.resize();
-    },
-
-    /**
-     * provides count to display next to minimize button
-     * @param {Event} e
-     * @private
-     */
-    _handleCount: function(e)
-    {
-        var side = e.currentTarget.offsetParent.side;
-        var div = side.minimized.pop();
-        localStorage.setItem(div.side.dir + '-' + div.name, 'false');
-        Debug.resize();
-    },
-
-    /**
-     * handler for click
-     * @param {Event} e
-     * @private
-     */
-    _handleClick: function(e)
-    {
-        var div = e.currentTarget;
-        if (div.type === 'link')
-        {
-            return;
-        }
-        // don't prevent default if coming from handleClick
-        if (!e.cheat)
-        {
-            e.preventDefault();
-        }
-        if (div.options.expandable)
-        {
-            div.expanded = !div.expanded;
-        }
-        else
-        {
-            var index = div.side.minimized.indexOf(div);
-            if (index === -1)
-            {
-                div.side.minimized.push(div);
-                localStorage.setItem(div.side.dir + '-' + div.name, 'true');
-            }
-            else
-            {
-                div.side.minimized.splice(index, 1);
-                localStorage.setItem(div.side.dir + '-' + div.name, 'false');
-            }
-        }
-        Debug.resize();
-    },
-
-    /**
-     * resize individual side
-     * @param {object} side returned by Debug._getSide()
-     * @private
-     */
-    _resizeSide: function(side)
-    {
-        if (side.isMinimized)
-        {
-            for (var name in side.panels)
-            {
-                var panel = side.panels[name];
-                panel.style.display = 'none';
-            }
-            if (Debug._isBottom(side))
-            {
-                side.minimize.style.bottom = window.innerHeight / 4 + 'px';
-            }
-            else
-            {
-                side.minimize.style.top = window.innerHeight / 4 + 'px';
-            }
-            side.count.style.display = 'none';
-        }
-        else
-        {
-            var count = 0;
-            var divs = [];
-            for (var name in side.panels)
-            {
-                var panel = side.panels[name];
-                if (side.minimized.indexOf(panel) === -1)
-                {
-                    panel.style.display = 'block';
-                    divs.push(panel);
-                }
-                else
-                {
-                    panel.style.display = 'none';
-                    count++;
-                }
-            }
-            divs.push(side.minimize);
-            var max = Math.min(window.innerWidth, window.innerHeight);
-            var current = 0;
-            for (var i = 0; i < divs.length; i++)
-            {
-                var div = divs[i];
-                if (div.options.parent && (side.minimized.indexOf(div.options.parent) === -1))
-                {
-                    var parent = div.options.parent;
-                    div.style.top = parent.style.top;
-                    div.style.bottom = parent.style.bottom;
-                    if (Debug._isLeft(parent.side))
-                    {
-                        div.style.left = (parent.offsetLeft + parent.offsetWidth + Debug.padding) + 'px';
-                    }
-                    else
-                    {
-                        div.style.right = (window.innerWidth - parent.offsetLeft + Debug.padding) + 'px';
-                    }
-                }
-                else
-                {
-                    if (Debug._isBottom(side))
-                    {
-                        div.style.bottom = current + 'px';
-                        div.style.top = '';
-                    }
-                    else
-                    {
-                        div.style.top = current + 'px';
-                        div.style.bottom = '';
-                    }
-                    if (Debug._isLeft(side))
-                    {
-                        div.style.left = '0px';
-                        div.style.right = '';
-                    }
-                    else
-                    {
-                        div.style.right = '0px';
-                        div.style.left = '';
-                    }
-                    if (div.options.size)
-                    {
-                        var size;
-                        if (div.options.expandable)
-                        {
-                            size = max * (div.expanded ? div.options.expandable : div.options.size);
-                        }
-                        else
-                        {
-                            size = max * div.options.size;
-                        }
-                        div.style.width = div.style.height = size + 'px';
-                        div.style.display = 'block';
-                    }
-                    div.scrollTop = div.scrollHeight;
-                    current += 10 + div.offsetHeight;
-                }
-            }
-            if (count === 0)
-            {
-                side.count.style.display = 'none';
-            }
-            else
-            {
-                side.count.style.display = 'inline';
-                side.count.innerHTML = count;
-            }
-        }
-    },
-
-    /**
-     * @param {object} side returned by Debug._getSide
-     * @return {boolean} whether on the left side
-     */
-    _isLeft: function(side)
-    {
-        return side.dir.indexOf('left') !== -1;
-    },
-
-    /**
-     * @param {object} side returned by Debug._getSide
-     * @return {boolean} whether on the bottom side
-     */
-    _isBottom: function(side)
-    {
-        return side.dir.indexOf('Bottom') !== -1;
-    },
-
-    /**
-     * handler for:
-     *  ` key used to expand default debug box
-     *  c/C key to copy contents of default div to clipboard
-     * @param {Event} e
-     */
-    _keypress: function(e)
-    {
-        var code = (typeof e.which === 'number') ? e.which : e.keyCode;
-        if (code === 96)
-        {
-            Debug._handleClick({currentTarget: Debug.defaultDiv, cheat: true});
-        }
-        if (code === 67 || code === 99)
-        {
-            Debug.clipboard(Debug.defaultDiv.textContent);
-        }
-    },
-
-    /**
-     * handler for errors
-     * @param {Event} e
-     */
-    _error: function(e)
-    {
-        console.error(e);
-        Debug.log((e.message ? e.message : (e.error && e.error.message ? e.error.message : '')) + ' at ' + e.filename + ' line ' + e.lineno, {color: 'error'});
-    },
-
-    /**
-     * copies text to clipboard
-     * called after pressing c or C (if input is allowed to bubble down)
-     * from http://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
-     * @param {string} text
-     */
-    clipboard: function(text)
-    {
-        var textArea = document.createElement('textarea');
-        textArea.style.alpha = 0;
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-    }
-};
-
-module.exports = Debug;
-
-// for eslint
-/* global document, localStorage, window, console */
-},{"clicked":4}],374:[function(require,module,exports){
+},{"yy-random":373}],373:[function(require,module,exports){
 /**
  * @file random.js
  * @author David Figatner
@@ -58808,7 +57636,7 @@ class Random
 }
 
 module.exports = new Random();
-},{"seedrandom":363}],375:[function(require,module,exports){
+},{"seedrandom":363}],374:[function(require,module,exports){
 const wait = require('./wait')
 
 /** animate object's {x, y} using an angle */
@@ -58873,117 +57701,13 @@ module.exports = class angle extends wait
         this.object.x += this.cos * elapsed * this.speed
         this.object.y += this.sin * elapsed * this.speed
     }
-}
-},{"./wait":384}],376:[function(require,module,exports){
-const _list = []
-const _defaults = { ease: 'linear' }
-let _ticker
 
-/**
- * initialize (may be called more than once to change options without changing animation list but don't pass Ticker more than once)
- * @param {object} [options]
- * @param {PIXI.Ticker} [options.ticker] attaches to the PIXI.Ticker; if this is not provided, you need to call update() manually
- * @param {function|string} [options.ease=linear] default easing function
- */
-function init(options)
-{
-    options = options || {}
-    _defaults.ease = options.ease || _defaults.ease
-    if (options.ticker)
+    reverse()
     {
-        _ticker = options.ticker
-        options.ticker.add(ticker)
+        this.angle += Math.PI
     }
 }
-
-/**
- * remove an animation
- * @param {object|array} animate - the animation (or array of animations) to remove - can be null
- */
-function remove(animate)
-{
-    if (animate)
-    {
-        if (Array.isArray(animate))
-        {
-            while (animate.length)
-            {
-                const pop = animate.pop()
-                if (pop && pop.options)
-                {
-                    pop.options.cancel = true
-                }
-            }
-        }
-        else
-        {
-            if (animate && animate.options)
-            {
-                animate.options.cancel = true
-            }
-        }
-    }
-}
-
-// internal function to add an animation
-function add(animate)
-{
-    _list.push(animate)
-    return animate
-}
-
-function ticker()
-{
-    update(_ticker.elapsedMS)
-}
-
-/**
- * update function only needed if options.ticker is not provided
- * @param {number} elapsed time since last tick
- * @returns {number} of active animations
- */
-function update(elapsed)
-{
-    let n = 0
-    for (let i = _list.length - 1; i >= 0; i--)
-    {
-        const animate = _list[i]
-        if (animate.update(elapsed))
-        {
-            _list.splice(i, 1)
-        }
-        else
-        {
-            if (!animate.options.pause)
-            {
-                n++
-            }
-        }
-    }
-    return n
-}
-
-module.exports = {
-    init,
-    update,
-    remove,
-    add,
-    get defaults()
-    {
-        return _defaults;
-    },
-    wait: require('./wait'),
-    to: require('./to'),
-    shake: require('./shake'),
-    tint: require('./tint'),
-    face: require('./face'),
-    angle: require('./angle'),
-    target: require('./target'),
-    movie: require('./movie'),
-    load: require('./load')
-}
-
-},{"./angle":375,"./face":377,"./load":378,"./movie":379,"./shake":380,"./target":381,"./tint":382,"./to":383,"./wait":384}],377:[function(require,module,exports){
+},{"./wait":383}],375:[function(require,module,exports){
 const Angle = require('yy-angle')
 const wait = require('./wait')
 
@@ -59053,7 +57777,93 @@ module.exports = class face extends wait
         }
     }
 }
-},{"./wait":384,"yy-angle":371}],378:[function(require,module,exports){
+},{"./wait":383,"yy-angle":371}],376:[function(require,module,exports){
+module.exports = class List
+{
+    constructor()
+    {
+        this.list = []
+        if (arguments.list)
+        {
+            this.add(arguments)
+        }
+    }
+
+    add()
+    {
+        for (let arg of arguments)
+        {
+            if (Array.isArray(arg))
+            {
+                for (let entry of arg)
+                {
+                    this.list.push(entry)
+                }
+            }
+            else
+            {
+                this.list.push(arg)
+            }
+        }
+        return arguments[0]
+    }
+
+    /**
+     * remove animation(s)
+     * @param {object|array} animate - the animation (or array of animations) to remove; can be null
+     */
+    remove(animate)
+    {
+        if (animate)
+        {
+            if (Array.isArray(animate))
+            {
+                while (animate.length)
+                {
+                    const pop = animate.pop()
+                    if (pop && pop.options)
+                    {
+                        pop.options.cancel = true
+                    }
+                }
+            }
+            else
+            {
+                if (animate && animate.options)
+                {
+                    animate.options.cancel = true
+                }
+            }
+        }
+        return animate
+    }
+
+    /**
+     * @param {number} elapsed time since last tick
+     * @returns {number} of active animations
+     */
+    update(elapsed)
+    {
+        let n = 0
+        for (let i = this.list.length - 1; i >= 0; i--)
+        {
+            const animate = this.list[i]
+            if (animate.update(elapsed))
+            {
+                this.list.splice(i, 1)
+            }
+            else
+            {
+                if (!animate.options.pause)
+                {
+                    n++
+                }
+            }
+        }
+        return n
+    }
+}
+},{}],377:[function(require,module,exports){
 const wait = require('./wait')
 const to = require('./to')
 const tint = require('./tint')
@@ -59094,7 +57904,7 @@ module.exports = function load(object, load)
             return new movie(object, object[1], null, options)
     }
 }
-},{"./angle":375,"./face":377,"./movie":379,"./shake":380,"./target":381,"./tint":382,"./to":383,"./wait":384}],379:[function(require,module,exports){
+},{"./angle":374,"./face":375,"./movie":378,"./shake":379,"./target":380,"./tint":381,"./to":382,"./wait":383}],378:[function(require,module,exports){
 const wait = require('./wait')
 
 /**
@@ -59104,7 +57914,7 @@ module.exports = class movie extends wait
 {
     /**
      * @param {object} object to animate
-     * @param {array} textures - parameters to animate, e.g.: {alpha: 5, scale: {x, 5} rotation: Math.PI}
+     * @param {PIXI.Texture[]} textures
      * @param {number} [duration=0] time to run (use 0 for infinite duration--should only be used with customized easing functions)
      * @param {object} [options]
      * @param {number} [options.wait=0] n milliseconds before starting animation (can also be used to pause animation for a length of time)
@@ -59203,7 +58013,7 @@ module.exports = class movie extends wait
         }
     }
 }
-},{"./wait":384}],380:[function(require,module,exports){
+},{"./wait":383}],379:[function(require,module,exports){
 const wait = require('./wait')
 
 /**
@@ -59312,7 +58122,7 @@ module.exports = class shake extends wait
         }
     }
 }
-},{"./wait":384}],381:[function(require,module,exports){
+},{"./wait":383}],380:[function(require,module,exports){
 const wait = require('./wait')
 
 /** move an object to a target's location */
@@ -59389,7 +58199,7 @@ module.exports = class target extends wait
         }
     }
 }
-},{"./wait":384}],382:[function(require,module,exports){
+},{"./wait":383}],381:[function(require,module,exports){
 const Color = require('yy-color')
 const wait = require('./wait')
 
@@ -59398,8 +58208,8 @@ module.exports = class tint extends wait
 {
     /**
      * @param {PIXI.DisplayObject|PIXI.DisplayObject[]} object
-     * @param {number} tint
-     * @param {number} [duration=0] in milliseconds, if 0, repeat forever
+     * @param {number|number[]} tint
+     * @param {number} [duration] in milliseconds
      * @param {object} [options] @see {@link Wait}
      */
     constructor(object, tint, duration, options)
@@ -59417,6 +58227,10 @@ module.exports = class tint extends wait
         if (options.load)
         {
             this.load(options.load)
+        }
+        else if (Array.isArray(tint))
+        {
+            this.tints = [this.object.tint, ...tint]
         }
         else
         {
@@ -59444,31 +58258,71 @@ module.exports = class tint extends wait
         this.to = load.to
     }
 
-    calculate(/* elapsed */)
+    calculate()
     {
         const percent = this.ease(this.time, 0, 1, this.duration)
-        const color = Color.blend(percent, this.start, this.to)
-        if (this.list)
+        if (this.tints)
         {
-            for (let object of this.list)
+            const each = 1 / (this.tints.length - 1)
+            let per = each
+            for (let i = 1; i < this.tints.length; i++)
             {
-                object.tint = color
+                if (percent <= per)
+                {
+                    const color = Color.blend(1 - (per - percent) / each, this.tints[i - 1], this.tints[i])
+                    if (this.list)
+                    {
+                        for (let object of this.list)
+                        {
+                            object.tint = color
+                        }
+                    }
+                    else
+                    {
+                        this.object.tint = color
+                    }
+                    break;
+                }
+                per += each
             }
         }
         else
         {
-            this.object.tint = color
+            const color = Color.blend(percent, this.start, this.to)
+            if (this.list)
+            {
+                for (let object of this.list)
+                {
+                    object.tint = color
+                }
+            }
+            else
+            {
+                this.object.tint = color
+            }
         }
     }
 
     reverse()
     {
-        const swap = this.to
-        this.to = this.start
-        this.start = swap
+        if (this.tints)
+        {
+            const tints = []
+            for (let i = this.tints.length - 1; i >= 0; i--)
+            {
+                tints.push(this.tints[i])
+            }
+            this.tints = tints
+        }
+        else
+        {
+            const swap = this.to
+            this.to = this.start
+            this.start = swap
+        }
     }
 }
-},{"./wait":384,"yy-color":372}],383:[function(require,module,exports){
+},{"./wait":383,"yy-color":372}],382:[function(require,module,exports){
 const wait = require('./wait')
 
 /**
@@ -59693,7 +58547,7 @@ module.exports = class to extends wait
         }
     }
 }
-},{"./wait":384}],384:[function(require,module,exports){
+},{"./wait":383}],383:[function(require,module,exports){
 const Easing = require('penner')
 const EventEmitter = require('eventemitter3')
 
@@ -59711,7 +58565,6 @@ module.exports = class wait extends EventEmitter
      * @param {boolean} [options.orphan] delete animation if .parent of object (or first object in list) is null
      * @param {Function} [options.load] loads an animation using an .save() object note the * parameters below cannot be loaded and must be re-set
      * @param {Function|string} [options.ease] function (or penner function name) from easing.js (see http://easings.net for examples)*
-     * @param {boolean} [options.noAdd] don't manage the animation through the main Ease loop (updates must be called manually)
      * @emits {done} animation expires
      * @emits {cancel} animation is cancelled
      * @emits {wait} each update during a wait
@@ -59723,7 +58576,6 @@ module.exports = class wait extends EventEmitter
     constructor(object, options)
     {
         super()
-        const Animate = require('./animate')
         this.object = object
         this.options = options || {}
         this.type = 'Wait'
@@ -59735,17 +58587,13 @@ module.exports = class wait extends EventEmitter
         {
             this.time = 0
         }
-        if (!this.options.ease && Animate.defaults.ease)
-        {
-            this.options.ease = Animate.defaults.ease
-        }
         if (this.options.ease && typeof this.options.ease !== 'function')
         {
-            this.options.ease = Easing[options.ease] || Animate.defaults.easing
+            this.options.ease = Easing[this.options.ease]
         }
-        if (!this.options.noAdd)
+        if (!this.options.ease)
         {
-            Animate.add(this)
+            this.options.ease = Easing['linear']
         }
     }
 
@@ -59964,9 +58812,9 @@ module.exports = class wait extends EventEmitter
 
     calculate() {}
 }
-},{"./animate":376,"eventemitter3":6,"penner":189}],385:[function(require,module,exports){
+},{"eventemitter3":6,"penner":189}],384:[function(require,module,exports){
 
-},{}],386:[function(require,module,exports){
+},{}],385:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -60194,7 +59042,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":387}],387:[function(require,module,exports){
+},{"_process":386}],386:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -60380,7 +59228,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],388:[function(require,module,exports){
+},{}],387:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
@@ -60917,7 +59765,7 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],389:[function(require,module,exports){
+},{}],388:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -61003,7 +59851,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],390:[function(require,module,exports){
+},{}],389:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -61090,13 +59938,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],391:[function(require,module,exports){
+},{}],390:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":389,"./encode":390}],392:[function(require,module,exports){
+},{"./decode":388,"./encode":389}],391:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -61830,7 +60678,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"./util":393,"punycode":388,"querystring":391}],393:[function(require,module,exports){
+},{"./util":392,"punycode":387,"querystring":390}],392:[function(require,module,exports){
 'use strict';
 
 module.exports = {
