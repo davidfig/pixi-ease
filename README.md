@@ -77,6 +77,12 @@ module.exports = class face extends wait
 ### src/list.js
 ```
     /**
+     * Add animation(s) to animation list
+     * @param {object|object[]...} any animation class
+     */
+    add()
+
+    /**
      * remove animation(s)
      * @param {object|array} animate - the animation (or array of animations) to remove; can be null
      */
