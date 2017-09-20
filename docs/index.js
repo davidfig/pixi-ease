@@ -57795,6 +57795,7 @@ module.exports = class List extends EventEmitter
      */
     constructor()
     {
+        super()
         this.list = []
         this.empty = true
         if (arguments.length)
