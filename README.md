@@ -76,11 +76,28 @@ module.exports = class face extends wait
 ```
 ### src/list.js
 ```
+/** Helper list for multiple animations */
+module.exports = class List extends EventEmitter
+{
+    /**
+     * @param {object|object[]...} any animation class
+     * @emits {done} final animation completed in the list
+     * @emits {each} each update
+     */
+    constructor()
+
     /**
      * Add animation(s) to animation list
      * @param {object|object[]...} any animation class
      */
     add()
+
+    /**
+     * get animation by index
+     * @param {number} index
+     * @return {object} animation class
+     */
+    get(index)
 
     /**
      * remove animation(s)

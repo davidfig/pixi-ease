@@ -57783,11 +57783,20 @@ module.exports = class face extends wait
     }
 }
 },{"./wait":383,"yy-angle":371}],376:[function(require,module,exports){
-module.exports = class List
+const EventEmitter = require('eventemitter3')
+
+/** Helper list for multiple animations */
+module.exports = class List extends EventEmitter
 {
+    /**
+     * @param {object|object[]...} any animation class
+     * @emits {done} final animation completed in the list
+     * @emits {each} each update
+     */
     constructor()
     {
         this.list = []
+        this.empty = true
         if (arguments.length)
         {
             this.add(...arguments)
@@ -57814,7 +57823,18 @@ module.exports = class List
                 this.list.push(arg)
             }
         }
+        this.empty = false
         return arguments[0]
+    }
+
+    /**
+     * get animation by index
+     * @param {number} index
+     * @return {object} animation class
+     */
+    get(index)
+    {
+        return this.list[index]
     }
 
     /**
@@ -57859,6 +57879,7 @@ module.exports = class List
             const animate = this.list[i]
             if (animate.update(elapsed))
             {
+                this.emit('remove', animate)
                 this.list.splice(i, 1)
             }
             else
@@ -57869,10 +57890,16 @@ module.exports = class List
                 }
             }
         }
+        this.emit('each', this, n)
+        if (this.list.length === 0 && !this.empty)
+        {
+            this.emit('done', this)
+            this.empty = true
+        }
         return n
     }
 }
-},{}],377:[function(require,module,exports){
+},{"eventemitter3":6}],377:[function(require,module,exports){
 const wait = require('./wait')
 const to = require('./to')
 const tint = require('./tint')
