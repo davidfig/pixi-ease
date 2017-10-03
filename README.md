@@ -106,6 +106,11 @@ module.exports = class List extends EventEmitter
     remove(animate)
 
     /**
+     * remove all animations from list
+     */
+    empty()
+
+    /**
      * @param {number} elapsed time since last tick
      * @returns {number} of active animations
      */
