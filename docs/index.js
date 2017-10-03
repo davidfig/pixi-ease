@@ -57871,9 +57871,10 @@ module.exports = class List extends EventEmitter
     /**
      * remove all animations from list
      */
-    empty()
+    removeAll()
     {
         this.list = []
+        this.empty = true
     }
 
     /**
