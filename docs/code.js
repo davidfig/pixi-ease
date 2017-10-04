@@ -20,9 +20,10 @@ list.add(
     new Ease.target(block(), target.object, 0.1, { keepAlive: true }),
     new Ease.to(block(), { rotation: Math.PI * 2 }, TIME, { ease: 'easeInOutQuad', reverse: true, repeat: true }),
     new Ease.tint(block(), 0x888888, TIME, { repeat: true, reverse: true }),
-    new Ease.tint(block(), [0x00ff00, 0xff0000, 0x0000ff], TIME * 10, { repeat: true, reverse: true }),
+    new Ease.tint(block(), [0x00ff00, 0xff0000, 0x0000ff], TIME * 10, { repeat: true, reverse: true })
 )
 
+list.to(block(), { scale: 0 }, TIME, {repeat: true, reverse: true })
 list.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true })
 
 list.start()
@@ -35,7 +36,7 @@ function pixi()
     document.body.appendChild(app.view)
     app.view.position = 'absolute'
     app.renderer.resize(window.innerWidth, window.innerHeight)
-    size = Math.min(window.innerWidth, window.innerHeight) / 10
+    size = Math.min(window.innerWidth, window.innerHeight) / 11
     return app
 }
 

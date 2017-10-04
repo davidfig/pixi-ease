@@ -1,11 +1,16 @@
 ## pixi-ease
 pixi.js animation library using easing functions
 
+## rationale
+This is a rewrite API for [YY-Animate](https://github.com/davidfig/animate). It provides an easy way to animate object parameters. It is optimized for use with pixi.js. 
+
+YY-Animate used a global Animate object, which worked well, but created clean-up issues (e.g., when destroying a level, I had to be careful to destroy all the animations connected to that level). pixi-ease uses separate list objects, that can be created, updated, and destroyed independently of other lists. 
+
 ## Installation
 
     npm i pixi-ease
 
-## Live Example
+## Live Demo
 https://davidfig.github.io/pixi-ease/
     
 ## Simple Usage
@@ -29,8 +34,8 @@ https://davidfig.github.io/pixi-ease/
     // change square's tint from blue to red over 2 seconds; reverse and repeat
     list.tint(square, 0xff0000, 2000, { repeat: true, reverse: true }))
 
-    // change square's location to (20, 55) over 2 seconds, and then return to the middle
-    const to = list.to(square, { x: 20, y: 55 }, 2000, { reverse: true }))
+    // change square's location to (20, 55) over 2 seconds, and then return to the middle (uses alternative creation method)
+    const to = list.add(new Ease.to(square, { x: 20, y: 55 }, 2000, { reverse: true })))
 
     // listen for done, then print to console
     to.on('done', () => console.log('Square has finished animating'))
@@ -232,38 +237,28 @@ module.exports = class tint extends wait
 ```
 ### src/to.js
 ```
-/**
- * animate any numeric parameter of an object or array of objects
- * @examples
- *
- *    // animate sprite to (20, 20) over 1s using easeInOuTsine, and then reverse the animation
- *    new Animate.to(sprite, {x: 20, y: 20}, 1000, {reverse: true, ease: Easing.easeInOutSine})
- *
- *    // animate list of sprites to a scale over 10s after waiting 1s
- *    new Animate.to([sprite1, sprite2, sprite3], {scale: {x: 0.25, y: 0.25}}, 10000, {wait: 1000})
- */
+/** animate any numeric parameter of an object or array of objects */
 module.exports = class to extends wait
-
+{
     /**
      * @param {object} object to animate
-     * @param {object} goto - parameters to animate, e.g.: {alpha: 5, scale: {x, 5} rotation: Math.PI}
-     * @param {number} [duration=0] - time to run (use 0 for infinite duration--should only be used with customized easing functions)
+     * @param {object} goto - parameters to animate, e.g.: {alpha: 5, scale: {3, 5}, scale: 5, rotation: Math.PI}
+     * @param {number} duration - time to run
      * @param {object} [options]
      * @param {number} [options.wait=0] n milliseconds before starting animation (can also be used to pause animation for a length of time)
      * @param {boolean} [options.pause] start the animation paused
-     * @param {(boolean|number)} [options.repeat] true: repeat animation forever n: repeat animation n times
-     * @param {(boolean|number)} [options.reverse] true: reverse animation (if combined with repeat, then pulse) n: reverse animation n times
-     * @param {(boolean|number)} [options.continue] true: continue animation with new starting values n: continue animation n times
-     * @param {boolean} [options.orphan] delete animation if .parent of object (or first object in list) is null
+     * @param {boolean|number} [options.repeat] true: repeat animation forever n: repeat animation n times
+     * @param {boolean|number} [options.reverse] true: reverse animation (if combined with repeat, then pulse) n: reverse animation n times
+     * @param {boolean|number} [options.continue] true: continue animation with new starting values n: continue animation n times
      * @param {Function} [options.load] loads an animation using an .save() object note the * parameters below cannot be loaded and must be re-set
-     * @param {Function} [options.ease] function from easing.js (see http://easings.net for examples)*
-     * @emits {done} animation expires
-     * @emits {cancel} animation is cancelled
-     * @emits {wait} each update during a wait
-     * @emits {first} first update when animation starts
-     * @emits {each} each update while animation is running
-     * @emits {loop} when animation is repeated
-     * @emits {reverse} when animation is reversed
+     * @param {string|Function} [options.ease] name or function from easing.js (see http://easings.net for examples)
+     * @emits to:done animation expires
+     * @emits to:cancel animation is cancelled
+     * @emits to:wait each update during a wait
+     * @emits to:first first update when animation starts
+     * @emits to:each each update while animation is running
+     * @emits to:loop when animation is repeated
+     * @emits to:reverse when animation is reversed
      */
     constructor(object, goto, duration, options)
 ```

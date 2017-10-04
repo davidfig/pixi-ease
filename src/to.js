@@ -1,37 +1,27 @@
 const wait = require('./wait')
 
-/**
- * animate any numeric parameter of an object or array of objects
- * @examples
- *
- *    // animate sprite to (20, 20) over 1s using easeInOuTsine, and then reverse the animation
- *    new Animate.to(sprite, {x: 20, y: 20}, 1000, {reverse: true, ease: Easing.easeInOutSine})
- *
- *    // animate list of sprites to a scale over 10s after waiting 1s
- *    new Animate.to([sprite1, sprite2, sprite3], {scale: {x: 0.25, y: 0.25}}, 10000, {wait: 1000})
- */
+/** animate any numeric parameter of an object or array of objects */
 module.exports = class to extends wait
 {
     /**
      * @param {object} object to animate
-     * @param {object} goto - parameters to animate, e.g.: {alpha: 5, scale: {x, 5} rotation: Math.PI}
-     * @param {number} [duration=0] - time to run (use 0 for infinite duration--should only be used with customized easing functions)
+     * @param {object} goto - parameters to animate, e.g.: {alpha: 5, scale: {3, 5}, scale: 5, rotation: Math.PI}
+     * @param {number} duration - time to run
      * @param {object} [options]
      * @param {number} [options.wait=0] n milliseconds before starting animation (can also be used to pause animation for a length of time)
      * @param {boolean} [options.pause] start the animation paused
-     * @param {(boolean|number)} [options.repeat] true: repeat animation forever n: repeat animation n times
-     * @param {(boolean|number)} [options.reverse] true: reverse animation (if combined with repeat, then pulse) n: reverse animation n times
-     * @param {(boolean|number)} [options.continue] true: continue animation with new starting values n: continue animation n times
-     * @param {boolean} [options.orphan] delete animation if .parent of object (or first object in list) is null
+     * @param {boolean|number} [options.repeat] true: repeat animation forever n: repeat animation n times
+     * @param {boolean|number} [options.reverse] true: reverse animation (if combined with repeat, then pulse) n: reverse animation n times
+     * @param {boolean|number} [options.continue] true: continue animation with new starting values n: continue animation n times
      * @param {Function} [options.load] loads an animation using an .save() object note the * parameters below cannot be loaded and must be re-set
-     * @param {Function} [options.ease] function from easing.js (see http://easings.net for examples)*
-     * @emits {done} animation expires
-     * @emits {cancel} animation is cancelled
-     * @emits {wait} each update during a wait
-     * @emits {first} first update when animation starts
-     * @emits {each} each update while animation is running
-     * @emits {loop} when animation is repeated
-     * @emits {reverse} when animation is reversed
+     * @param {string|Function} [options.ease] name or function from easing.js (see http://easings.net for examples)
+     * @emits to:done animation expires
+     * @emits to:cancel animation is cancelled
+     * @emits to:wait each update during a wait
+     * @emits to:first first update when animation starts
+     * @emits to:each each update while animation is running
+     * @emits to:loop when animation is repeated
+     * @emits to:reverse when animation is reversed
      */
     constructor(object, goto, duration, options)
     {
@@ -51,8 +41,21 @@ module.exports = class to extends wait
         else
         {
             this.goto = goto
+            this.fixScale()
             this.duration = duration
             this.restart()
+        }
+    }
+
+    /**
+     * converts scale from { scale: n } to { scale: { x: n, y: n }}
+     * @private
+     */
+    fixScale()
+    {
+        if (typeof this.goto['scale'] !== 'undefined' && !Number.isNaN(this.goto['scale']))
+        {
+            this.goto['scale'] = {x: this.goto['scale'], y: this.goto['scale']}
         }
     }
 
@@ -92,7 +95,7 @@ module.exports = class to extends wait
         for (let key in goto)
         {
 
-            // handles keys with one additional level e.g.: goto = {scale: {x: 5, y: 5}}
+            // handles keys with one additional level e.g.: goto = {scale: {x: 5, y: 3}}
             if (isNaN(goto[key]))
             {
                 keys[i] = {key: key, children: []}
