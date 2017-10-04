@@ -115,6 +115,9 @@ module.exports = class List extends EventEmitter
         }
     }
 
+    /**
+     * @return {number} number of active animations
+     */
     count()
     {
         let count = 0

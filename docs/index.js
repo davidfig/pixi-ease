@@ -57883,7 +57883,6 @@ module.exports = class List extends EventEmitter
      */
     update(elapsed)
     {
-        let n = 0
         for (let i = this.list.length - 1; i >= 0; i--)
         {
             const animate = this.list[i]
@@ -57892,21 +57891,29 @@ module.exports = class List extends EventEmitter
                 this.emit('remove', animate)
                 this.list.splice(i, 1)
             }
-            else
-            {
-                if (!animate.options.pause)
-                {
-                    n++
-                }
-            }
         }
-        this.emit('each', this, n)
+        this.emit('each', this)
         if (this.list.length === 0 && !this.empty)
         {
             this.emit('done', this)
             this.empty = true
         }
-        return n
+    }
+
+    /**
+     * @return {number} number of active animations
+     */
+    count()
+    {
+        let count = 0
+        for (let animate of this.list)
+        {
+            if (!animate.options.pause)
+            {
+                count++
+            }
+        }
+        return count
     }
 }
 },{"eventemitter3":6}],377:[function(require,module,exports){

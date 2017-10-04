@@ -115,6 +115,11 @@ module.exports = class List extends EventEmitter
      * @returns {number} of active animations
      */
     update(elapsed)
+
+    /**
+     * @return {number} number of active animations
+     */
+    count()
 ```
 ### src/load.js
 ```
