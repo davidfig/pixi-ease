@@ -6,6 +6,8 @@ This is a rewrite API for [YY-Animate](https://github.com/davidfig/animate). It 
 
 YY-Animate used a global Animate object, which worked well, but created clean-up issues (e.g., when destroying a level, I had to be careful to destroy all the animations connected to that level). pixi-ease uses separate list objects, that can be created, updated, and destroyed independently of other lists. 
 
+Additionally, I used eventemitter3 to create a more robust event system, replacing the onDone, onLoop, etc. options from YY-Animate.
+
 ## Installation
 
     npm i pixi-ease
