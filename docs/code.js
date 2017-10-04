@@ -5,14 +5,14 @@ const Ease = require('..')
 
 const TIME = 1000
 
-let size, last = performance.now()
+let size
 const app = pixi()
 const textures = load()
 
 const list = new Ease.list(
-    new Ease.shake(block(), 5),
-    new Ease.movie(block(), textures, TIME, { repeat: true, reverse: true })
+    new Ease.shake(block(), 5)
 )
+list.movie(block(), textures, TIME, { repeat: true, reverse: true })
 
 const target = list.add(new Ease.to(block(), { x: window.innerWidth - size / 2 }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true }))
 list.add(
@@ -21,8 +21,9 @@ list.add(
     new Ease.to(block(), { rotation: Math.PI * 2 }, TIME, { ease: 'easeInOutQuad', reverse: true, repeat: true }),
     new Ease.tint(block(), 0x888888, TIME, { repeat: true, reverse: true }),
     new Ease.tint(block(), [0x00ff00, 0xff0000, 0x0000ff], TIME * 10, { repeat: true, reverse: true }),
-    new Ease.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true })
 )
+
+list.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true })
 
 list.start()
 

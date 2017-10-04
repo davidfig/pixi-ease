@@ -6,14 +6,14 @@ const Ease = require('..')
 
 const TIME = 1000
 
-let size, last = performance.now()
+let size
 const app = pixi()
 const textures = load()
 
 const list = new Ease.list(
-    new Ease.shake(block(), 5),
-    new Ease.movie(block(), textures, TIME, { repeat: true, reverse: true })
+    new Ease.shake(block(), 5)
 )
+list.movie(block(), textures, TIME, { repeat: true, reverse: true })
 
 const target = list.add(new Ease.to(block(), { x: window.innerWidth - size / 2 }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true }))
 list.add(
@@ -22,8 +22,9 @@ list.add(
     new Ease.to(block(), { rotation: Math.PI * 2 }, TIME, { ease: 'easeInOutQuad', reverse: true, repeat: true }),
     new Ease.tint(block(), 0x888888, TIME, { repeat: true, reverse: true }),
     new Ease.tint(block(), [0x00ff00, 0xff0000, 0x0000ff], TIME * 10, { repeat: true, reverse: true }),
-    new Ease.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true })
 )
+
+list.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true })
 
 list.start()
 
@@ -57775,6 +57776,15 @@ module.exports = class face extends wait
 }
 },{"./wait":383,"yy-angle":371}],376:[function(require,module,exports){
 const EventEmitter = require('eventemitter3')
+const Angle = require('./angle')
+const Face = require('./face')
+const Load = require('./load')
+const Movie = require('./movie')
+const Shake = require('./shake')
+const Target = require('./target')
+const Tint = require('./tint')
+const To = require('./to')
+const Wait = require('./wait')
 
 /** Helper list for multiple animations */
 module.exports = class List extends EventEmitter
@@ -57943,10 +57953,37 @@ module.exports = class List extends EventEmitter
     {
         this.running = false
     }
+
+    /** helper to add to the list a new Ease.to class; see Ease.to class below for parameters */
+    to() { return this.add(new To(...arguments)) }
+
+    /** helper to add to the list a new Ease.angle class; see Ease.to class below for parameters */
+    angle() { return this.add(new Angle(...arguments)) }
+
+    /** helper to add to the list a new Ease.face class; see Ease.to class below for parameters */
+    face() { return this.add(new Face(...arguments)) }
+
+    /** helper to add to the list a new Ease.load class; see Ease.to class below for parameters */
+    load() { return this.add(new Load(...arguments)) }
+
+    /** helper to add to the list a new Ease.movie class; see Ease.to class below for parameters */
+    movie() { return this.add(new Movie(...arguments)) }
+
+    /** helper to add to the list a new Ease.shake class; see Ease.to class below for parameters */
+    shake() { return this.add(new Shake(...arguments)) }
+
+    /** helper to add to the list a new Ease.target class; see Ease.to class below for parameters */
+    target() { return this.add(new Target(...arguments)) }
+
+    /** helper to add to the list a new Ease.angle tint; see Ease.to class below for parameters */
+    tint() { return this.add(new Tint(...arguments)) }
+
+    /** helper to add to the list a new Ease.wait class; see Ease.to class below for parameters */
+    wait() { return this.add(new Wait(...arguments)) }
 }
 
 /* global requestAnimationFrame, performance */
-},{"eventemitter3":6}],377:[function(require,module,exports){
+},{"./angle":374,"./face":375,"./load":377,"./movie":378,"./shake":379,"./target":380,"./tint":381,"./to":382,"./wait":383,"eventemitter3":6}],377:[function(require,module,exports){
 const wait = require('./wait')
 const to = require('./to')
 const tint = require('./tint')

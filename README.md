@@ -23,27 +23,20 @@ https://davidfig.github.io/pixi-ease/
     square.tint = 0x0000ff
     square.width = square.height = 20
 
-    // create container for animations
+    // create list of animations
     const list = new Ease.list()
 
     // change square's tint from blue to red over 2 seconds; reverse and repeat
-    const tint = list.add(new Ease.tint(square, 0xff0000, 2000, { repeat: true, reverse: true }))
+    list.tint(square, 0xff0000, 2000, { repeat: true, reverse: true }))
 
     // change square's location to (20, 55) over 2 seconds, and then return to the middle
-    const to = list.add(new Ease.to(square, { x: 20, y: 55 }, 2000, { reverse: true }))
+    const to = list.to(square, { x: 20, y: 55 }, 2000, { reverse: true }))
 
     // listen for done, then print to console
     to.on('done', () => console.log('Square has finished animating'))
 
-    const last = performance.now()
-    function update()
-    {
-        const now = performance.now()
-        list.update(now - last)
-        last = now        
-        requestAnimationFrame(update)
-    }
-    update()
+    // start the list's animation loop
+    list.start()
 
 ## API
 ### src/list.js
@@ -104,6 +97,30 @@ module.exports = class List extends EventEmitter
      * stops the automatic requestAnimationFrame() loop
      */
     stop()
+
+    /** helper to add to the list a new Ease.to class; see Ease.to class below for parameters */
+    to() { return this.add(new To(...arguments)) }
+
+    /** helper to add to the list a new Ease.angle class; see Ease.to class below for parameters */
+    angle() { return this.add(new Angle(...arguments)) }
+
+    /** helper to add to the list a new Ease.face class; see Ease.to class below for parameters */
+    face() { return this.add(new Face(...arguments)) }
+
+    /** helper to add to the list a new Ease.load class; see Ease.to class below for parameters */
+    load() { return this.add(new Load(...arguments)) }
+
+    /** helper to add to the list a new Ease.movie class; see Ease.to class below for parameters */
+    movie() { return this.add(new Movie(...arguments)) }
+
+    /** helper to add to the list a new Ease.shake class; see Ease.to class below for parameters */
+    shake() { return this.add(new Shake(...arguments)) }
+
+    /** helper to add to the list a new Ease.target class; see Ease.to class below for parameters */
+    target() { return this.add(new Target(...arguments)) }
+
+    /** helper to add to the list a new Ease.angle tint; see Ease.to class below for parameters */
+    tint() { return this.add(new Tint(...arguments)) }
 ```
 ### src/angle.js
 ```
