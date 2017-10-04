@@ -129,6 +129,33 @@ module.exports = class List extends EventEmitter
     /** helper to add to the list a new Ease.angle tint; see Ease.to class below for parameters */
     tint() { return this.add(new Tint(...arguments)) }
 ```
+### src/to.js
+```
+/** animate any numeric parameter of an object or array of objects */
+module.exports = class to extends wait
+{
+    /**
+     * @param {object} object to animate
+     * @param {object} goto - parameters to animate, e.g.: {alpha: 5, scale: {3, 5}, scale: 5, rotation: Math.PI}
+     * @param {number} duration - time to run
+     * @param {object} [options]
+     * @param {number} [options.wait=0] n milliseconds before starting animation (can also be used to pause animation for a length of time)
+     * @param {boolean} [options.pause] start the animation paused
+     * @param {boolean|number} [options.repeat] true: repeat animation forever n: repeat animation n times
+     * @param {boolean|number} [options.reverse] true: reverse animation (if combined with repeat, then pulse) n: reverse animation n times
+     * @param {boolean|number} [options.continue] true: continue animation with new starting values n: continue animation n times
+     * @param {Function} [options.load] loads an animation using an .save() object note the * parameters below cannot be loaded and must be re-set
+     * @param {string|Function} [options.ease] name or function from easing.js (see http://easings.net for examples)
+     * @emits to:done animation expires
+     * @emits to:cancel animation is cancelled
+     * @emits to:wait each update during a wait
+     * @emits to:first first update when animation starts
+     * @emits to:each each update while animation is running
+     * @emits to:loop when animation is repeated
+     * @emits to:reverse when animation is reversed
+     */
+    constructor(object, goto, duration, options)
+```
 ### src/angle.js
 ```
 /** animate object's {x, y} using an angle */
@@ -236,33 +263,6 @@ module.exports = class tint extends wait
      * @param {object} [options] @see {@link Wait}
      */
     constructor(object, tint, duration, options)
-```
-### src/to.js
-```
-/** animate any numeric parameter of an object or array of objects */
-module.exports = class to extends wait
-{
-    /**
-     * @param {object} object to animate
-     * @param {object} goto - parameters to animate, e.g.: {alpha: 5, scale: {3, 5}, scale: 5, rotation: Math.PI}
-     * @param {number} duration - time to run
-     * @param {object} [options]
-     * @param {number} [options.wait=0] n milliseconds before starting animation (can also be used to pause animation for a length of time)
-     * @param {boolean} [options.pause] start the animation paused
-     * @param {boolean|number} [options.repeat] true: repeat animation forever n: repeat animation n times
-     * @param {boolean|number} [options.reverse] true: reverse animation (if combined with repeat, then pulse) n: reverse animation n times
-     * @param {boolean|number} [options.continue] true: continue animation with new starting values n: continue animation n times
-     * @param {Function} [options.load] loads an animation using an .save() object note the * parameters below cannot be loaded and must be re-set
-     * @param {string|Function} [options.ease] name or function from easing.js (see http://easings.net for examples)
-     * @emits to:done animation expires
-     * @emits to:cancel animation is cancelled
-     * @emits to:wait each update during a wait
-     * @emits to:first first update when animation starts
-     * @emits to:each each update while animation is running
-     * @emits to:loop when animation is repeated
-     * @emits to:reverse when animation is reversed
-     */
-    constructor(object, goto, duration, options)
 ```
 ### src/wait.js
 ```
