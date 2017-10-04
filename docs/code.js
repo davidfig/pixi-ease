@@ -24,16 +24,7 @@ list.add(
     new Ease.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true })
 )
 
-const max = 1000 / 60
-function update()
-{
-    const now = performance.now()
-    const elapsed = now - last > max ? max : now - last
-    last = now
-    list.update(elapsed)
-    requestAnimationFrame(update)
-}
-update()
+list.start()
 
 require('./highlight.js')
 

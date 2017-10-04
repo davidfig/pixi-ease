@@ -25,16 +25,7 @@ list.add(
     new Ease.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true })
 )
 
-const max = 1000 / 60
-function update()
-{
-    const now = performance.now()
-    const elapsed = now - last > max ? max : now - last
-    last = now
-    list.update(elapsed)
-    requestAnimationFrame(update)
-}
-update()
+list.start()
 
 require('./highlight.js')
 
@@ -57790,8 +57781,8 @@ module.exports = class List extends EventEmitter
 {
     /**
      * @param {object|object[]...} any animation class
-     * @emits {done} final animation completed in the list
-     * @emits {each} each update
+     * @event List#done(List) final animation completed in the list
+     * @event List#each(List) each update
      */
     constructor()
     {
@@ -57915,7 +57906,46 @@ module.exports = class List extends EventEmitter
         }
         return count
     }
+
+    /**
+     * handler for requestAnimationFrame
+     * @private
+     */
+    loop()
+    {
+        if (this.running)
+        {
+            const now = performance.now()
+            const elapsed = now - this.now > this.max ? this.max : now - this.now
+            this.update(elapsed)
+            this.now = now
+            requestAnimationFrame(this.loop.bind(this))
+        }
+    }
+
+    /**
+     * starts an automatic requestAnimationFrame() loop
+     * alternatively, you can call update() manually
+     * @param {number} [max=1000 / 60] maximum FPS--i.e., in update(elapsed) if elapsed > max, then use max instead of elapsed
+     */
+    start(max)
+    {
+        this.max = max || 1000 / 60
+        this.running = true
+        this.now = performance.now()
+        requestAnimationFrame(this.loop.bind(this))
+    }
+
+    /**
+     * stops the automatic requestAnimationFrame() loop
+     */
+    stop()
+    {
+        this.running = false
+    }
 }
+
+/* global requestAnimationFrame, performance */
 },{"eventemitter3":6}],377:[function(require,module,exports){
 const wait = require('./wait')
 const to = require('./to')

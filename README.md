@@ -46,34 +46,6 @@ https://davidfig.github.io/pixi-ease/
     update()
 
 ## API
-### src/angle.js
-```
-/** animate object's {x, y} using an angle */
-module.exports = class angle extends wait
-{
-    /**
-     * @param {object} object to animate
-     * @param {number} angle in radians
-     * @param {number} speed in pixels/millisecond
-     * @param {number} [duration=0] in milliseconds; if 0, then continues forever
-     * @param {object} [options] @see {@link Wait}
-     */
-    constructor(object, angle, speed, duration, options)
-```
-### src/face.js
-```
-/** Rotates an object to face the target */
-module.exports = class face extends wait
-{
-    /**
-     * @param {object} object
-     * @param {Point} target
-     * @param {number} speed in radians/millisecond
-     * @param {object} [options] @see {@link Wait}
-     * @param {boolean} [options.keepAlive] don't stop animation when complete
-     */
-    constructor(object, target, speed, options)
-```
 ### src/list.js
 ```
 /** Helper list for multiple animations */
@@ -81,8 +53,8 @@ module.exports = class List extends EventEmitter
 {
     /**
      * @param {object|object[]...} any animation class
-     * @emits {done} final animation completed in the list
-     * @emits {each} each update
+     * @event List#done(List) final animation completed in the list
+     * @event List#each(List) each update
      */
     constructor()
 
@@ -120,6 +92,46 @@ module.exports = class List extends EventEmitter
      * @return {number} number of active animations
      */
     count()
+
+    /**
+     * starts an automatic requestAnimationFrame() loop
+     * alternatively, you can call update() manually
+     * @param {number} [max=1000 / 60] maximum FPS--i.e., in update(elapsed) if elapsed > max, then use max instead of elapsed
+     */
+    start(max)
+
+    /**
+     * stops the automatic requestAnimationFrame() loop
+     */
+    stop()
+```
+### src/angle.js
+```
+/** animate object's {x, y} using an angle */
+module.exports = class angle extends wait
+{
+    /**
+     * @param {object} object to animate
+     * @param {number} angle in radians
+     * @param {number} speed in pixels/millisecond
+     * @param {number} [duration=0] in milliseconds; if 0, then continues forever
+     * @param {object} [options] @see {@link Wait}
+     */
+    constructor(object, angle, speed, duration, options)
+```
+### src/face.js
+```
+/** Rotates an object to face the target */
+module.exports = class face extends wait
+{
+    /**
+     * @param {object} object
+     * @param {Point} target
+     * @param {number} speed in radians/millisecond
+     * @param {object} [options] @see {@link Wait}
+     * @param {boolean} [options.keepAlive] don't stop animation when complete
+     */
+    constructor(object, target, speed, options)
 ```
 ### src/load.js
 ```

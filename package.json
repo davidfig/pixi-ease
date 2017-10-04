@@ -1,12 +1,12 @@
 {
     "name": "pixi-ease",
-    "version": "0.7.1",
+    "version": "0.8.0",
     "description": "pixi.js animation library using easing functions",
     "main": "index.js",
     "scripts": {
         "test": "budo docs/code.js:index.js --live --dir docs",
         "build": "browserify docs/code.js -o docs/index.js",
-        "docs": "markdown-api README.md src/animate.js src/**/*.js --header",
+        "docs": "markdown-api README.md src/list.js src/**/*.js --header",
         "test-docs": "budo --dir docs",
         "prepare": "npm run build && npm run docs"
     },
