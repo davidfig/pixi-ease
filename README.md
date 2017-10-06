@@ -49,12 +49,12 @@ https://davidfig.github.io/pixi-ease/
 ### src/list.js
 ```
 /** Helper list for multiple animations */
-module.exports = class List extends EventEmitter
+module.exports = class List extends Events
 {
     /**
      * @param {object|object[]...} any animation class
      * @event List#done(List) final animation completed in the list
-     * @event List#each(List) each update
+     * @event List#each(elapsed, List) each update
      */
     constructor()
 

@@ -9,24 +9,51 @@ let size
 const app = pixi()
 const textures = load()
 
-const list = new Ease.list(
+// initialize a list of animations
+const ease = new Ease.list(
     new Ease.shake(block(), 5)
 )
-list.movie(block(), textures, TIME, { repeat: true, reverse: true })
 
-const target = list.add(new Ease.to(block(), { x: window.innerWidth - size / 2 }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true }))
-list.add(
+// this is the second way to initialize an animation; this time create a movie with a list of textures
+ease.movie(block(), textures, TIME, { repeat: true, reverse: true })
+
+const target = ease.to(block(), { x: window.innerWidth - size / 2 }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true })
+ease.add(
+
+    // keeps the block facing the target
     new Ease.face(block(), target.object, 0.01, { keepAlive: true }),
+
+    // moves the block toward a moving targat
     new Ease.target(block(), target.object, 0.1, { keepAlive: true }),
+
+    // full spin, and then reversed spin, etc.
     new Ease.to(block(), { rotation: Math.PI * 2 }, TIME, { ease: 'easeInOutQuad', reverse: true, repeat: true }),
+
+    // tint a block from current color to a new color, and then reverse and repeat
     new Ease.tint(block(), 0x888888, TIME, { repeat: true, reverse: true }),
+
+    // tint a block through a series of colors starting at the current color; reverse and repeat
     new Ease.tint(block(), [0x00ff00, 0xff0000, 0x0000ff], TIME * 10, { repeat: true, reverse: true })
 )
 
-list.to(block(), { scale: 0 }, TIME, {repeat: true, reverse: true })
-list.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true })
+// initialize without adding it to the list; will manually update it in the update function below
+// NOTE: scale may be called as { scale: number } or { scale: {x: number, y: number }}
+const to = ease.to(block(), { scale: 0 }, TIME, { repeat: true, reverse: true })
 
-list.start()
+// this sends a block off at an angle
+ease.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true })
+
+// starts the animations
+ease.start()
+
+// all lists and animation types have EventEmitters
+ease.on('each', update)
+
+// you can manually update individual animations without using Ease.list if you prefer
+function update(elapsed)
+{
+    to.update(elapsed)
+}
 
 require('./highlight.js')
 

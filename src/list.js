@@ -1,4 +1,4 @@
-const EventEmitter = require('eventemitter3')
+const Events = require('eventemitter3')
 const Angle = require('./angle')
 const Face = require('./face')
 const Load = require('./load')
@@ -10,12 +10,12 @@ const To = require('./to')
 const Wait = require('./wait')
 
 /** Helper list for multiple animations */
-module.exports = class List extends EventEmitter
+module.exports = class List extends Events
 {
     /**
      * @param {object|object[]...} any animation class
      * @event List#done(List) final animation completed in the list
-     * @event List#each(List) each update
+     * @event List#each(elapsed, List) each update
      */
     constructor()
     {
@@ -116,7 +116,7 @@ module.exports = class List extends EventEmitter
                 this.list.splice(i, 1)
             }
         }
-        this.emit('each', this)
+        this.emit('each', elapsed, this)
         if (this.list.length === 0 && !this.empty)
         {
             this.emit('done', this)
