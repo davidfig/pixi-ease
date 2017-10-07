@@ -19,7 +19,9 @@ ease.shake(block(), 5)
 ease.movie(block(), textures, TIME, { repeat: true, reverse: true })
 
 // create a target animation
-const target = ease.to(block(), { x: window.innerWidth - size / 2 }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true })
+const b = block()
+b.x = size / 2
+const target = ease.to(b, { x: window.innerWidth - size / 2 }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true })
 
 // this is an alternative way to create and add animations to the list
 ease.add(
@@ -87,7 +89,7 @@ function block(tint)
     block.anchor.set(0.5)
     block.width = block.height = size * 0.9
     block.tint = typeof tint !== 'undefined' ? tint : Random.color()
-    block.x = size / 2
+    block.x = window.innerWidth / 2 - size / 2
     block.y = size / 2 + size * (app.stage.children.length - 1)
     return block
 }
