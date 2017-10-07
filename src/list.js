@@ -1,4 +1,5 @@
-const Events = require('eventemitter3')
+const Loop = require('yy-loop')
+
 const Angle = require('./angle')
 const Face = require('./face')
 const Load = require('./load')
@@ -10,22 +11,23 @@ const To = require('./to')
 const Wait = require('./wait')
 
 /** Helper list for multiple animations */
-module.exports = class List extends Events
+module.exports = class List extends Loop
 {
     /**
-     * @param {object|object[]...} any animation class
+     * @param [options]
+     * @param {number} [options.maxFrameTime=1000 / 60] maximum time in milliseconds for a frame
+     * @param {object} [options.pauseOnBlur] pause loop when app loses focus, start it when app regains focus
      * @event List#done(List) final animation completed in the list
      * @event List#each(elapsed, List) each update
      */
-    constructor()
+    constructor(options)
     {
-        super()
-        this.list = []
+        options = options || {}
+        super(options)
+        this.entries = []
         this.empty = true
-        if (arguments.length)
-        {
-            this.add(...arguments)
-        }
+
+        super.add(this.loop.bind(this))
     }
 
     /**
@@ -40,12 +42,12 @@ module.exports = class List extends Events
             {
                 for (let entry of arg)
                 {
-                    this.list.push(entry)
+                    this.entries.push(entry)
                 }
             }
             else
             {
-                this.list.push(arg)
+                this.entries.push(arg)
             }
         }
         this.empty = false
@@ -59,7 +61,7 @@ module.exports = class List extends Events
      */
     get(index)
     {
-        return this.list[index]
+        return this.entries[index]
     }
 
     /**
@@ -97,7 +99,7 @@ module.exports = class List extends Events
      */
     removeAll()
     {
-        this.list = []
+        this.entries = []
         this.empty = true
     }
 
@@ -105,19 +107,19 @@ module.exports = class List extends Events
      * @param {number} elapsed time since last tick
      * @returns {number} of active animations
      */
-    update(elapsed)
+    loop(elapsed)
     {
-        for (let i = this.list.length - 1; i >= 0; i--)
+        for (let i = this.entries.length - 1; i >= 0; i--)
         {
-            const animate = this.list[i]
+            const animate = this.entries[i]
             if (animate.update(elapsed))
             {
                 this.emit('remove', animate)
-                this.list.splice(i, 1)
+                this.entries.splice(i, 1)
             }
         }
         this.emit('each', elapsed, this)
-        if (this.list.length === 0 && !this.empty)
+        if (this.entries.length === 0 && !this.empty)
         {
             this.emit('done', this)
             this.empty = true
@@ -130,7 +132,7 @@ module.exports = class List extends Events
     count()
     {
         let count = 0
-        for (let animate of this.list)
+        for (let animate of this.entries)
         {
             if (!animate.options.pause)
             {
@@ -141,41 +143,17 @@ module.exports = class List extends Events
     }
 
     /**
-     * handler for requestAnimationFrame
-     * @private
-     */
-    loop()
-    {
-        if (this.running)
-        {
-            const now = performance.now()
-            const elapsed = now - this.now > this.max ? this.max : now - this.now
-            this.update(elapsed)
-            this.now = now
-            requestAnimationFrame(this.loop.bind(this))
-        }
-    }
-
-    /**
-     * starts an automatic requestAnimationFrame() loop
+     * starts an automatic requestAnimationFrame() loop based on yy-loop
      * alternatively, you can call update() manually
-     * @param {number} [max=1000 / 60] maximum FPS--i.e., in update(elapsed) if elapsed > max, then use max instead of elapsed
+     * @inherited yy-loop
      */
-    start(max)
-    {
-        this.max = max || 1000 / 60
-        this.running = true
-        this.now = performance.now()
-        requestAnimationFrame(this.loop.bind(this))
-    }
+    // start()
 
     /**
      * stops the automatic requestAnimationFrame() loop
+     * @inherited yy-loop
      */
-    stop()
-    {
-        this.running = false
-    }
+    // stop()
 
     /** helper to add to the list a new Ease.to class; see Ease.to class below for parameters */
     to() { return this.add(new To(...arguments)) }

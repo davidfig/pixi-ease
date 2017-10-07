@@ -49,14 +49,16 @@ https://davidfig.github.io/pixi-ease/
 ### src/list.js
 ```
 /** Helper list for multiple animations */
-module.exports = class List extends Events
+module.exports = class List extends Loop
 {
     /**
-     * @param {object|object[]...} any animation class
+     * @param [options]
+     * @param {number} [options.maxFrameTime=1000 / 60] maximum time in milliseconds for a frame
+     * @param {object} [options.pauseOnBlur] pause loop when app loses focus, start it when app regains focus
      * @event List#done(List) final animation completed in the list
      * @event List#each(elapsed, List) each update
      */
-    constructor()
+    constructor(options)
 
     /**
      * Add animation(s) to animation list
@@ -86,7 +88,7 @@ module.exports = class List extends Events
      * @param {number} elapsed time since last tick
      * @returns {number} of active animations
      */
-    update(elapsed)
+    loop(elapsed)
 
     /**
      * @return {number} number of active animations
@@ -94,16 +96,17 @@ module.exports = class List extends Events
     count()
 
     /**
-     * starts an automatic requestAnimationFrame() loop
+     * starts an automatic requestAnimationFrame() loop based on yy-loop
      * alternatively, you can call update() manually
-     * @param {number} [max=1000 / 60] maximum FPS--i.e., in update(elapsed) if elapsed > max, then use max instead of elapsed
+     * @inherited yy-loop
      */
-    start(max)
+    // start()
 
     /**
      * stops the automatic requestAnimationFrame() loop
+     * @inherited yy-loop
      */
-    stop()
+    // stop()
 
     /** helper to add to the list a new Ease.to class; see Ease.to class below for parameters */
     to() { return this.add(new To(...arguments)) }

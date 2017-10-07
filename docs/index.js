@@ -11,14 +11,18 @@ const app = pixi()
 const textures = load()
 
 // initialize a list of animations
-const ease = new Ease.list(
-    new Ease.shake(block(), 5)
-)
+const ease = new Ease.list({ pauseOnBlur: true })
 
-// this is the second way to initialize an animation; this time create a movie with a list of textures
+// create a shake animation and add it to the list
+ease.shake(block(), 5)
+
+// create a movie with a list of textures and add it to the list
 ease.movie(block(), textures, TIME, { repeat: true, reverse: true })
 
+// create a target animation
 const target = ease.to(block(), { x: window.innerWidth - size / 2 }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true })
+
+// this is an alternative way to create and add animations to the list
 ease.add(
 
     // keeps the block facing the target
@@ -39,7 +43,7 @@ ease.add(
 
 // initialize without adding it to the list; will manually update it in the update function below
 // NOTE: scale may be called as { scale: number } or { scale: {x: number, y: number }}
-const to = ease.to(block(), { scale: 0 }, TIME, { repeat: true, reverse: true })
+const to = new Ease.to(block(), { scale: 0 }, TIME, { repeat: true, reverse: true })
 
 // this sends a block off at an angle
 ease.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true })
@@ -90,7 +94,7 @@ function block(tint)
 }
 
 /* globals performance, requestAnimationFrame */
-},{"..":3,"./highlight.js":2,"pixi.js":322,"yy-random":373}],2:[function(require,module,exports){
+},{"..":3,"./highlight.js":2,"pixi.js":322,"yy-random":376}],2:[function(require,module,exports){
 // shows the code in the demo
 window.onload = function()
 {
@@ -124,7 +128,7 @@ module.exports = {
 
     default: new list()
 }
-},{"./src/angle":374,"./src/face":375,"./src/list":376,"./src/load":377,"./src/movie":378,"./src/shake":379,"./src/target":380,"./src/tint":381,"./src/to":382,"./src/wait":383}],4:[function(require,module,exports){
+},{"./src/angle":377,"./src/face":378,"./src/list":379,"./src/load":380,"./src/movie":381,"./src/shake":382,"./src/target":383,"./src/tint":384,"./src/to":385,"./src/wait":386}],4:[function(require,module,exports){
 /**
  * Bit twiddling hacks for JavaScript.
  *
@@ -21419,7 +21423,7 @@ exports.__esModule = true;
  * @name VERSION
  * @type {string}
  */
-var VERSION = exports.VERSION = '4.5.5';
+var VERSION = exports.VERSION = '4.5.6';
 
 /**
  * Two Pi.
@@ -30497,6 +30501,19 @@ var WebGLRenderer = function (_SystemRenderer) {
          */
         _this.currentRenderer = _this.emptyRenderer;
 
+        /**
+         * Manages textures
+         * @member {PIXI.TextureManager}
+         */
+        _this.textureManager = null;
+
+        /**
+         * Manages the filters.
+         *
+         * @member {PIXI.FilterManager}
+         */
+        _this.filterManager = null;
+
         _this.initPlugins();
 
         /**
@@ -30547,12 +30564,6 @@ var WebGLRenderer = function (_SystemRenderer) {
 
         _this._initContext();
 
-        /**
-         * Manages the filters.
-         *
-         * @member {PIXI.FilterManager}
-         */
-        _this.filterManager = new _FilterManager2.default(_this);
         // map some webGL blend and drawmodes..
         _this.drawModes = (0, _mapWebGLDrawModesToPixi2.default)(_this.gl);
 
@@ -30606,6 +30617,7 @@ var WebGLRenderer = function (_SystemRenderer) {
 
         // create a texture manager...
         this.textureManager = new _TextureManager2.default(this);
+        this.filterManager = new _FilterManager2.default(this);
         this.textureGC = new _TextureGarbageCollector2.default(this);
 
         this.state.resetToDefault();
@@ -31039,6 +31051,7 @@ var WebGLRenderer = function (_SystemRenderer) {
 
     WebGLRenderer.prototype.handleContextRestored = function handleContextRestored() {
         this.textureManager.removeAll();
+        this.filterManager.destroy(true);
         this._initContext();
     };
 
@@ -31466,6 +31479,9 @@ var Filter = function () {
 
     for (var i in this.uniformData) {
       this.uniforms[i] = this.uniformData[i].value;
+      if (this.uniformData[i].type) {
+        this.uniformData[i].type = this.uniformData[i].type.toLowerCase();
+      }
     }
 
     // this is where we store shader references..
@@ -31698,36 +31714,13 @@ function calculateNormalizedScreenSpaceMatrix(outputMatrix, filterArea, textureS
 
 // this will map the filter coord so that a texture can be used based on the transform of a sprite
 function calculateSpriteMatrix(outputMatrix, filterArea, textureSize, sprite) {
-    var worldTransform = sprite.worldTransform.copy(_math.Matrix.TEMP_MATRIX);
     var texture = sprite._texture.baseTexture;
-
-    // TODO unwrap?
-    var mappedMatrix = outputMatrix.identity();
-
-    // scale..
-    var ratio = textureSize.height / textureSize.width;
-
-    mappedMatrix.translate(filterArea.x / textureSize.width, filterArea.y / textureSize.height);
-
-    mappedMatrix.scale(1, ratio);
-
-    var translateScaleX = textureSize.width / texture.width;
-    var translateScaleY = textureSize.height / texture.height;
-
-    worldTransform.tx /= texture.width * translateScaleX;
-
-    // this...?  free beer for anyone who can explain why this makes sense!
-    worldTransform.ty /= texture.width * translateScaleX;
-    // worldTransform.ty /= texture.height * translateScaleY;
+    var mappedMatrix = outputMatrix.set(textureSize.width, 0, 0, textureSize.height, filterArea.x, filterArea.y);
+    var worldTransform = sprite.worldTransform.copy(_math.Matrix.TEMP_MATRIX);
 
     worldTransform.invert();
     mappedMatrix.prepend(worldTransform);
-
-    // apply inverse scale..
-    mappedMatrix.scale(1, 1 / ratio);
-
-    mappedMatrix.scale(translateScaleX, translateScaleY);
-
+    mappedMatrix.scale(1.0 / texture.width, 1.0 / texture.height);
     mappedMatrix.translate(sprite.anchor.x, sprite.anchor.y);
 
     return mappedMatrix;
@@ -31805,7 +31798,7 @@ var SpriteMaskFilter = function (_Filter) {
 
 exports.default = SpriteMaskFilter;
 
-},{"../../../../math":237,"../Filter":253,"path":385}],257:[function(require,module,exports){
+},{"../../../../math":237,"../Filter":253,"path":388}],257:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -31892,6 +31885,8 @@ var FilterManager = function (_WebGLManager) {
         _this.pool = {};
 
         _this.filterData = null;
+
+        _this.managedFilters = [];
         return _this;
     }
 
@@ -32059,6 +32054,8 @@ var FilterManager = function (_WebGLManager) {
                 shader = filter.glShaders[renderer.CONTEXT_UID] = new _Shader2.default(this.gl, filter.vertexSrc, filter.fragmentSrc);
             }
 
+            this.managedFilters.push(filter);
+
             // TODO - this only needs to be done once?
             renderer.bindVao(null);
 
@@ -32150,7 +32147,9 @@ var FilterManager = function (_WebGLManager) {
 
         // TODO Cacheing layer..
         for (var i in uniformData) {
-            if (uniformData[i].type === 'sampler2D' && uniforms[i] !== 0) {
+            var type = uniformData[i].type;
+
+            if (type === 'sampler2d' && uniforms[i] !== 0) {
                 if (uniforms[i].baseTexture) {
                     shader.uniforms[i] = this.renderer.bindTexture(uniforms[i].baseTexture, textureCount);
                 } else {
@@ -32170,14 +32169,14 @@ var FilterManager = function (_WebGLManager) {
                 }
 
                 textureCount++;
-            } else if (uniformData[i].type === 'mat3') {
+            } else if (type === 'mat3') {
                 // check if its PixiJS matrix..
                 if (uniforms[i].a !== undefined) {
                     shader.uniforms[i] = uniforms[i].toArray(true);
                 } else {
                     shader.uniforms[i] = uniforms[i];
                 }
-            } else if (uniformData[i].type === 'vec2') {
+            } else if (type === 'vec2') {
                 // check if its a point..
                 if (uniforms[i].x !== undefined) {
                     var val = shader.uniforms[i] || new Float32Array(2);
@@ -32188,7 +32187,7 @@ var FilterManager = function (_WebGLManager) {
                 } else {
                     shader.uniforms[i] = uniforms[i];
                 }
-            } else if (uniformData[i].type === 'float') {
+            } else if (type === 'float') {
                 if (shader.uniforms.data[i].value !== uniformData[i]) {
                     shader.uniforms[i] = uniforms[i];
                 }
@@ -32276,12 +32275,30 @@ var FilterManager = function (_WebGLManager) {
     /**
      * Destroys this Filter Manager.
      *
+     * @param {boolean} [contextLost=false] context was lost, do not free shaders
+     *
      */
 
 
     FilterManager.prototype.destroy = function destroy() {
+        var contextLost = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
+        var renderer = this.renderer;
+        var filters = this.managedFilters;
+
+        for (var i = 0; i < filters.length; i++) {
+            if (!contextLost) {
+                filters[i].glShaders[renderer.CONTEXT_UID].destroy();
+            }
+            delete filters[i].glShaders[renderer.CONTEXT_UID];
+        }
+
         this.shaderCache = {};
-        this.emptyPool();
+        if (!contextLost) {
+            this.emptyPool();
+        } else {
+            this.pool = {};
+        }
     };
 
     /**
@@ -33959,6 +33976,7 @@ var Sprite = function (_Container) {
     Sprite.prototype._onTextureUpdate = function _onTextureUpdate() {
         this._textureID = -1;
         this._textureTrimmedID = -1;
+        this.cachedTint = 0xFFFFFF;
 
         // so if _width is 0 then width was not set..
         if (this._width) {
@@ -35470,7 +35488,7 @@ function generateSampleSrc(maxTextures) {
     return src;
 }
 
-},{"../../Shader":211,"path":385}],275:[function(require,module,exports){
+},{"../../Shader":211,"path":388}],275:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -38531,6 +38549,7 @@ var Spritesheet = function () {
     Spritesheet.prototype._processFrames = function _processFrames(initialFrameIndex) {
         var frameIndex = initialFrameIndex;
         var maxFrames = Spritesheet.BATCH_SIZE;
+        var sourceScale = this.baseTexture.sourceScale;
 
         while (frameIndex - initialFrameIndex < maxFrames && frameIndex < this._frameKeys.length) {
             var i = this._frameKeys[frameIndex];
@@ -38539,17 +38558,17 @@ var Spritesheet = function () {
             if (rect) {
                 var frame = null;
                 var trim = null;
-                var orig = new _.Rectangle(0, 0, this._frames[i].sourceSize.w / this.resolution, this._frames[i].sourceSize.h / this.resolution);
+                var orig = new _.Rectangle(0, 0, Math.floor(this._frames[i].sourceSize.w * sourceScale) / this.resolution, Math.floor(this._frames[i].sourceSize.h * sourceScale) / this.resolution);
 
                 if (this._frames[i].rotated) {
-                    frame = new _.Rectangle(rect.x / this.resolution, rect.y / this.resolution, rect.h / this.resolution, rect.w / this.resolution);
+                    frame = new _.Rectangle(Math.floor(rect.x * sourceScale) / this.resolution, Math.floor(rect.y * sourceScale) / this.resolution, Math.floor(rect.h * sourceScale) / this.resolution, Math.floor(rect.w * sourceScale) / this.resolution);
                 } else {
-                    frame = new _.Rectangle(rect.x / this.resolution, rect.y / this.resolution, rect.w / this.resolution, rect.h / this.resolution);
+                    frame = new _.Rectangle(Math.floor(rect.x * sourceScale) / this.resolution, Math.floor(rect.y * sourceScale) / this.resolution, Math.floor(rect.w * sourceScale) / this.resolution, Math.floor(rect.h * sourceScale) / this.resolution);
                 }
 
                 //  Check to see if the sprite is trimmed
                 if (this._frames[i].trimmed) {
-                    trim = new _.Rectangle(this._frames[i].spriteSourceSize.x / this.resolution, this._frames[i].spriteSourceSize.y / this.resolution, rect.w / this.resolution, rect.h / this.resolution);
+                    trim = new _.Rectangle(Math.floor(this._frames[i].spriteSourceSize.x * sourceScale) / this.resolution, Math.floor(this._frames[i].spriteSourceSize.y * sourceScale) / this.resolution, Math.floor(rect.w * sourceScale) / this.resolution, Math.floor(rect.h * sourceScale) / this.resolution);
                 }
 
                 this.textures[i] = new _.Texture(this.baseTexture, frame, orig, trim, this._frames[i].rotated ? 2 : 0);
@@ -39191,12 +39210,24 @@ var Texture = function (_EventEmitter) {
 
             this.noFrame = false;
 
-            if (frame.x + frame.width > this.baseTexture.width || frame.y + frame.height > this.baseTexture.height) {
-                throw new Error('Texture Error: frame does not fit inside the base Texture dimensions: ' + ('X: ' + frame.x + ' + ' + frame.width + ' = ' + (frame.x + frame.width) + ' > ' + this.baseTexture.width + ' ') + ('Y: ' + frame.y + ' + ' + frame.height + ' = ' + (frame.y + frame.height) + ' > ' + this.baseTexture.height));
+            var x = frame.x,
+                y = frame.y,
+                width = frame.width,
+                height = frame.height;
+
+            var xNotFit = x + width > this.baseTexture.width;
+            var yNotFit = y + height > this.baseTexture.height;
+
+            if (xNotFit || yNotFit) {
+                var relationship = xNotFit && yNotFit ? 'and' : 'or';
+                var errorX = 'X: ' + x + ' + ' + width + ' = ' + (x + width) + ' > ' + this.baseTexture.width;
+                var errorY = 'Y: ' + y + ' + ' + height + ' = ' + (y + height) + ' > ' + this.baseTexture.height;
+
+                throw new Error('Texture Error: frame does not fit inside the base Texture dimensions: ' + (errorX + ' ' + relationship + ' ' + errorY));
             }
 
-            // this.valid = frame && frame.width && frame.height && this.baseTexture.source && this.baseTexture.hasLoaded;
-            this.valid = frame && frame.width && frame.height && this.baseTexture.hasLoaded;
+            // this.valid = width && height && this.baseTexture.source && this.baseTexture.hasLoaded;
+            this.valid = width && height && this.baseTexture.hasLoaded;
 
             if (!this.trim && !this.rotate) {
                 this.orig = frame;
@@ -40565,7 +40596,7 @@ function determineCrossOrigin(url) {
     return '';
 }
 
-},{"url":391}],291:[function(require,module,exports){
+},{"url":394}],291:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -43109,6 +43140,7 @@ var AnimatedSprite = function (_core$Sprite) {
     AnimatedSprite.prototype.updateTexture = function updateTexture() {
         this._texture = this._textures[this.currentFrame];
         this._textureID = -1;
+        this.cachedTint = 0xFFFFFF;
 
         if (this.onFrameChange) {
             this.onFrameChange(this.currentFrame);
@@ -44116,6 +44148,7 @@ var TilingSprite = function (_core$Sprite) {
         if (this.uvTransform) {
             this.uvTransform.texture = this._texture;
         }
+        this.cachedTint = 0xFFFFFF;
     };
 
     /**
@@ -44165,22 +44198,19 @@ var TilingSprite = function (_core$Sprite) {
         var modY = this.tilePosition.y / this.tileScale.y % texture._frame.height * baseTextureResolution;
 
         // create a nice shiny pattern!
-        // TODO this needs to be refreshed if texture changes..
-        if (!this._canvasPattern) {
+        if (this._textureID !== this._texture._updateID || this.cachedTint !== this.tint) {
+            this._textureID = this._texture._updateID;
             // cut an object from a spritesheet..
             var tempCanvas = new core.CanvasRenderTarget(texture._frame.width, texture._frame.height, baseTextureResolution);
 
             // Tint the tiling sprite
             if (this.tint !== 0xFFFFFF) {
-                if (this.cachedTint !== this.tint) {
-                    this.cachedTint = this.tint;
-
-                    this.tintedTexture = _CanvasTinter2.default.getTintedTexture(this, this.tint);
-                }
+                this.tintedTexture = _CanvasTinter2.default.getTintedTexture(this, this.tint);
                 tempCanvas.context.drawImage(this.tintedTexture, 0, 0);
             } else {
                 tempCanvas.context.drawImage(baseTexture.source, -texture._frame.x * baseTextureResolution, -texture._frame.y * baseTextureResolution);
             }
+            this.cachedTint = this.tint;
             this._canvasPattern = tempCanvas.context.createPattern(tempCanvas.canvas, 'repeat');
         }
 
@@ -45133,7 +45163,7 @@ exports.default = TilingSpriteRenderer;
 
 core.WebGLRenderer.registerPlugin('tilingSprite', TilingSpriteRenderer);
 
-},{"../../core":232,"../../core/const":213,"path":385}],310:[function(require,module,exports){
+},{"../../core":232,"../../core/const":213,"path":388}],310:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -46296,7 +46326,7 @@ var ColorMatrixFilter = function (_core$Filter) {
 exports.default = ColorMatrixFilter;
 ColorMatrixFilter.prototype.grayscale = ColorMatrixFilter.prototype.greyscale;
 
-},{"../../core":232,"path":385}],317:[function(require,module,exports){
+},{"../../core":232,"path":388}],317:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -46406,7 +46436,7 @@ var DisplacementFilter = function (_core$Filter) {
 
 exports.default = DisplacementFilter;
 
-},{"../../core":232,"path":385}],318:[function(require,module,exports){
+},{"../../core":232,"path":388}],318:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -46460,7 +46490,7 @@ var FXAAFilter = function (_core$Filter) {
 
 exports.default = FXAAFilter;
 
-},{"../../core":232,"path":385}],319:[function(require,module,exports){
+},{"../../core":232,"path":388}],319:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -46636,7 +46666,7 @@ var NoiseFilter = function (_core$Filter) {
 
 exports.default = NoiseFilter;
 
-},{"../../core":232,"path":385}],321:[function(require,module,exports){
+},{"../../core":232,"path":388}],321:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -46686,7 +46716,7 @@ var VoidFilter = function (_core$Filter) {
 
 exports.default = VoidFilter;
 
-},{"../../core":232,"path":385}],322:[function(require,module,exports){
+},{"../../core":232,"path":388}],322:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -49306,7 +49336,7 @@ function parse(resource, texture) {
     resource.bitmapFont = _extras.BitmapText.registerFont(resource.data, texture);
 }
 
-},{"../core":232,"../extras":308,"path":385,"resource-loader":361}],330:[function(require,module,exports){
+},{"../core":232,"../extras":308,"path":388,"resource-loader":361}],330:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -49664,7 +49694,7 @@ function getResourcePath(resource, baseUrl) {
     return _url2.default.resolve(resource.url.replace(baseUrl, ''), resource.data.meta.image);
 }
 
-},{"../core":232,"resource-loader":361,"url":391}],333:[function(require,module,exports){
+},{"../core":232,"resource-loader":361,"url":394}],333:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -50334,7 +50364,7 @@ var NineSlicePlane = function (_Plane) {
         this.updateHorizontalVertices();
         this.updateVerticalVertices();
 
-        this.dirty = true;
+        this.dirty++;
 
         this.multiplyUvs();
     };
@@ -50554,7 +50584,7 @@ var Plane = function (_Mesh) {
         this.uvs = new Float32Array(uvs);
         this.colors = new Float32Array(colors);
         this.indices = new Uint16Array(indices);
-        this.indexDirty = true;
+        this.indexDirty++;
 
         this.multiplyUvs();
     };
@@ -51311,7 +51341,7 @@ exports.default = MeshRenderer;
 
 core.WebGLRenderer.registerPlugin('mesh', MeshRenderer);
 
-},{"../../core":232,"../Mesh":334,"path":385,"pixi-gl-core":196}],341:[function(require,module,exports){
+},{"../../core":232,"../Mesh":334,"path":388,"pixi-gl-core":196}],341:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -51360,19 +51390,23 @@ var ParticleContainer = function (_core$Container) {
     _inherits(ParticleContainer, _core$Container);
 
     /**
-     * @param {number} [maxSize=15000] - The maximum number of particles that can be renderer by the container.
+     * @param {number} [maxSize=1500] - The maximum number of particles that can be rendered by the container.
+     *  Affects size of allocated buffers.
      * @param {object} [properties] - The properties of children that should be uploaded to the gpu and applied.
      * @param {boolean} [properties.scale=false] - When true, scale be uploaded and applied.
      * @param {boolean} [properties.position=true] - When true, position be uploaded and applied.
      * @param {boolean} [properties.rotation=false] - When true, rotation be uploaded and applied.
      * @param {boolean} [properties.uvs=false] - When true, uvs be uploaded and applied.
-     * @param {boolean} [properties.alpha=false] - When true, alpha be uploaded and applied.
-     * @param {number} [batchSize=15000] - Number of particles per batch.
+     * @param {boolean} [properties.tint=false] - When true, alpha and tint be uploaded and applied.
+     * @param {number} [batchSize=16384] - Number of particles per batch. If less than maxSize, it uses maxSize instead.
+     * @param {boolean} [autoResize=true] If true, container allocates more batches in case
+     *  there are more than `maxSize` particles.
      */
     function ParticleContainer() {
         var maxSize = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1500;
         var properties = arguments[1];
         var batchSize = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 16384;
+        var autoResize = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
         _classCallCheck(this, ParticleContainer);
 
@@ -51440,6 +51474,13 @@ var ParticleContainer = function (_core$Container) {
         _this.blendMode = core.BLEND_MODES.NORMAL;
 
         /**
+         * If true, container allocates more batches in case there are more than `maxSize` particles.
+         * @member {boolean}
+         * @default false
+         */
+        _this.autoResize = autoResize;
+
+        /**
          * Used for canvas renderering. If true then the elements will be positioned at the
          * nearest pixel. This provides a nice speed boost.
          *
@@ -51485,7 +51526,7 @@ var ParticleContainer = function (_core$Container) {
             this._properties[1] = 'position' in properties ? !!properties.position : this._properties[1];
             this._properties[2] = 'rotation' in properties ? !!properties.rotation : this._properties[2];
             this._properties[3] = 'uvs' in properties ? !!properties.uvs : this._properties[3];
-            this._properties[4] = 'alpha' in properties ? !!properties.alpha : this._properties[4];
+            this._properties[4] = 'alpha' in properties || 'tint' in properties ? !!properties.alpha || !!properties.tint : this._properties[4];
         }
     };
 
@@ -51757,20 +51798,6 @@ var ParticleBuffer = function () {
         this.gl = gl;
 
         /**
-         * Size of a single vertex.
-         *
-         * @member {number}
-         */
-        this.vertSize = 2;
-
-        /**
-         * Size of a single vertex in bytes.
-         *
-         * @member {number}
-         */
-        this.vertByteSize = this.vertSize * 4;
-
-        /**
          * The number of particles the buffer can hold
          *
          * @member {number}
@@ -51800,6 +51827,7 @@ var ParticleBuffer = function () {
                 attribute: property.attribute,
                 size: property.size,
                 uploadFunction: property.uploadFunction,
+                unsignedByte: property.unsignedByte,
                 offset: property.offset
             };
 
@@ -51813,10 +51841,12 @@ var ParticleBuffer = function () {
         this.staticStride = 0;
         this.staticBuffer = null;
         this.staticData = null;
+        this.staticDataUint32 = null;
 
         this.dynamicStride = 0;
         this.dynamicBuffer = null;
         this.dynamicData = null;
+        this.dynamicDataUint32 = null;
 
         this.initBuffers();
     }
@@ -51850,8 +51880,11 @@ var ParticleBuffer = function () {
             this.dynamicStride += property.size;
         }
 
-        this.dynamicData = new Float32Array(this.size * this.dynamicStride * 4);
-        this.dynamicBuffer = _pixiGlCore2.default.GLBuffer.createVertexBuffer(gl, this.dynamicData, gl.STREAM_DRAW);
+        var dynBuffer = new ArrayBuffer(this.size * this.dynamicStride * 4 * 4);
+
+        this.dynamicData = new Float32Array(dynBuffer);
+        this.dynamicDataUint32 = new Uint32Array(dynBuffer);
+        this.dynamicBuffer = _pixiGlCore2.default.GLBuffer.createVertexBuffer(gl, dynBuffer, gl.STREAM_DRAW);
 
         // static //
         var staticOffset = 0;
@@ -51866,21 +51899,32 @@ var ParticleBuffer = function () {
             this.staticStride += _property.size;
         }
 
-        this.staticData = new Float32Array(this.size * this.staticStride * 4);
-        this.staticBuffer = _pixiGlCore2.default.GLBuffer.createVertexBuffer(gl, this.staticData, gl.STATIC_DRAW);
+        var statBuffer = new ArrayBuffer(this.size * this.staticStride * 4 * 4);
+
+        this.staticData = new Float32Array(statBuffer);
+        this.staticDataUint32 = new Uint32Array(statBuffer);
+        this.staticBuffer = _pixiGlCore2.default.GLBuffer.createVertexBuffer(gl, statBuffer, gl.STATIC_DRAW);
 
         this.vao = new _pixiGlCore2.default.VertexArrayObject(gl).addIndex(this.indexBuffer);
 
         for (var _i2 = 0; _i2 < this.dynamicProperties.length; ++_i2) {
             var _property2 = this.dynamicProperties[_i2];
 
-            this.vao.addAttribute(this.dynamicBuffer, _property2.attribute, gl.FLOAT, false, this.dynamicStride * 4, _property2.offset * 4);
+            if (_property2.unsignedByte) {
+                this.vao.addAttribute(this.dynamicBuffer, _property2.attribute, gl.UNSIGNED_BYTE, true, this.dynamicStride * 4, _property2.offset * 4);
+            } else {
+                this.vao.addAttribute(this.dynamicBuffer, _property2.attribute, gl.FLOAT, false, this.dynamicStride * 4, _property2.offset * 4);
+            }
         }
 
         for (var _i3 = 0; _i3 < this.staticProperties.length; ++_i3) {
             var _property3 = this.staticProperties[_i3];
 
-            this.vao.addAttribute(this.staticBuffer, _property3.attribute, gl.FLOAT, false, this.staticStride * 4, _property3.offset * 4);
+            if (_property3.unsignedByte) {
+                this.vao.addAttribute(this.staticBuffer, _property3.attribute, gl.UNSIGNED_BYTE, true, this.staticStride * 4, _property3.offset * 4);
+            } else {
+                this.vao.addAttribute(this.staticBuffer, _property3.attribute, gl.FLOAT, false, this.staticStride * 4, _property3.offset * 4);
+            }
         }
     };
 
@@ -51897,7 +51941,7 @@ var ParticleBuffer = function () {
         for (var i = 0; i < this.dynamicProperties.length; i++) {
             var property = this.dynamicProperties[i];
 
-            property.uploadFunction(children, startIndex, amount, this.dynamicData, this.dynamicStride, property.offset);
+            property.uploadFunction(children, startIndex, amount, property.unsignedByte ? this.dynamicDataUint32 : this.dynamicData, this.dynamicStride, property.offset);
         }
 
         this.dynamicBuffer.upload();
@@ -51916,7 +51960,7 @@ var ParticleBuffer = function () {
         for (var i = 0; i < this.staticProperties.length; i++) {
             var property = this.staticProperties[i];
 
-            property.uploadFunction(children, startIndex, amount, this.staticData, this.staticStride, property.offset);
+            property.uploadFunction(children, startIndex, amount, property.unsignedByte ? this.staticDataUint32 : this.staticData, this.staticStride, property.offset);
         }
 
         this.staticBuffer.upload();
@@ -51959,6 +52003,8 @@ var _ParticleShader2 = _interopRequireDefault(_ParticleShader);
 var _ParticleBuffer = require('./ParticleBuffer');
 
 var _ParticleBuffer2 = _interopRequireDefault(_ParticleBuffer);
+
+var _utils = require('../../core/utils');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -52066,11 +52112,12 @@ var ParticleRenderer = function (_core$ObjectRenderer) {
             uploadFunction: this.uploadUvs,
             offset: 0
         },
-        // alphaData
+        // tintData
         {
             attribute: this.shader.attributes.aColor,
             size: 1,
-            uploadFunction: this.uploadAlpha,
+            unsignedByte: true,
+            uploadFunction: this.uploadTint,
             offset: 0
         }];
     };
@@ -52137,6 +52184,13 @@ var ParticleRenderer = function (_core$ObjectRenderer) {
                 amount = batchSize;
             }
 
+            if (j >= buffers.length) {
+                if (!container.autoResize) {
+                    break;
+                }
+                buffers.push(this._generateOneMoreBuffer(container));
+            }
+
             var buffer = buffers[j];
 
             // we always upload the dynamic
@@ -52174,6 +52228,23 @@ var ParticleRenderer = function (_core$ObjectRenderer) {
         }
 
         return buffers;
+    };
+
+    /**
+     * Creates one more particle buffer, because container has autoResize feature
+     *
+     * @param {PIXI.ParticleContainer} container - The container to render using this ParticleRenderer
+     * @return {PIXI.ParticleBuffer} generated buffer
+     * @private
+     */
+
+
+    ParticleRenderer.prototype._generateOneMoreBuffer = function _generateOneMoreBuffer(container) {
+        var gl = this.renderer.gl;
+        var batchSize = container._batchSize;
+        var dynamicPropertyFlags = container._properties;
+
+        return new _ParticleBuffer2.default(gl, this.properties, dynamicPropertyFlags, batchSize);
     };
 
     /**
@@ -52348,14 +52419,18 @@ var ParticleRenderer = function (_core$ObjectRenderer) {
      */
 
 
-    ParticleRenderer.prototype.uploadAlpha = function uploadAlpha(children, startIndex, amount, array, stride, offset) {
-        for (var i = 0; i < amount; i++) {
-            var spriteAlpha = children[startIndex + i].alpha;
+    ParticleRenderer.prototype.uploadTint = function uploadTint(children, startIndex, amount, array, stride, offset) {
+        for (var i = 0; i < amount; ++i) {
+            var sprite = children[startIndex + i];
+            var premultiplied = sprite._texture.baseTexture.premultipliedAlpha;
+            var alpha = sprite.alpha;
+            // we dont call extra function if alpha is 1.0, that's faster
+            var argb = alpha < 1.0 && premultiplied ? (0, _utils.premultiplyTint)(sprite._tintRGB, alpha) : sprite._tintRGB + (alpha * 255 << 24);
 
-            array[offset] = spriteAlpha;
-            array[offset + stride] = spriteAlpha;
-            array[offset + stride * 2] = spriteAlpha;
-            array[offset + stride * 3] = spriteAlpha;
+            array[offset] = argb;
+            array[offset + stride] = argb;
+            array[offset + stride * 2] = argb;
+            array[offset + stride * 3] = argb;
 
             offset += stride * 4;
         }
@@ -52388,7 +52463,7 @@ exports.default = ParticleRenderer;
 
 core.WebGLRenderer.registerPlugin('particle', ParticleRenderer);
 
-},{"../../core":232,"./ParticleBuffer":343,"./ParticleShader":345}],345:[function(require,module,exports){
+},{"../../core":232,"../../core/utils":291,"./ParticleBuffer":343,"./ParticleShader":345}],345:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -52421,9 +52496,9 @@ var ParticleShader = function (_Shader) {
 
         return _possibleConstructorReturn(this, _Shader.call(this, gl,
         // vertex shader
-        ['attribute vec2 aVertexPosition;', 'attribute vec2 aTextureCoord;', 'attribute float aColor;', 'attribute vec2 aPositionCoord;', 'attribute vec2 aScale;', 'attribute float aRotation;', 'uniform mat3 projectionMatrix;', 'varying vec2 vTextureCoord;', 'varying float vColor;', 'void main(void){', '   vec2 v = aVertexPosition;', '   v.x = (aVertexPosition.x) * cos(aRotation) - (aVertexPosition.y) * sin(aRotation);', '   v.y = (aVertexPosition.x) * sin(aRotation) + (aVertexPosition.y) * cos(aRotation);', '   v = v + aPositionCoord;', '   gl_Position = vec4((projectionMatrix * vec3(v, 1.0)).xy, 0.0, 1.0);', '   vTextureCoord = aTextureCoord;', '   vColor = aColor;', '}'].join('\n'),
+        ['attribute vec2 aVertexPosition;', 'attribute vec2 aTextureCoord;', 'attribute vec4 aColor;', 'attribute vec2 aPositionCoord;', 'attribute vec2 aScale;', 'attribute float aRotation;', 'uniform mat3 projectionMatrix;', 'uniform vec4 uColor;', 'varying vec2 vTextureCoord;', 'varying vec4 vColor;', 'void main(void){', '   vec2 v = aVertexPosition;', '   v.x = (aVertexPosition.x) * cos(aRotation) - (aVertexPosition.y) * sin(aRotation);', '   v.y = (aVertexPosition.x) * sin(aRotation) + (aVertexPosition.y) * cos(aRotation);', '   v = v + aPositionCoord;', '   gl_Position = vec4((projectionMatrix * vec3(v, 1.0)).xy, 0.0, 1.0);', '   vTextureCoord = aTextureCoord;', '   vColor = aColor * uColor;', '}'].join('\n'),
         // hello
-        ['varying vec2 vTextureCoord;', 'varying float vColor;', 'uniform sampler2D uSampler;', 'uniform vec4 uColor;', 'void main(void){', '  vec4 color = texture2D(uSampler, vTextureCoord) * vColor * uColor;', '  if (color.a == 0.0) discard;', '  gl_FragColor = color;', '}'].join('\n')));
+        ['varying vec2 vTextureCoord;', 'varying vec4 vColor;', 'uniform sampler2D uSampler;', 'void main(void){', '  vec4 color = texture2D(uSampler, vTextureCoord) * vColor;', '  if (color.a == 0.0) discard;', '  gl_FragColor = color;', '}'].join('\n')));
     }
 
     return ParticleShader;
@@ -56607,247 +56682,282 @@ if ((typeof module) == 'object' && module.exports) {
   Math    // math: package containing random, pow, and seedrandom
 );
 
-},{"crypto":384}],371:[function(require,module,exports){
-/*
-    angle.js <https://github.com/davidfig/anglejs>
-    Released under MIT license <https://github.com/davidfig/angle/blob/master/LICENSE>
-    Author: David Figatner
-    Copyright (c) 2016 YOPEY YOPEY LLC
-*/
+},{"crypto":387}],371:[function(require,module,exports){
+// angle.js <https://github.com/davidfig/anglejs>
+// Released under MIT license <https://github.com/davidfig/angle/blob/master/LICENSE>
+// Author: David Figatner
+// Copyright (c) 2016-17 YOPEY YOPEY LLC
 
-/** @class */
-class Angle
+const _toDegreeConversion = 180 / Math.PI
+const _toRadianConversion = Math.PI / 180
+
+
+/** @constant {number} */
+const UP = Math.PI / 2
+const DOWN = 3 * Math.PI / 2
+const LEFT = Math.PI
+const RIGHT = 0
+
+const NORTH = UP
+const SOUTH = DOWN
+const WEST = LEFT
+const EAST = RIGHT
+
+const PI_2 = Math.PI * 2
+const PI_QUARTER = Math.PI / 4
+const PI_HALF = Math.PI / 2
+
+/**
+ * converts from radians to degrees (all other functions expect radians)
+ * @param {number} radians
+ * @return {number} degrees
+ */
+function toDegrees(radians)
 {
-    constructor()
+    return radians * _toDegreeConversion
+}
+
+/**
+ * converts from degrees to radians (all other functions expect radians)
+ * @param {number} degrees
+ * @return {number} radians
+ */
+function toRadians(degrees)
+{
+    return degrees * _toRadianConversion
+}
+
+/**
+ * returns whether the target angle is between angle1 and angle2 (in radians)
+ * (based on: http://stackoverflow.com/questions/11406189/determine-if-angle-lies-between-2-other-angles)
+ * @param {number} target angle
+ * @param {number} angle1
+ * @param {number} angle2
+ * @return {boolean}
+ */
+function isAngleBetween(target, angle1, angle2)
+{
+    const rAngle = ((angle2 - angle1) % PI_2 + PI_2) % PI_2
+    if (rAngle >= Math.PI)
     {
-        // constants
-        this.UP = Math.PI / 2;
-        this.DOWN = 3 * Math.PI / 2;
-        this.LEFT = Math.PI;
-        this.RIGHT = 0;
-
-        this.NORTH = this.UP;
-        this.SOUTH = this.DOWN;
-        this.WEST = this.LEFT;
-        this.EAST = this.RIGHT;
-
-        this.PI_2 = Math.PI * 2;
-        this.PI_QUARTER = Math.PI / 4;
-        this.PI_HALF = Math.PI / 2;
-
-        this._toDegreeConversion = 180 / Math.PI;
-        this._toRadianConversion = Math.PI / 180;
+        const swap = angle1
+        angle1 = angle2
+        angle2 = swap
     }
 
-    /**
-     * converts from radians to degrees (all other functions expect radians)
-     * @param {number} radians
-     * @return {number} degrees
-     */
-    toDegrees(radians)
+    if (angle1 <= angle2)
     {
-        return radians * this._toDegreeConversion;
+        return target >= angle1 && target <= angle2
     }
-
-    /**
-     * converts from degrees to radians (all other functions expect radians)
-     * @param {number} degrees
-     * @return {number} radians
-     */
-    toRadians(degrees)
+    else
     {
-        return degrees * this._toRadianConversion;
-    }
-
-    /**
-     * returns whether the target angle is between angle1 and angle2 (in radians)
-     * (based on: http://stackoverflow.com/questions/11406189/determine-if-angle-lies-between-2-other-angles)
-     * @param {number} target angle
-     * @param {number} angle1
-     * @param {number} angle2
-     * @return {boolean}
-     */
-    isAngleBetween(target, angle1, angle2)
-    {
-        const rAngle = ((angle2 - angle1) % this.PI_2 + this.PI_2) % this.PI_2;
-        if (rAngle >= Math.PI)
-        {
-            const swap = angle1;
-            angle1 = angle2;
-            angle2 = swap;
-        }
-
-        if (angle1 <= angle2)
-        {
-            return target >= angle1 && target <= angle2;
-        }
-        else
-        {
-            return target >= angle1 || target <= angle2;
-        }
-    }
-
-    /**
-     * returns +1 or -1 based on whether the difference between two angles is positive or negative (in radians)
-     * @param {number} target angle
-     * @param {number} source angle
-     * @return {number} 1 or -1
-     */
-    differenceAnglesSign(target, source)
-    {
-        function mod(a, n)
-        {
-            return (a % n + n) % n;
-        }
-
-        const a = target - source;
-        return mod((a + Math.PI), this.PI_2) - Math.PI > 0 ? 1 : -1;
-    }
-
-    /**
-     * returns the normalized difference between two angles (in radians)
-     * @param {number} a - first angle
-     * @param {number} b - second angle
-     * @return {number} normalized difference between a and b
-     */
-    differenceAngles(a, b)
-    {
-        const c = Math.abs(a - b) % this.PI_2;
-        return c > Math.PI ? (this.PI_2 - c) : c;
-    }
-
-    /**
-     * returns a target angle that is the shortest way to rotate an object between start and to--may choose a negative angle
-     * @param {number} start
-     * @param {number} to
-     * @return {number} shortest target angle
-     */
-    shortestAngle(start, to)
-    {
-        const difference = this.differenceAngles(to, start);
-        const sign = this.differenceAnglesSign(to, start);
-        const delta = difference * sign;
-        return delta + start;
-    }
-
-    /**
-     * returns the normalized angle (0 - PI x 2)
-     * @param {number} radians
-     * @return {number} normalized angle in radians
-     */
-    normalize(radians)
-    {
-        return radians - this.PI_2 * Math.floor(radians / this.PI_2);
-    }
-
-    /**
-     * returns angle between two points (in radians)
-     * @param {Point} [point1] {x: x, y: y}
-     * @param {Point} [point2] {x: x, y: y}
-     * @param {number} [x1]
-     * @param {number} [y1]
-     * @param {number} [x2]
-     * @param {number} [y2]
-     * @return {number} angle
-     */
-    angleTwoPoints(/* (point1, point2) OR (x1, y1, x2, y2) */)
-    {
-        if (arguments.length === 4)
-        {
-            return Math.atan2(arguments[3] - arguments[1], arguments[2] - arguments[0]);
-        }
-        else
-        {
-            return Math.atan2(arguments[1].y - arguments[0].y, arguments[1].x - arguments[0].x);
-        }
-    }
-
-    /**
-     * returns distance between two points
-     * @param {Point} [point1] {x: x, y: y}
-     * @param {Point} [point2] {x: x, y: y}
-     * @param {number} [x1]
-     * @param {number} [y1]
-     * @param {number} [x2]
-     * @param {number} [y2]
-     * @return {number} distance
-     */
-    distanceTwoPoints(/* (point1, point2) OR (x1, y1, x2, y2) */)
-    {
-        if (arguments.length === 2)
-        {
-            return Math.sqrt(Math.pow(arguments[1].x - arguments[0].x, 2) + Math.pow(arguments[1].y - arguments[0].y, 2));
-        }
-        else
-        {
-            return Math.sqrt(Math.pow(arguments[2] - arguments[0], 2) + Math.pow(arguments[3] - arguments[1], 2));
-        }
-    }
-
-    /**
-     * returns the squared distance between two points
-     * @param {Point} [point1] {x: x, y: y}
-     * @param {Point} [point2] {x: x, y: y}
-     * @param {number} [x1]
-     * @param {number} [y1]
-     * @param {number} [x2]
-     * @param {number} [y2]
-     * @return {number} squared distance
-     */
-    distanceTwoPointsSquared(/* (point1, point2) OR (x1, y1, x2, y2) */)
-    {
-        if (arguments.length === 2)
-        {
-            return Math.pow(arguments[1].x - arguments[0].x, 2) + Math.pow(arguments[1].y - arguments[0].y, 2);
-        }
-        else
-        {
-            return Math.pow(arguments[2] - arguments[0], 2) + Math.pow(arguments[3] - arguments[1], 2);
-        }
-    }
-
-    /**
-     * returns the closest cardinal (N, S, E, W) to the given angle (in radians)
-     * @param {number} angle
-     * @return {number} closest cardinal in radians
-     */
-    closestAngle(angle)
-    {
-        const left = this.differenceAngles(angle, this.LEFT);
-        const right = this.differenceAngles(angle, this.RIGHT);
-        const up = this.differenceAngles(angle, this.UP);
-        const down = this.differenceAngles(angle, this.DOWN);
-        if (left <= right && left <= up && left <= down)
-        {
-            return this.LEFT;
-        }
-        else if (right <= up && right <= down)
-        {
-            return this.RIGHT;
-        }
-        else if (up <= down)
-        {
-            return this.UP;
-        }
-        else
-        {
-            return this.DOWN;
-        }
-    }
-
-    /**
-     * checks whether angles a1 and a2 are equal (after normalizing)
-     * @param {number} a1
-     * @param {number} a2
-     * @param {boolean} a1 === a2
-     *  */
-    equals(a1, a2)
-    {
-        return this.normalize(a1) === this.normalize(a2);
+        return target >= angle1 || target <= angle2
     }
 }
 
-module.exports = new Angle();
+/**
+ * returns +1 or -1 based on whether the difference between two angles is positive or negative (in radians)
+ * @param {number} target angle
+ * @param {number} source angle
+ * @return {number} 1 or -1
+ */
+function differenceAnglesSign(target, source)
+{
+    function mod(a, n)
+    {
+        return (a % n + n) % n
+    }
+
+    const a = target - source
+    return mod((a + Math.PI), PI_2) - Math.PI > 0 ? 1 : -1
+}
+
+/**
+ * returns the normalized difference between two angles (in radians)
+ * @param {number} a - first angle
+ * @param {number} b - second angle
+ * @return {number} normalized difference between a and b
+ */
+function differenceAngles(a, b)
+{
+    const c = Math.abs(a - b) % PI_2
+    return c > Math.PI ? (PI_2 - c) : c
+}
+
+/**
+ * returns a target angle that is the shortest way to rotate an object between start and to--may choose a negative angle
+ * @param {number} start
+ * @param {number} to
+ * @return {number} shortest target angle
+ */
+function shortestAngle(start, to)
+{
+    const difference = differenceAngles(to, start)
+    const sign = differenceAnglesSign(to, start)
+    const delta = difference * sign
+    return delta + start
+}
+
+/**
+ * returns the normalized angle (0 - PI x 2)
+ * @param {number} radians
+ * @return {number} normalized angle in radians
+ */
+function normalize(radians)
+{
+    return radians - PI_2 * Math.floor(radians / PI_2)
+}
+
+/**
+ * returns angle between two points (in radians)
+ * @param {Point} [point1] {x: x, y: y}
+ * @param {Point} [point2] {x: x, y: y}
+ * @param {number} [x1]
+ * @param {number} [y1]
+ * @param {number} [x2]
+ * @param {number} [y2]
+ * @return {number} angle
+ */
+function angleTwoPoints(/* (point1, point2) OR (x1, y1, x2, y2) */)
+{
+    if (arguments.length === 4)
+    {
+        return Math.atan2(arguments[3] - arguments[1], arguments[2] - arguments[0])
+    }
+    else
+    {
+        return Math.atan2(arguments[1].y - arguments[0].y, arguments[1].x - arguments[0].x)
+    }
+}
+
+/**
+ * returns distance between two points
+ * @param {Point} [point1] {x: x, y: y}
+ * @param {Point} [point2] {x: x, y: y}
+ * @param {number} [x1]
+ * @param {number} [y1]
+ * @param {number} [x2]
+ * @param {number} [y2]
+ * @return {number} distance
+ */
+function distanceTwoPoints(/* (point1, point2) OR (x1, y1, x2, y2) */)
+{
+    if (arguments.length === 2)
+    {
+        return Math.sqrt(Math.pow(arguments[1].x - arguments[0].x, 2) + Math.pow(arguments[1].y - arguments[0].y, 2))
+    }
+    else
+    {
+        return Math.sqrt(Math.pow(arguments[2] - arguments[0], 2) + Math.pow(arguments[3] - arguments[1], 2))
+    }
+}
+
+/**
+ * returns the squared distance between two points
+ * @param {Point} [point1] {x: x, y: y}
+ * @param {Point} [point2] {x: x, y: y}
+ * @param {number} [x1]
+ * @param {number} [y1]
+ * @param {number} [x2]
+ * @param {number} [y2]
+ * @return {number} squared distance
+ */
+function distanceTwoPointsSquared(/* (point1, point2) OR (x1, y1, x2, y2) */)
+{
+    if (arguments.length === 2)
+    {
+        return Math.pow(arguments[1].x - arguments[0].x, 2) + Math.pow(arguments[1].y - arguments[0].y, 2)
+    }
+    else
+    {
+        return Math.pow(arguments[2] - arguments[0], 2) + Math.pow(arguments[3] - arguments[1], 2)
+    }
+}
+
+/**
+ * returns the closest cardinal (N, S, E, W) to the given angle (in radians)
+ * @param {number} angle
+ * @return {number} closest cardinal in radians
+ */
+function closestAngle(angle)
+{
+    const left = differenceAngles(angle, LEFT)
+    const right = differenceAngles(angle, RIGHT)
+    const up = differenceAngles(angle, UP)
+    const down = differenceAngles(angle, DOWN)
+    if (left <= right && left <= up && left <= down)
+    {
+        return LEFT
+    }
+    else if (right <= up && right <= down)
+    {
+        return RIGHT
+    }
+    else if (up <= down)
+    {
+        return UP
+    }
+    else
+    {
+        return DOWN
+    }
+}
+
+/**
+ * checks whether angles a1 and a2 are equal (after normalizing)
+ * @param {number} a1
+ * @param {number} a2
+ * @param {number} [wiggle] return true if the difference between the angles is <= wiggle
+ * @return {boolean} a1 === a2
+ */
+function equals(a1, a2, wiggle)
+{
+    if (wiggle)
+    {
+        return differenceAngles(a1, a2) < wiggle
+    }
+    else
+    {
+        return normalize(a1) === normalize(a2)
+    }
+}
+
+/**
+ * return a text representation of the cardinal direction
+ * @param {number} angle
+ * @returns {string} UP, DOWN, LEFT, RIGHT, or NOT CARDINAL
+ */
+function explain(angle)
+{
+    switch (angle)
+    {
+        case UP: return 'UP'
+        case DOWN: return 'DOWN'
+        case LEFT: return 'LEFT'
+        case RIGHT: return 'RIGHT'
+        default: return 'NOT CARDINAL'
+    }
+}
+
+module.exports = {
+    UP, DOWN, LEFT, RIGHT,
+    NORTH, SOUTH, WEST, EAST,
+    PI_2, PI_QUARTER, PI_HALF,
+
+    toDegrees,
+    toRadians,
+    isAngleBetween,
+    differenceAnglesSign,
+    differenceAngles,
+    shortestAngle,
+    normalize,
+    angleTwoPoints,
+    distanceTwoPoints,
+    distanceTwoPointsSquared,
+    closestAngle,
+    equals,
+    explain
+}
 },{}],372:[function(require,module,exports){
 /**
  * @file color.js
@@ -57157,23 +57267,272 @@ class Color
 };
 
 module.exports = new Color();
-},{"yy-random":373}],373:[function(require,module,exports){
-/**
- * @file random.js
- * @author David Figatner
- * @license MIT
- * @copyright YOPEY YOPEY LLC 2016
- * {@link https://github.com/davidfig/random}
- */
+},{"yy-random":376}],373:[function(require,module,exports){
+module.exports = require('./src/loop')
+},{"./src/loop":375}],374:[function(require,module,exports){
+const Events = require('eventemitter3')
 
-const seedrandom = require('seedrandom');
+/** Entry class for Loop */
+class Entry extends Events
+{
+    /**
+     * create an entry in the update loop
+     * used by Loop
+     * @param {function} callback
+     * @param {number} [time=0] in milliseconds to call this update
+     * @param {number} [count] number of times to run this update (undefined=infinite)
+     */
+    constructor(callback, time, count)
+    {
+        super()
+        this.callback = callback
+        this.time = time
+        this.current = 0
+        this.count = count
+    }
 
-/** a javascript random number API with seeded support. not cryptographically sound. useful for games */
+    /**
+     * run the callback if available
+     * @private
+     * @param {number} elapsed
+     */
+    _update(elapsed)
+    {
+        let result
+        if (this.callback)
+        {
+            result = this.callback(elapsed, this)
+        }
+        this.emit('each', elapsed, this)
+        if (result || (!isNaN(this.count) && !--this.count))
+        {
+            this.emit('done', this)
+            return true
+        }
+    }
+
+    /**
+     * update checks time and runs the callback
+     * @param {number} elapsed
+     * @return {boolean} whether entry is complete and may be removed from list
+     */
+    update(elapsed)
+    {
+        if (!this._pause)
+        {
+            if (this.time)
+            {
+                this.current += elapsed
+                if (this.current >= this.time)
+                {
+                    this.current -= this.time
+                    return this._update(elapsed)
+                }
+            }
+            else
+            {
+                return this._update(elapsed)
+            }
+        }
+    }
+
+    /**
+     * @type {boolean} pause this entry
+     */
+    set pause(value)
+    {
+        this._pause = value
+    }
+    get pause()
+    {
+        return this._pause
+    }
+}
+
+module.exports = Entry
+},{"eventemitter3":6}],375:[function(require,module,exports){
+/* Copyright (c) 2017 YOPEY YOPEY LLC */
+
+const Events = require('eventemitter3')
+
+class Loop extends Events
+{
+    /**
+     * basic loop support
+     * note: the default is to stop the loop when app loses focus
+     * @param {object} [options]
+     * @param {number} [options.maxFrameTime=1000 / 60] maximum time in milliseconds for a frame
+     * @param {object} [options.pauseOnBlur] pause loop when app loses focus, start it when app regains focus
+     *
+     * @event each(elapsed, Loop)
+     * @event start(Loop)
+     * @event stop(Loop)
+     */
+    constructor(options)
+    {
+        super()
+        options = options || {}
+        this.maxFrameTime = options.maxFrameTime || 1000 / 60
+        if (options.pauseOnBlur)
+        {
+            window.addEventListener('blur', this.stopBlur.bind(this))
+            window.addEventListener('focus', this.startBlur.bind(this))
+        }
+        this.list = []
+    }
+
+    /**
+     * start requestAnimationFrame() loop
+     * @return {Loop} this
+     */
+    start()
+    {
+        if (!this.running)
+        {
+            this.running = performance.now()
+            this.update()
+            this.emit('start', this)
+        }
+        return this
+    }
+
+    /**
+     * handler for focus event
+     * @private
+     */
+    startBlur()
+    {
+        if (this.blurred)
+        {
+            this.start()
+        }
+    }
+
+    /**
+     * handler for blur event
+     * @private
+     */
+    stopBlur()
+    {
+        if (this.running)
+        {
+            this.stop()
+            this.blurred = true
+        }
+    }
+
+    /**
+     * stop loop
+     * @return {Loop} this
+     */
+    stop()
+    {
+        this.running = false
+        this.blurred = false
+        this.emit('stop', this)
+        return this
+    }
+
+    /**
+     * loop through updates
+     */
+    update()
+    {
+        if (this.running)
+        {
+            const now = performance.now()
+            let elapsed = now - this.running
+            elapsed = elapsed > this.maxFrameTime ? this.maxFrameTime : elapsed
+            for (let entry of this.list)
+            {
+                if (entry.update(elapsed))
+                {
+                    this.remove(entry)
+                }
+            }
+            this.emit('each', elapsed, this)
+            requestAnimationFrame(this.update.bind(this))
+        }
+    }
+
+    /**
+     * add a callback to the update loop
+     * @param {function} callback
+     * @param {number} [time=0] in milliseconds to call this update
+     * @param {number} [count=0] number of times to run this update (0=infinite)
+     * @return {object} entry - used to remove or change the parameters of the update
+     */
+    add(callback, time, count)
+    {
+        const entry = new Entry(callback, time, count)
+        this.list.push(entry)
+        return entry
+    }
+
+    /**
+     * remove a callback from the loop
+     * @param {object} entry - returned by add()
+     */
+    remove(entry)
+    {
+        const index = this.list.indexOf(entry)
+        if (index !== -1)
+        {
+            this.list.splice(index, 1)
+        }
+    }
+
+    /**
+     * removes all callbacks from the loop
+     */
+    removeAll()
+    {
+        this.list = []
+    }
+
+    /**
+     * @type {number} count of all animations
+     */
+    get count()
+    {
+        return this.list.length
+    }
+
+    /**
+     * @type {number} count of running animations
+     */
+    get countRunning()
+    {
+        let count = 0
+        for (let entry of this.list)
+        {
+            if (!entry.pause)
+            {
+                count++
+            }
+        }
+        return count
+    }
+}
+
+const Entry = require('./entry')
+
+Loop.entry = Entry
+module.exports = Loop
+},{"./entry":374,"eventemitter3":6}],376:[function(require,module,exports){
+// yy-random
+// by David Figatner
+// MIT license
+// copyright YOPEY YOPEY LLC 2016-17
+// https://github.com/davidfig/random
+
+const seedrandom = require('seedrandom')
+
 class Random
 {
     constructor()
     {
-        this.generator = Math.random;
+        this.generator = Math.random
     }
 
     /**
@@ -57181,33 +57540,35 @@ class Random
      * @param {number} seed
      * @param {object} [options]
      * @param {string} [PRNG="alea"] - name of algorithm, see https://github.com/davidbau/seedrandom
-     * @param {boolean} [save=true] 
+     * @param {boolean} [save=true]
      */
     seed(seed, options)
     {
-        options = options || {};
-        this.generator = seedrandom[options.PRNG || 'alea'](seed, { state: options.state });
-        this.options = options;
+        options = options || {}
+        this.generator = seedrandom[options.PRNG || 'alea'](seed, { state: options.state })
+        this.options = options
     }
 
     /**
-     * saves the state of the random generator ()
+     * saves the state of the random generator
+     * can only be used after Random.seed() is called
      * @returns {number} state
      */
     save()
     {
         if (this.generator !== Math.random)
         {
-            return this.generator.state();
+            return this.generator.state()
         }
     }
 
+    /**
+     * restores the state of the random generator
+     * @param {number} state
+     */
     restore(state)
     {
-        if (this.generator !== Math.random)
-        {
-            this.generator = seedrandom[this.options.PRNG || 'alea']('', { state });
-        }
+        this.generator = seedrandom[this.options.PRNG || 'alea']('', { state })
     }
 
     /**
@@ -57220,9 +57581,9 @@ class Random
     {
         this.generator = function()
         {
-            const x = Math.sin(seed++) * 10000;
-            return x - Math.floor(x);
-        };
+            const x = Math.sin(seed++) * 10000
+            return x - Math.floor(x)
+        }
     }
 
     /**
@@ -57232,83 +57593,17 @@ class Random
      */
     separateSeed(seed)
     {
-        const random = new Random();
-        random.seed(seed);
-        return random;
+        const random = new Random()
+        random.seed(seed)
+        return random
     }
-
-    /*
-    // future work to replace Math.sin seed generator with an XOR generator
-    // changes the this.generator to use a seeded random based on XOR
-    // see http://baagoe.com/en/RandomMusings/javascript/ (https://web.archive.org/web/20101106000458/http://baagoe.com/en/RandomMusings/javascript/)
-    // as seen here: http://jsdo.it/akm2/amk0
-    seedXORshift(seed)
-    {
-        mash(data)
-        {
-            data = data.toString();
-            var n = 0xefc8249d;
-            for (var i = 0; i < data.length; i++)
-            {
-                n += data.charCodeAt(i);
-                var h = 0.02519603282416938 * n;
-                n = h >>> 0;
-                h -= n;
-                h *= n;
-                n = h >>> 0;
-                h -= n;
-                n += h * 0x100000000;
-            }
-            return (n >>> 0) * 2.3283064365386963e-10;
-        }
-
-        this.generator = function()
-        {
-            var self = this;
-            var seeds = (arguments.length) ? Array.prototype.slice.call(arguments) : [new Date().getTime()];
-
-            var x = 123456789;
-            var y = 362436069;
-            var z = 521288629;
-            var w = 88675123;
-            var v = 886756453;
-
-            self.uint32 = function()
-            {
-                var t = (x ^ (x >>> 7)) >>> 0;
-                x = y;
-                y = z;
-                z = w;
-                w = v;
-                v = (v ^ (v << 6)) ^ (t ^ (t << 13)) >>> 0;
-                return ((y + y + 1) * v) >>> 0;
-            };
-
-            self.random = function() {
-                return self.uint32() * 2.3283064365386963e-10;
-            };
-
-            self.fract53 = function() {
-                return self.random() + (self.uint32() & 0x1fffff) * 1.1102230246251565e-16;
-            };
-
-            for (var i = 0, len = seeds.length, seed; i < len; i++) {
-                seed = seeds[i];
-                x ^= mash(seed) * 0x100000000;
-                y ^= mash(seed) * 0x100000000;
-                z ^= mash(seed) * 0x100000000;
-                v ^= mash(seed) * 0x100000000;
-                w ^= mash(seed) * 0x100000000;
-            }
-    }
-    */
 
     /**
      * resets the random number this.generator to Math.random()
      */
     reset()
     {
-        this.generator = Math.random;
+        this.generator = Math.random
     }
 
     /**
@@ -57319,18 +57614,18 @@ class Random
      */
     get(ceiling, useFloat)
     {
-        const negative = ceiling < 0 ? -1 : 1;
-        ceiling *= negative;
-        let result;
+        const negative = ceiling < 0 ? -1 : 1
+        ceiling *= negative
+        let result
         if (useFloat)
         {
-            result = this.generator() * ceiling;
+            result = this.generator() * ceiling
         }
         else
         {
-            result = Math.floor(this.generator() * ceiling);
+            result = Math.floor(this.generator() * ceiling)
         }
-        return result * negative;
+        return result * negative
     }
 
     /**
@@ -57339,7 +57634,7 @@ class Random
      */
     getHuge()
     {
-        return this.get(Number.MAX_SAFE_INTEGER);
+        return this.get(Number.MAX_SAFE_INTEGER)
     }
 
     /**
@@ -57351,8 +57646,8 @@ class Random
      */
     middle(middle, delta, useFloat)
     {
-        const half = delta / 2;
-        return this.range(middle - half, middle + half, useFloat);
+        const half = delta / 2
+        return this.range(middle - half, middle + half, useFloat)
     }
 
     /**
@@ -57364,41 +57659,41 @@ class Random
      */
     range(start, end, useFloat)
     {
-        // case where theres is no range
+        // case where there is no range
         if (end === start)
         {
-            return end;
+            return end
         }
 
         if (useFloat)
         {
-            return this.get(end - start, true) + start;
+            return this.get(end - start, true) + start
         }
         else
         {
-            let range;
+            let range
             if (start < 0 && end > 0)
             {
-                range = -start + end + 1;
+                range = -start + end + 1
             }
             else if (start === 0 && end > 0)
             {
-                range = end + 1;
+                range = end + 1
             }
             else if (start < 0 && end === 0)
             {
-                range = start - 1;
-                start = 1;
+                range = start - 1
+                start = 1
             }
             else if (start < 0 && end < 0)
             {
-                range = end - start - 1;
+                range = end - start - 1
             }
             else
             {
-                range = end - start + 1;
+                range = end - start + 1
             }
-            return Math.floor(this.generator() * range) + start;
+            return Math.floor(this.generator() * range) + start
         }
     }
 
@@ -57412,12 +57707,12 @@ class Random
      */
     rangeMultiple(start, end, count, useFloat)
     {
-        var array = [];
-        for (var i = 0; i < count; i++)
+        var array = []
+        for (let i = 0; i < count; i++)
         {
-            array.push(this.range(start, end, useFloat));
+            array.push(this.range(start, end, useFloat))
         }
-        return array;
+        return array
     }
 
     /**
@@ -57430,23 +57725,14 @@ class Random
      */
     middleMultiple(middle, range, count, useFloat)
     {
-        const array = [];
+        const array = []
         for (let i = 0; i < count; i++)
         {
-            array.push(middle(middle, range, useFloat));
+            array.push(middle(middle, range, useFloat))
         }
-        return array;
+        return array
     }
 
-
-    // THIS DOES NOT WORK PROPERLY . . . (shoule be replaced with an algorithm from https://github.com/ckknight/random-js)
-    // returns a uniform distribution random integer using the this.generator between [0, ceiling - 1]
-    // uniform(ceiling)
-    // {
-    //     return Math.floor(this.generator() * ceiling);
-    // }
-
-    //
     /**
      * @param {number} [chance=0.5]
      * returns random sign (either +1 or -1)
@@ -57454,11 +57740,10 @@ class Random
      */
     sign(chance)
     {
-        chance = chance || 0.5;
-        return this.generator() < chance ? 1 : -1;
+        chance = chance || 0.5
+        return this.generator() < chance ? 1 : -1
     }
 
-    //
     /**
      * tells you whether a random chance was achieved
      * @param {number} [percent=0.5]
@@ -57466,7 +57751,7 @@ class Random
      */
     chance(percent)
     {
-        return this.generator() < (percent || 0.5);
+        return this.generator() < (percent || 0.5)
     }
 
     /**
@@ -57474,7 +57759,7 @@ class Random
      */
     angle()
     {
-        return this.get(Math.PI * 2, true);
+        return this.get(Math.PI * 2, true)
     }
 
     /**
@@ -57488,28 +57773,28 @@ class Random
     {
         if (copy)
         {
-            array = array.slice();
+            array = array.slice()
         }
         if (array.length === 0)
         {
-            return array;
+            return array
         }
 
-        let currentIndex = array.length, temporaryValue, randomIndex;
+        let currentIndex = array.length, temporaryValue, randomIndex
 
         // While there remain elements to shuffle...
         while (0 !== currentIndex)
         {
             // Pick a remaining element...
-            randomIndex = this.get(currentIndex);
-            currentIndex -= 1;
+            randomIndex = this.get(currentIndex)
+            currentIndex -= 1
 
             // And swap it with the current element.
-            temporaryValue = array[currentIndex];
-            array[currentIndex] = array[randomIndex];
-            array[randomIndex] = temporaryValue;
+            temporaryValue = array[currentIndex]
+            array[currentIndex] = array[randomIndex]
+            array[randomIndex] = temporaryValue
         }
-        return array;
+        return array
     }
 
     /**
@@ -57521,14 +57806,14 @@ class Random
     {
         if (!remove)
         {
-            return array[this.get(array.length)];
+            return array[this.get(array.length)]
         }
         else
         {
-            const pick = this.get(array.length);
-            const temp = array[pick];
-            array.splice(pick, 1);
-            return temp;
+            const pick = this.get(array.length)
+            const temp = array[pick]
+            array.splice(pick, 1)
+            return temp
         }
     }
 
@@ -57540,16 +57825,16 @@ class Random
      */
     property(obj)
     {
-        var result;
-        var count = 0;
+        var result
+        var count = 0
         for (var prop in obj)
         {
             if (this.chance(1 / ++count))
             {
-                result = prop;
+                result = prop
             }
         }
-        return result;
+        return result
     }
 
     /**
@@ -57561,19 +57846,19 @@ class Random
      */
     set(min, max, amount)
     {
-        var set = [], all = [], i;
+        var set = [], all = [], i
         for (i = min; i < max; i++)
         {
-            all.push(i);
+            all.push(i)
         }
 
         for (i = 0; i < amount; i++)
         {
-            var found = this.get(all.length);
-            set.push(all[found]);
-            all.splice(found, 1);
+            var found = this.get(all.length)
+            set.push(all[found])
+            all.splice(found, 1)
         }
-        return set;
+        return set
     }
 
 
@@ -57589,23 +57874,23 @@ class Random
      */
     distribution(start, end, count, includeStart, includeEnd, useFloat)
     {
-        var interval = Math.floor((end - start) / count);
-        var halfInterval = interval / 2;
-        var quarterInterval = interval / 4;
-        var set = [];
+        var interval = Math.floor((end - start) / count)
+        var halfInterval = interval / 2
+        var quarterInterval = interval / 4
+        var set = []
         if (includeStart)
         {
-            set.push(start);
+            set.push(start)
         }
         for (var i = 0; i < count; i++)
         {
-            set.push(start + i * interval + halfInterval + this.range(-quarterInterval, quarterInterval, useFloat));
+            set.push(start + i * interval + halfInterval + this.range(-quarterInterval, quarterInterval, useFloat))
         }
         if (includeEnd)
         {
-            set.push(end);
+            set.push(end)
         }
-        return set;
+        return set
     }
 
     /**
@@ -57620,48 +57905,47 @@ class Random
     {
         function normRand()
         {
-            let x1, x2, rad;
+            let x1, x2, rad
             do
             {
-                x1 = 2 * this.get(1, true) - 1;
-                x2 = 2 * this.get(1, true) - 1;
-                rad = x1 * x1 + x2 * x2;
-            } while (rad >= 1 || rad === 0);
-            const c = Math.sqrt(-2 * Math.log(rad) / rad);
-            return x1 * c;
+                x1 = 2 * this.get(1, true) - 1
+                x2 = 2 * this.get(1, true) - 1
+                rad = x1 * x1 + x2 * x2
+            } while (rad >= 1 || rad === 0)
+            const c = Math.sqrt(-2 * Math.log(rad) / rad)
+            return x1 * c
         }
 
-        stddev = stddev || 1;
+        stddev = stddev || 1
         if (Math.random() < 0.81546)
         {
             while (true)
             {
-                const sample = ((normRand() * stddev) + target);
+                const sample = ((normRand() * stddev) + target)
                 if (sample >= min && sample <= max)
                 {
-                    return sample;
+                    return sample
                 }
             }
         }
         else
         {
-            return this.range(min, max);
+            return this.range(min, max)
         }
     }
 
     /*
      * returns a random hex color (0 - 0xffffff)
-     * this provides very bad random colors; use davidfig/color (npm yy-color) for better random colors
      * @return {number}
      */
     color()
     {
-        return this.get(0xffffff);
+        return this.get(0xffffff)
     }
 }
 
-module.exports = new Random();
-},{"seedrandom":363}],374:[function(require,module,exports){
+module.exports = new Random()
+},{"seedrandom":363}],377:[function(require,module,exports){
 const wait = require('./wait')
 
 /** animate object's {x, y} using an angle */
@@ -57732,7 +58016,7 @@ module.exports = class angle extends wait
         this.angle += Math.PI
     }
 }
-},{"./wait":383}],375:[function(require,module,exports){
+},{"./wait":386}],378:[function(require,module,exports){
 const Angle = require('yy-angle')
 const wait = require('./wait')
 
@@ -57802,8 +58086,9 @@ module.exports = class face extends wait
         }
     }
 }
-},{"./wait":383,"yy-angle":371}],376:[function(require,module,exports){
-const Events = require('eventemitter3')
+},{"./wait":386,"yy-angle":371}],379:[function(require,module,exports){
+const Loop = require('yy-loop')
+
 const Angle = require('./angle')
 const Face = require('./face')
 const Load = require('./load')
@@ -57815,22 +58100,23 @@ const To = require('./to')
 const Wait = require('./wait')
 
 /** Helper list for multiple animations */
-module.exports = class List extends Events
+module.exports = class List extends Loop
 {
     /**
-     * @param {object|object[]...} any animation class
+     * @param [options]
+     * @param {number} [options.maxFrameTime=1000 / 60] maximum time in milliseconds for a frame
+     * @param {object} [options.pauseOnBlur] pause loop when app loses focus, start it when app regains focus
      * @event List#done(List) final animation completed in the list
      * @event List#each(elapsed, List) each update
      */
-    constructor()
+    constructor(options)
     {
-        super()
-        this.list = []
+        options = options || {}
+        super(options)
+        this.entries = []
         this.empty = true
-        if (arguments.length)
-        {
-            this.add(...arguments)
-        }
+
+        super.add(this.loop.bind(this))
     }
 
     /**
@@ -57845,12 +58131,12 @@ module.exports = class List extends Events
             {
                 for (let entry of arg)
                 {
-                    this.list.push(entry)
+                    this.entries.push(entry)
                 }
             }
             else
             {
-                this.list.push(arg)
+                this.entries.push(arg)
             }
         }
         this.empty = false
@@ -57864,7 +58150,7 @@ module.exports = class List extends Events
      */
     get(index)
     {
-        return this.list[index]
+        return this.entries[index]
     }
 
     /**
@@ -57902,7 +58188,7 @@ module.exports = class List extends Events
      */
     removeAll()
     {
-        this.list = []
+        this.entries = []
         this.empty = true
     }
 
@@ -57910,19 +58196,19 @@ module.exports = class List extends Events
      * @param {number} elapsed time since last tick
      * @returns {number} of active animations
      */
-    update(elapsed)
+    loop(elapsed)
     {
-        for (let i = this.list.length - 1; i >= 0; i--)
+        for (let i = this.entries.length - 1; i >= 0; i--)
         {
-            const animate = this.list[i]
+            const animate = this.entries[i]
             if (animate.update(elapsed))
             {
                 this.emit('remove', animate)
-                this.list.splice(i, 1)
+                this.entries.splice(i, 1)
             }
         }
         this.emit('each', elapsed, this)
-        if (this.list.length === 0 && !this.empty)
+        if (this.entries.length === 0 && !this.empty)
         {
             this.emit('done', this)
             this.empty = true
@@ -57935,7 +58221,7 @@ module.exports = class List extends Events
     count()
     {
         let count = 0
-        for (let animate of this.list)
+        for (let animate of this.entries)
         {
             if (!animate.options.pause)
             {
@@ -57946,41 +58232,17 @@ module.exports = class List extends Events
     }
 
     /**
-     * handler for requestAnimationFrame
-     * @private
-     */
-    loop()
-    {
-        if (this.running)
-        {
-            const now = performance.now()
-            const elapsed = now - this.now > this.max ? this.max : now - this.now
-            this.update(elapsed)
-            this.now = now
-            requestAnimationFrame(this.loop.bind(this))
-        }
-    }
-
-    /**
-     * starts an automatic requestAnimationFrame() loop
+     * starts an automatic requestAnimationFrame() loop based on yy-loop
      * alternatively, you can call update() manually
-     * @param {number} [max=1000 / 60] maximum FPS--i.e., in update(elapsed) if elapsed > max, then use max instead of elapsed
+     * @inherited yy-loop
      */
-    start(max)
-    {
-        this.max = max || 1000 / 60
-        this.running = true
-        this.now = performance.now()
-        requestAnimationFrame(this.loop.bind(this))
-    }
+    // start()
 
     /**
      * stops the automatic requestAnimationFrame() loop
+     * @inherited yy-loop
      */
-    stop()
-    {
-        this.running = false
-    }
+    // stop()
 
     /** helper to add to the list a new Ease.to class; see Ease.to class below for parameters */
     to() { return this.add(new To(...arguments)) }
@@ -58011,7 +58273,7 @@ module.exports = class List extends Events
 }
 
 /* global requestAnimationFrame, performance */
-},{"./angle":374,"./face":375,"./load":377,"./movie":378,"./shake":379,"./target":380,"./tint":381,"./to":382,"./wait":383,"eventemitter3":6}],377:[function(require,module,exports){
+},{"./angle":377,"./face":378,"./load":380,"./movie":381,"./shake":382,"./target":383,"./tint":384,"./to":385,"./wait":386,"yy-loop":373}],380:[function(require,module,exports){
 const wait = require('./wait')
 const to = require('./to')
 const tint = require('./tint')
@@ -58052,7 +58314,7 @@ module.exports = function load(object, load)
             return new movie(object, object[1], null, options)
     }
 }
-},{"./angle":374,"./face":375,"./movie":378,"./shake":379,"./target":380,"./tint":381,"./to":382,"./wait":383}],378:[function(require,module,exports){
+},{"./angle":377,"./face":378,"./movie":381,"./shake":382,"./target":383,"./tint":384,"./to":385,"./wait":386}],381:[function(require,module,exports){
 const wait = require('./wait')
 
 /**
@@ -58161,7 +58423,7 @@ module.exports = class movie extends wait
         }
     }
 }
-},{"./wait":383}],379:[function(require,module,exports){
+},{"./wait":386}],382:[function(require,module,exports){
 const wait = require('./wait')
 
 /**
@@ -58270,7 +58532,7 @@ module.exports = class shake extends wait
         }
     }
 }
-},{"./wait":383}],380:[function(require,module,exports){
+},{"./wait":386}],383:[function(require,module,exports){
 const wait = require('./wait')
 
 /** move an object to a target's location */
@@ -58347,7 +58609,7 @@ module.exports = class target extends wait
         }
     }
 }
-},{"./wait":383}],381:[function(require,module,exports){
+},{"./wait":386}],384:[function(require,module,exports){
 const Color = require('yy-color')
 const wait = require('./wait')
 
@@ -58470,7 +58732,7 @@ module.exports = class tint extends wait
         }
     }
 }
-},{"./wait":383,"yy-color":372}],382:[function(require,module,exports){
+},{"./wait":386,"yy-color":372}],385:[function(require,module,exports){
 const wait = require('./wait')
 
 /** animate any numeric parameter of an object or array of objects */
@@ -58698,7 +58960,7 @@ module.exports = class to extends wait
         }
     }
 }
-},{"./wait":383}],383:[function(require,module,exports){
+},{"./wait":386}],386:[function(require,module,exports){
 const Easing = require('penner')
 const EventEmitter = require('eventemitter3')
 
@@ -58963,9 +59225,9 @@ module.exports = class wait extends EventEmitter
 
     calculate() {}
 }
-},{"eventemitter3":6,"penner":189}],384:[function(require,module,exports){
+},{"eventemitter3":6,"penner":189}],387:[function(require,module,exports){
 
-},{}],385:[function(require,module,exports){
+},{}],388:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -59193,7 +59455,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":386}],386:[function(require,module,exports){
+},{"_process":389}],389:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -59379,7 +59641,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],387:[function(require,module,exports){
+},{}],390:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
@@ -59916,7 +60178,7 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],388:[function(require,module,exports){
+},{}],391:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -60002,7 +60264,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],389:[function(require,module,exports){
+},{}],392:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -60089,13 +60351,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],390:[function(require,module,exports){
+},{}],393:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":388,"./encode":389}],391:[function(require,module,exports){
+},{"./decode":391,"./encode":392}],394:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -60829,7 +61091,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"./util":392,"punycode":387,"querystring":390}],392:[function(require,module,exports){
+},{"./util":395,"punycode":390,"querystring":393}],395:[function(require,module,exports){
 'use strict';
 
 module.exports = {

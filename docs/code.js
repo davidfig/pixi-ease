@@ -10,14 +10,18 @@ const app = pixi()
 const textures = load()
 
 // initialize a list of animations
-const ease = new Ease.list(
-    new Ease.shake(block(), 5)
-)
+const ease = new Ease.list({ pauseOnBlur: true })
 
-// this is the second way to initialize an animation; this time create a movie with a list of textures
+// create a shake animation and add it to the list
+ease.shake(block(), 5)
+
+// create a movie with a list of textures and add it to the list
 ease.movie(block(), textures, TIME, { repeat: true, reverse: true })
 
+// create a target animation
 const target = ease.to(block(), { x: window.innerWidth - size / 2 }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true })
+
+// this is an alternative way to create and add animations to the list
 ease.add(
 
     // keeps the block facing the target
@@ -38,7 +42,7 @@ ease.add(
 
 // initialize without adding it to the list; will manually update it in the update function below
 // NOTE: scale may be called as { scale: number } or { scale: {x: number, y: number }}
-const to = ease.to(block(), { scale: 0 }, TIME, { repeat: true, reverse: true })
+const to = new Ease.to(block(), { scale: 0 }, TIME, { repeat: true, reverse: true })
 
 // this sends a block off at an angle
 ease.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true })
