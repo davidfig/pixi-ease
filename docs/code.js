@@ -33,7 +33,7 @@ ease.add(
     new Ease.target(block(), target.object, 0.1, { keepAlive: true }),
 
     // full spin, and then reversed spin, etc.
-    new Ease.to(block(), { rotation: Math.PI * 2 }, TIME, { ease: 'easeInOutQuad', reverse: true, repeat: true }),
+    new Ease.to(block(), { rotation: Math.PI * 2 }, TIME * 3, { ease: 'easeInOutQuad', reverse: true, repeat: true }),
 
     // tint a block from current color to a new color, and then reverse and repeat
     new Ease.tint(block(), 0x888888, TIME, { repeat: true, reverse: true }),
