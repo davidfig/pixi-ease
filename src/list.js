@@ -31,6 +31,22 @@ module.exports = class List extends Loop
     }
 
     /**
+     * add an entry to yy-loop
+     */
+    addLoop()
+    {
+        return super.add(...arguments)
+    }
+
+    /**
+     * remove an entry from yy-loop
+     */
+    removeLoop()
+    {
+        return super.remove(...arguments)
+    }
+
+    /**
      * Add animation(s) to animation list
      * @param {object|object[]...} any animation class
      */

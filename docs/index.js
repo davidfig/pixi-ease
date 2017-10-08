@@ -20,7 +20,9 @@ ease.shake(block(), 5)
 ease.movie(block(), textures, TIME, { repeat: true, reverse: true })
 
 // create a target animation
-const target = ease.to(block(), { x: window.innerWidth - size / 2 }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true })
+const b = block()
+b.x = size / 2
+const target = ease.to(b, { x: window.innerWidth - size / 2 }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true })
 
 // this is an alternative way to create and add animations to the list
 ease.add(
@@ -32,7 +34,7 @@ ease.add(
     new Ease.target(block(), target.object, 0.1, { keepAlive: true }),
 
     // full spin, and then reversed spin, etc.
-    new Ease.to(block(), { rotation: Math.PI * 2 }, TIME, { ease: 'easeInOutQuad', reverse: true, repeat: true }),
+    new Ease.to(block(), { rotation: Math.PI * 2 }, TIME * 3, { ease: 'easeInOutQuad', reverse: true, repeat: true }),
 
     // tint a block from current color to a new color, and then reverse and repeat
     new Ease.tint(block(), 0x888888, TIME, { repeat: true, reverse: true }),
@@ -88,7 +90,7 @@ function block(tint)
     block.anchor.set(0.5)
     block.width = block.height = size * 0.9
     block.tint = typeof tint !== 'undefined' ? tint : Random.color()
-    block.x = size / 2
+    block.x = window.innerWidth / 2 - size / 2
     block.y = size / 2 + size * (app.stage.children.length - 1)
     return block
 }
@@ -58117,6 +58119,22 @@ module.exports = class List extends Loop
         this.empty = true
 
         super.add(this.loop.bind(this))
+    }
+
+    /**
+     * add an entry to yy-loop
+     */
+    addLoop()
+    {
+        return super.add(...arguments)
+    }
+
+    /**
+     * remove an entry from yy-loop
+     */
+    removeLoop()
+    {
+        return super.remove(...arguments)
     }
 
     /**
