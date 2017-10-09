@@ -1,16 +1,20 @@
 const PIXI = require('pixi.js')
 const Random = require('yy-random')
+const FPS = require('yy-fps')
 
 const Ease = require('..')
 
 const TIME = 1000
 
-let size
+let size, fps
 const app = pixi()
 const textures = load()
 
 // initialize a list of animations
 const ease = new Ease.list({ pauseOnBlur: true })
+
+// add an event that calculates FPS
+ease.addLoop(() => fps.frame())
 
 // create a shake animation and add it to the list
 ease.shake(block(), 5)
@@ -70,6 +74,7 @@ function pixi()
     app.view.position = 'absolute'
     app.renderer.resize(window.innerWidth, window.innerHeight)
     size = Math.min(window.innerWidth, window.innerHeight) / 11
+    fps = new FPS()
     return app
 }
 
@@ -89,7 +94,7 @@ function block(tint)
     block.anchor.set(0.5)
     block.width = block.height = size * 0.9
     block.tint = typeof tint !== 'undefined' ? tint : Random.color()
-    block.x = window.innerWidth / 2 - size / 2
+    block.x = size / 2
     block.y = size / 2 + size * (app.stage.children.length - 1)
     return block
 }
