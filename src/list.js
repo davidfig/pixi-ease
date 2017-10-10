@@ -121,7 +121,6 @@ module.exports = class List extends Loop
 
     /**
      * @param {number} elapsed time since last tick
-     * @returns {number} of active animations
      */
     loop(elapsed)
     {
@@ -160,7 +159,7 @@ module.exports = class List extends Loop
 
     /**
      * starts an automatic requestAnimationFrame() loop based on yy-loop
-     * alternatively, you can call update() manually
+     * alternatively, you can call loop() manually
      * @inherited yy-loop
      */
     // start()
