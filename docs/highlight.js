@@ -1,5 +1,5 @@
 // shows the code in the demo
-window.onload = function()
+module.exports = function highlight()
 {
     var client = new XMLHttpRequest()
     client.open('GET', 'code.js')
@@ -11,6 +11,3 @@ window.onload = function()
     }
     client.send()
 }
-
-// for eslint
-/* globals window, XMLHttpRequest, document */

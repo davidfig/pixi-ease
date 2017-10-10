@@ -24,26 +24,7 @@ module.exports = class List extends Loop
     {
         options = options || {}
         super(options)
-        this.entries = []
         this.empty = true
-
-        super.add(this.loop.bind(this))
-    }
-
-    /**
-     * add an entry to yy-loop
-     */
-    addLoop()
-    {
-        return super.add(...arguments)
-    }
-
-    /**
-     * remove an entry from yy-loop
-     */
-    removeLoop()
-    {
-        return super.remove(...arguments)
     }
 
     /**
@@ -58,12 +39,12 @@ module.exports = class List extends Loop
             {
                 for (let entry of arg)
                 {
-                    this.entries.push(entry)
+                    this.list.push(entry)
                 }
             }
             else
             {
-                this.entries.push(arg)
+                this.list.push(arg)
             }
         }
         this.empty = false
@@ -71,70 +52,25 @@ module.exports = class List extends Loop
     }
 
     /**
-     * get animation by index
-     * @param {number} index
-     * @return {object} animation class
-     */
-    get(index)
-    {
-        return this.entries[index]
-    }
-
-    /**
      * remove animation(s)
      * @param {object|array} animate - the animation (or array of animations) to remove; can be null
+     * @inherited from yy-loop
      */
-    remove(animate)
-    {
-        if (animate)
-        {
-            if (Array.isArray(animate))
-            {
-                while (animate.length)
-                {
-                    const pop = animate.pop()
-                    if (pop && pop.options)
-                    {
-                        pop.options.cancel = true
-                    }
-                }
-            }
-            else
-            {
-                if (animate && animate.options)
-                {
-                    animate.options.cancel = true
-                }
-            }
-        }
-        return animate
-    }
+    // remove(animate)
 
     /**
      * remove all animations from list
+     * @inherited from yy-loop
      */
-    removeAll()
-    {
-        this.entries = []
-        this.empty = true
-    }
+    // removeAll()
 
     /**
-     * @param {number} elapsed time since last tick
+     * update frame; can be called manually or automatically with start()
      */
-    loop(elapsed)
+    update()
     {
-        for (let i = this.entries.length - 1; i >= 0; i--)
-        {
-            const animate = this.entries[i]
-            if (animate.update(elapsed))
-            {
-                this.emit('remove', animate)
-                this.entries.splice(i, 1)
-            }
-        }
-        this.emit('each', elapsed, this)
-        if (this.entries.length === 0 && !this.empty)
+        super.update()
+        if (this.list.length === 0 && !this.empty)
         {
             this.emit('done', this)
             this.empty = true
@@ -142,24 +78,20 @@ module.exports = class List extends Loop
     }
 
     /**
-     * @return {number} number of active animations
+     * @type {number} number of animations
+     * @inherited yy-looop
      */
-    count()
-    {
-        let count = 0
-        for (let animate of this.entries)
-        {
-            if (!animate.options.pause)
-            {
-                count++
-            }
-        }
-        return count
-    }
+    // get count()
+
+    /**
+     * @type {number} number of active animations
+     * @inherited yy-looop
+     */
+    // get countRunning()
 
     /**
      * starts an automatic requestAnimationFrame() loop based on yy-loop
-     * alternatively, you can call loop() manually
+     * alternatively, you can call update() manually
      * @inherited yy-loop
      */
     // start()
@@ -196,6 +128,23 @@ module.exports = class List extends Loop
 
     /** helper to add to the list a new Ease.wait class; see Ease.to class below for parameters */
     wait() { return this.add(new Wait(...arguments)) }
-}
 
-/* global requestAnimationFrame, performance */
+    /** Inherited functions from yy-loop */
+
+    /**
+     * adds an interval
+     * @param {function} callback
+     * @param {number} time
+     * @param {number} count
+     * @inherited from yy-loop
+     */
+    // interval(callback, time, count)
+
+    /**
+     * adds a timeout
+     * @param {function} callback
+     * @param {number} time
+     * @inherited from yy-loop
+     */
+    // timeout(callback, time)
+}

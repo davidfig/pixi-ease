@@ -99,14 +99,16 @@ module.exports = class wait extends EventEmitter
         this.duration = load.duration
     }
 
-    pause()
+    /**
+     * @type {boolean} pause this entry
+     */
+    set pause(value)
     {
-        this.options.pause = true
+        this.options.pause = value
     }
-
-    resume()
+    get pause()
     {
-        this.options.pause = false
+        return this.options.pause
     }
 
     cancel()

@@ -61,52 +61,44 @@ module.exports = class List extends Loop
     constructor(options)
 
     /**
-     * add an entry to yy-loop
-     */
-    addLoop()
-
-    /**
-     * remove an entry from yy-loop
-     */
-    removeLoop()
-
-    /**
      * Add animation(s) to animation list
      * @param {object|object[]...} any animation class
      */
     add()
 
     /**
-     * get animation by index
-     * @param {number} index
-     * @return {object} animation class
-     */
-    get(index)
-
-    /**
      * remove animation(s)
      * @param {object|array} animate - the animation (or array of animations) to remove; can be null
+     * @inherited from yy-loop
      */
-    remove(animate)
+    // remove(animate)
 
     /**
      * remove all animations from list
+     * @inherited from yy-loop
      */
-    removeAll()
+    // removeAll()
 
     /**
-     * @param {number} elapsed time since last tick
+     * update frame; can be called manually or automatically with start()
      */
-    loop(elapsed)
+    update()
 
     /**
-     * @return {number} number of active animations
+     * @type {number} number of animations
+     * @inherited yy-looop
      */
-    count()
+    // get count()
+
+    /**
+     * @type {number} number of active animations
+     * @inherited yy-looop
+     */
+    // get countRunning()
 
     /**
      * starts an automatic requestAnimationFrame() loop based on yy-loop
-     * alternatively, you can call loop() manually
+     * alternatively, you can call update() manually
      * @inherited yy-loop
      */
     // start()
@@ -140,6 +132,29 @@ module.exports = class List extends Loop
 
     /** helper to add to the list a new Ease.angle tint; see Ease.to class below for parameters */
     tint() { return this.add(new Tint(...arguments)) }
+
+    /** helper to add to the list a new Ease.wait class; see Ease.to class below for parameters */
+    wait() { return this.add(new Wait(...arguments)) }
+
+    /** Inherited functions from yy-loop */
+
+
+    /**
+     * adds an interval
+     * @param {function} callback
+     * @param {number} time
+     * @param {number} count
+     * @inherited from yy-loop
+     */
+    // interval(callback, time, count)
+
+    /**
+     * adds a timeout
+     * @param {function} callback
+     * @param {number} time
+     * @inherited from yy-loop
+     */
+    // timeout(callback, time)
 ```
 ### src/to.js
 ```
@@ -299,6 +314,11 @@ module.exports = class tint extends wait
      * @emits {reverse} when animation is reversed
      */
     constructor(object, options)
+
+    /**
+     * @type {boolean} pause this entry
+     */
+    set pause(value)
 ```
 ## License 
 MIT License  

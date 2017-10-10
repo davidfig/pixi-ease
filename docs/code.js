@@ -1,91 +1,76 @@
 const PIXI = require('pixi.js')
+const Renderer = require('yy-renderer')
 const Random = require('yy-random')
 const FPS = require('yy-fps')
+const Counter = require('yy-counter')
 
 const Ease = require('..')
 
 const TIME = 1000
 
-let size, fps
-const app = pixi()
-const textures = load()
-
-// initialize a list of animations
-const ease = new Ease.list({ pauseOnBlur: true })
-
-// add an event that calculates FPS
-ease.addLoop(() => fps.frame())
-
-// create a shake animation and add it to the list
-ease.shake(block(), 5)
-
-// create a movie with a list of textures and add it to the list
-ease.movie(block(), textures, TIME, { repeat: true, reverse: true })
-
-// create a target animation
-const b = block()
-b.x = size / 2
-const target = ease.to(b, { x: window.innerWidth - size / 2 }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true })
-
-// this is an alternative way to create and add animations to the list
-ease.add(
-
-    // keeps the block facing the target
-    new Ease.face(block(), target.object, 0.01, { keepAlive: true }),
-
-    // moves the block toward a moving targat
-    new Ease.target(block(), target.object, 0.1, { keepAlive: true }),
-
-    // full spin, and then reversed spin, etc.
-    new Ease.to(block(), { rotation: Math.PI * 2 }, TIME * 3, { ease: 'easeInOutQuad', reverse: true, repeat: true }),
-
-    // tint a block from current color to a new color, and then reverse and repeat
-    new Ease.tint(block(), 0x888888, TIME, { repeat: true, reverse: true }),
-
-    // tint a block through a series of colors starting at the current color; reverse and repeat
-    new Ease.tint(block(), [0x00ff00, 0xff0000, 0x0000ff], TIME * 10, { repeat: true, reverse: true })
-)
-
-// initialize without adding it to the list; will manually update it in the update function below
-// NOTE: scale may be called as { scale: number } or { scale: {x: number, y: number }}
-const to = new Ease.to(block(), { scale: 0 }, TIME, { repeat: true, reverse: true })
-
-// this sends a block off at an angle
-ease.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true })
-
-// starts the animations
-ease.start()
-
-// all lists and animation types have EventEmitters
-ease.on('each', update)
-
-// you can manually update individual animations without using Ease.list if you prefer
-function update(elapsed)
+function test()
 {
-    to.update(elapsed)
-}
+    const textures = load()
 
-require('./highlight.js')
+    // initialize a list of animations
+    const ease = new Ease.list({ pauseOnBlur: true })
 
-function pixi()
-{
-    const app = new PIXI.Application({ transparent: true })
-    document.body.appendChild(app.view)
-    app.view.position = 'absolute'
-    app.renderer.resize(window.innerWidth, window.innerHeight)
-    size = Math.min(window.innerWidth, window.innerHeight) / 11
-    fps = new FPS()
-    return app
-}
+    // create a shake animation and add it to the list
+    ease.shake(block(), 5)
 
-function load()
-{
-    const textures = []
-    for (let i = 1; i <= 5; i++)
+    // create a movie with a list of textures and add it to the list
+    ease.movie(block(), textures, TIME, { repeat: true, reverse: true })
+
+    // create a target animation
+    const b = block()
+    b.x = size / 2
+    const target = ease.to(b, { x: window.innerWidth - size / 2 }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true })
+    // this is an alternative way to create and add animations to the list
+    ease.add(
+
+        // keeps the block facing the target (keepAlive means don't end the animation when the face is complete)
+        new Ease.face(block(), target.object, 0.01, { keepAlive: true }),
+
+        // moves the block toward a moving target (keepAlive means don't end the animation when the target is reached)
+        new Ease.target(block(), target.object, 0.1, { keepAlive: true }),
+
+        // full spin, and then reversed spin, etc.
+        new Ease.to(block(), { rotation: Math.PI * 2 }, TIME * 3, { ease: 'easeInOutQuad', reverse: true, repeat: true }),
+
+        // tint a block from current color to a new color, and then reverse and repeat
+        new Ease.tint(block(), 0x888888, TIME, { repeat: true, reverse: true }),
+
+        // tint a block through a series of colors starting at the current color; reverse and repeat
+        new Ease.tint(block(), [0x00ff00, 0xff0000, 0x0000ff], TIME * 10, { repeat: true, reverse: true })
+    )
+
+    // initialize without adding it to the list; will manually update it in the update function below
+    // NOTE: scale may be called as { scale: number } or { scale: {x: number, y: number }}
+    const to = new Ease.to(block(), { scale: 0 }, TIME, { repeat: true, reverse: true })
+
+    // this sends a block off at an angle
+    ease.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true })
+
+    // all lists and animation types have EventEmitters
+    ease.on('each', update)
+
+    // you can manually update individual animations without using Ease.list if you prefer
+    function update(elapsed)
     {
-        textures.push(PIXI.Texture.fromImage('images/' + i + '.png'))
+        to.update(elapsed)
     }
-    return textures
+
+    // render at the end of each loop
+    ease.interval(
+        function ()
+        {
+            app.render()
+            fps.frame()
+            counter.log('Eases: ' + ease.count)
+        })
+
+    // starts the animations
+    ease.start()
 }
 
 function block(tint)
@@ -99,4 +84,31 @@ function block(tint)
     return block
 }
 
-/* globals performance, requestAnimationFrame */
+let app, size, fps, counter
+
+function init()
+{
+    app = new Renderer()
+    size = Math.min(window.innerWidth, window.innerHeight) / 11
+    fps = new FPS()
+    counter = new Counter({ side: 'bottom-left' })
+}
+
+function load()
+{
+    const textures = []
+    for (let i = 1; i <= 5; i++)
+    {
+        textures.push(PIXI.Texture.fromImage('images/' + i + '.png'))
+    }
+    return textures
+}
+
+window.onload = function ()
+{
+    init()
+    test()
+
+    require('fork-me-github')('https://github.com/davidfig/pixi-ease')
+    require('./highlight')()
+}
