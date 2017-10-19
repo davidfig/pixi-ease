@@ -58908,7 +58908,7 @@ module.exports = class FPS
             if (this.lastTime !== 0)
             {
                 this.lastFPS = Math.floor(this.frameNumber / (currentTime / 1000))
-                if (this.lastFPS >= FPS - this.tolerance && this.lastFPS <= FPS + this.tolerance)
+                if (this.lastFPS >= this.FPS - this.tolerance && this.lastFPS <= this.FPS + this.tolerance)
                 {
                     this.lastFPS = this.FPS
                 }
@@ -59066,9 +59066,8 @@ class Loop extends Events
 {
     /**
      * basic loop support
-     * note: the default is to stop the loop when app loses focus
      * @param {object} [options]
-     * @param {number} [options.maxFrameTime=1000 / 60] maximum time in milliseconds for a frame
+     * @param {number} [options.maxFrameTime=1000/60] maximum time in milliseconds for a frame
      * @param {object} [options.pauseOnBlur] pause loop when app loses focus, start it when app regains focus
      *
      * @event each(elapsed, Loop, elapsedInLoop)
@@ -59096,8 +59095,11 @@ class Loop extends Events
     {
         if (!this.running)
         {
-            this.running = performance.now()
-            this.loop()
+            this.running = true
+            if (!this.waiting)
+            {
+                this.loop()
+            }
             this.emit('start', this)
         }
         return this
@@ -59112,6 +59114,7 @@ class Loop extends Events
         if (this.blurred)
         {
             this.start()
+            this.blurred = false
         }
     }
 
@@ -59146,7 +59149,7 @@ class Loop extends Events
     update()
     {
         const now = performance.now()
-        let elapsed = now - this.running
+        let elapsed = now - this.last ? this.last : 0
         elapsed = elapsed > this.maxFrameTime ? this.maxFrameTime : elapsed
         for (let entry of this.list)
         {
@@ -59156,6 +59159,7 @@ class Loop extends Events
             }
         }
         this.emit('each', elapsed, this, now - performance.now())
+        this.last = now
     }
 
     /**
@@ -59166,8 +59170,14 @@ class Loop extends Events
     {
         if (this.running)
         {
+            this.waiting = false
             this.update()
             requestAnimationFrame(this.loop.bind(this))
+            this.waiting = true
+        }
+        else
+        {
+            this.waiting = false
         }
     }
 
