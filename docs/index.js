@@ -49,8 +49,8 @@ function test()
     // NOTE: scale may be called as { scale: number } or { scale: {x: number, y: number }}
     const to = new Ease.to(block(), { scale: 0 }, TIME, { repeat: true, reverse: true })
 
-    // this sends a block off at an angle
-    ease.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true })
+    // this sends a block off at an angle after waiting 1 second before starting
+    ease.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true, wait: 1000 })
 
     // all lists and animation types have EventEmitters
     ease.on('each', update)
