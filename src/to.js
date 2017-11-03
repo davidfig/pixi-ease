@@ -1,5 +1,6 @@
-const wait = require('./wait')
+const exists = require('exists')
 
+const wait = require('./wait')
 /** animate any numeric parameter of an object or array of objects */
 module.exports = class to extends wait
 {
@@ -15,13 +16,14 @@ module.exports = class to extends wait
      * @param {boolean|number} [options.continue] true: continue animation with new starting values n: continue animation n times
      * @param {Function} [options.load] loads an animation using an .save() object note the * parameters below cannot be loaded and must be re-set
      * @param {string|Function} [options.ease] name or function from easing.js (see http://easings.net for examples)
-     * @emits to:done animation expires
-     * @emits to:cancel animation is cancelled
-     * @emits to:wait each update during a wait
-     * @emits to:first first update when animation starts
-     * @emits to:each each update while animation is running
-     * @emits to:loop when animation is repeated
-     * @emits to:reverse when animation is reversed
+     *
+     * @event done(to) animation expires
+     * @event cancel(to) animation is cancelled
+     * @event wait(to) each update during a wait
+     * @event first(to) first update when animation starts
+     * @event each(to, wait) each update while animation is running
+     * @event loop(to) when animation is repeated
+     * @event reverse(to) when animation is reversed
      */
     constructor(object, goto, duration, options)
     {
@@ -44,6 +46,26 @@ module.exports = class to extends wait
             this.fixScale()
             this.duration = duration
             this.restart()
+        }
+    }
+
+    /**
+     * change or add a animation parameter
+     * NOTE: the function extrapolates the starting value based on an average calculation without regard to easing function
+     * @param {object} goto
+     */
+    modify(goto)
+    {
+        if (this.duration !== 0)
+        {
+            const percent = this.time / this.duration
+            for (let key in goto)
+            {
+                if (exists(this.goto[key]))
+                {
+                    this.start[key] =
+                }
+            }
         }
     }
 

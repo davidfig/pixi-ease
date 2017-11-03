@@ -3,10 +3,12 @@ const Renderer = require('yy-renderer')
 const Random = require('yy-random')
 const FPS = require('yy-fps')
 const Counter = require('yy-counter')
+const Input = require('yy-input')
 
 const Ease = require('..')
 
 const TIME = 1000
+const BLOCKS = 12
 
 function test()
 {
@@ -51,6 +53,13 @@ function test()
     // this sends a block off at an angle after waiting 1 second before starting
     ease.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true, wait: 1000 })
 
+    // test ease.to.modify() - this allows user to modify the values during the ease
+    const mover = block()
+    let change = ease.to(mover, {x: mover.x, y: mover.y}, TIME, { ease: 'easeInOutSine' })
+    change.on('done', () => change = ease.to(mover, { x: mover.x, y: mover.y }, TIME, { ease: 'easeInOutSine' }))
+    const input = new Input()
+    input.on('move', (x, y) => change.modify({ x, y }))
+
     // all lists and animation types have EventEmitters
     ease.on('each', update)
 
@@ -89,7 +98,7 @@ let app, size, fps, counter
 function init()
 {
     app = new Renderer()
-    size = Math.min(window.innerWidth, window.innerHeight) / 11
+    size = Math.min(window.innerWidth, window.innerHeight) / BLOCKS
     fps = new FPS()
     counter = new Counter({ side: 'bottom-left' })
 }

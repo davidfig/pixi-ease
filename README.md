@@ -47,7 +47,7 @@ https://davidfig.github.io/pixi-ease/
 
 ## API
 ### src/list.js
-```
+```js
 /** Helper list for multiple animations */
 module.exports = class List extends Loop
 {
@@ -157,7 +157,7 @@ module.exports = class List extends Loop
     // timeout(callback, time)
 ```
 ### src/to.js
-```
+```js
 /** animate any numeric parameter of an object or array of objects */
 module.exports = class to extends wait
 {
@@ -182,9 +182,16 @@ module.exports = class to extends wait
      * @emits to:reverse when animation is reversed
      */
     constructor(object, goto, duration, options)
+
+    /**
+     * change or add a animation parameter
+     * NOTE: the function extrapolates the starting value based on an average calculation without regard to easing function
+     * @param {object} goto
+     */
+    modify(goto)
 ```
 ### src/angle.js
-```
+```js
 /** animate object's {x, y} using an angle */
 module.exports = class angle extends wait
 {
@@ -198,7 +205,7 @@ module.exports = class angle extends wait
     constructor(object, angle, speed, duration, options)
 ```
 ### src/face.js
-```
+```js
 /** Rotates an object to face the target */
 module.exports = class face extends wait
 {
@@ -212,7 +219,7 @@ module.exports = class face extends wait
     constructor(object, target, speed, options)
 ```
 ### src/load.js
-```
+```js
 /**
  * restart an animation = requires a saved state
  * @param {object} object(s) to animate
@@ -220,7 +227,7 @@ module.exports = class face extends wait
 module.exports = function load(object, load)
 ```
 ### src/movie.js
-```
+```js
 /**
  * animate a movie of textures
  */
@@ -249,7 +256,7 @@ module.exports = class movie extends wait
     constructor(object, textures, duration, options)
 ```
 ### src/shake.js
-```
+```js
 /**
  * shakes an object or list of objects
  */
@@ -264,7 +271,7 @@ module.exports = class shake extends wait
     constructor(object, amount, duration, options)
 ```
 ### src/target.js
-```
+```js
 /** move an object to a target's location */
 module.exports = class target extends wait
 {
@@ -279,7 +286,7 @@ module.exports = class target extends wait
     constructor(object, target, speed, options)
 ```
 ### src/tint.js
-```
+```js
 /** changes the tint of an object */
 module.exports = class tint extends wait
 {
@@ -292,7 +299,7 @@ module.exports = class tint extends wait
     constructor(object, tint, duration, options)
 ```
 ### src/wait.js
-```
+```js
     /**
      * @param {object|object[]} object or list of objects to animate
      * @param {object} [options]
