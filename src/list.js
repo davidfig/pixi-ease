@@ -1,3 +1,4 @@
+const Events = require('eventemitter3')
 const Loop = require('yy-loop')
 
 const Angle = require('./angle')
@@ -11,25 +12,29 @@ const To = require('./to')
 const Wait = require('./wait')
 
 /** Helper list for multiple animations */
-module.exports = class List extends Loop
+module.exports = class List extends Events
 {
     /**
      * @param [options]
      * @param {number} [options.maxFrameTime=1000 / 60] maximum time in milliseconds for a frame
      * @param {object} [options.pauseOnBlur] pause loop when app loses focus, start it when app regains focus
+     *
      * @event List#done(List) final animation completed in the list
-     * @event List#each(elapsed, List) each update
+     * @event List#each(elapsed, List) each update after eases are updated
      */
     constructor(options)
     {
-        options = options || {}
-        super(options)
+        super()
+        this.loop = new Loop(options)
+        this.loop.add((elapsed) => this.update(elapsed))
+        this.list = []
         this.empty = true
     }
 
     /**
      * Add animation(s) to animation list
      * @param {object|object[]...} any animation class
+     * @return {object} first animation
      */
     add()
     {
@@ -56,20 +61,33 @@ module.exports = class List extends Loop
      * @param {object|array} animate - the animation (or array of animations) to remove; can be null
      * @inherited from yy-loop
      */
-    // remove(animate)
+    remove(animate)
+    {
+        this.list.splice(this.list.indexOf(animate), 1)
+    }
 
     /**
      * remove all animations from list
      * @inherited from yy-loop
      */
-    // removeAll()
+    removeAll()
+    {
+        this.list = []
+    }
 
     /**
      * update frame; can be called manually or automatically with start()
      */
     update(elapsed)
     {
-        super.update(elapsed)
+        for (let entry of this.list)
+        {
+            if (entry.update(elapsed))
+            {
+                this.list.splice(this.list.indexOf(entry), 1)
+            }
+        }
+        this.emit('each', this)
         if (this.list.length === 0 && !this.empty)
         {
             this.emit('done', this)
@@ -78,29 +96,47 @@ module.exports = class List extends Loop
     }
 
     /**
-     * @type {number} number of animations
-     * @inherited yy-looop
+     * number of animations
+     * @type {number}
      */
-    // get count()
+    get count()
+    {
+        return this.list.length
+    }
 
     /**
-     * @type {number} number of active animations
-     * @inherited yy-looop
+     * number of active animations
+     * @type {number}
      */
-    // get countRunning()
+    get countRunning()
+    {
+        let count = 0
+        for (let entry of this.list)
+        {
+            if (!entry.pause)
+            {
+                count++
+            }
+        }
+        return count
+    }
 
     /**
-     * starts an automatic requestAnimationFrame() loop based on yy-loop
+     * starts an automatic requestAnimationFrame() loop
      * alternatively, you can call update() manually
-     * @inherited yy-loop
      */
-    // start()
+    start()
+    {
+        this.loop.start()
+    }
 
     /**
      * stops the automatic requestAnimationFrame() loop
-     * @inherited yy-loop
      */
-    // stop()
+    stop()
+    {
+        this.loop.stop()
+    }
 
     /** helper to add to the list a new Ease.to class; see Ease.to class below for parameters */
     to() { return this.add(new To(...arguments)) }
@@ -128,23 +164,4 @@ module.exports = class List extends Loop
 
     /** helper to add to the list a new Ease.wait class; see Ease.to class below for parameters */
     wait() { return this.add(new Wait(...arguments)) }
-
-    /** Inherited functions from yy-loop */
-
-    /**
-     * adds an interval
-     * @param {function} callback
-     * @param {number} time
-     * @param {number} count
-     * @inherited from yy-loop
-     */
-    // interval(callback, time, count)
-
-    /**
-     * adds a timeout
-     * @param {function} callback
-     * @param {number} time
-     * @inherited from yy-loop
-     */
-    // timeout(callback, time)
 }

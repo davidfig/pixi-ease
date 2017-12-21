@@ -49,20 +49,22 @@ https://davidfig.github.io/pixi-ease/
 ### src/list.js
 ```js
 /** Helper list for multiple animations */
-module.exports = class List extends Loop
+module.exports = class List extends Events
 {
     /**
      * @param [options]
      * @param {number} [options.maxFrameTime=1000 / 60] maximum time in milliseconds for a frame
      * @param {object} [options.pauseOnBlur] pause loop when app loses focus, start it when app regains focus
+     *
      * @event List#done(List) final animation completed in the list
-     * @event List#each(elapsed, List) each update
+     * @event List#each(elapsed, List) each update after eases are updated
      */
     constructor(options)
 
     /**
      * Add animation(s) to animation list
      * @param {object|object[]...} any animation class
+     * @return {object} first animation
      */
     add()
 
@@ -71,13 +73,13 @@ module.exports = class List extends Loop
      * @param {object|array} animate - the animation (or array of animations) to remove; can be null
      * @inherited from yy-loop
      */
-    // remove(animate)
+    remove(animate)
 
     /**
      * remove all animations from list
      * @inherited from yy-loop
      */
-    // removeAll()
+    removeAll()
 
     /**
      * update frame; can be called manually or automatically with start()
@@ -85,29 +87,27 @@ module.exports = class List extends Loop
     update(elapsed)
 
     /**
-     * @type {number} number of animations
-     * @inherited yy-looop
+     * number of animations
+     * @type {number}
      */
-    // get count()
+    get count()
 
     /**
-     * @type {number} number of active animations
-     * @inherited yy-looop
+     * number of active animations
+     * @type {number}
      */
-    // get countRunning()
+    get countRunning()
 
     /**
-     * starts an automatic requestAnimationFrame() loop based on yy-loop
+     * starts an automatic requestAnimationFrame() loop
      * alternatively, you can call update() manually
-     * @inherited yy-loop
      */
-    // start()
+    start()
 
     /**
      * stops the automatic requestAnimationFrame() loop
-     * @inherited yy-loop
      */
-    // stop()
+    stop()
 
     /** helper to add to the list a new Ease.to class; see Ease.to class below for parameters */
     to() { return this.add(new To(...arguments)) }
@@ -132,29 +132,6 @@ module.exports = class List extends Loop
 
     /** helper to add to the list a new Ease.angle tint; see Ease.to class below for parameters */
     tint() { return this.add(new Tint(...arguments)) }
-
-    /** helper to add to the list a new Ease.wait class; see Ease.to class below for parameters */
-    wait() { return this.add(new Wait(...arguments)) }
-
-    /** Inherited functions from yy-loop */
-
-
-    /**
-     * adds an interval
-     * @param {function} callback
-     * @param {number} time
-     * @param {number} count
-     * @inherited from yy-loop
-     */
-    // interval(callback, time, count)
-
-    /**
-     * adds a timeout
-     * @param {function} callback
-     * @param {number} time
-     * @inherited from yy-loop
-     */
-    // timeout(callback, time)
 
 ```
 ### src/to.js

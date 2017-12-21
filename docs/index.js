@@ -62,7 +62,7 @@ function test()
     }
 
     // render at the end of each loop
-    ease.interval(
+    ease.loop.add(
         function ()
         {
             renderer.update()
@@ -59490,8 +59490,11 @@ module.exports = class FPS
     }
 }
 },{"tinycolor2":374,"yy-counter":377}],379:[function(require,module,exports){
-module.exports = require('./src/loop')
-},{"./src/loop":381}],380:[function(require,module,exports){
+const Loop = require('./src/loop')
+Loop.entry = require('./src/entry')
+
+module.exports = Loop
+},{"./src/entry":380,"./src/loop":381}],380:[function(require,module,exports){
 const Events = require('eventemitter3')
 
 /** Entry class for Loop */
@@ -59672,7 +59675,7 @@ class Loop extends Events
         {
             if (entry.update(elapsed))
             {
-                this.remove(entry)
+                this.list.splice(this.list.indexOf(entry), 1)
             }
         }
         this.emit('each', elapsed, this)
@@ -59693,12 +59696,26 @@ class Loop extends Events
 
     /**
      * adds a callback to the loop
+     * @deprecated use add() instead
      * @param {function} callback
      * @param {number} [time=0] in milliseconds to call this update (0=every frame)
      * @param {number} [count=0] number of times to run this update (0=infinite)
      * @return {object} entry - used to remove or change the parameters of the update
      */
     interval(callback, time, count)
+    {
+        console.warn('yy-loop: interval() deprecated. Use add() instead.')
+        this.add(callback, time, count)
+    }
+
+    /**
+     * adds a callback to the loop
+     * @param {function} callback
+     * @param {number} [time=0] in milliseconds to call this update (0=every frame)
+     * @param {number} [count=0] number of times to run this update (0=infinite)
+     * @return {object} entry - used to remove or change the parameters of the update
+     */
+    add(callback, time, count)
     {
         const entry = new Entry(callback, time, count)
         this.list.push(entry)
@@ -59713,7 +59730,7 @@ class Loop extends Events
      */
     timeout(callback, time)
     {
-        return this.interval(callback, time, 1)
+        return this.add(callback, time, 1)
     }
 
     /**
@@ -60204,7 +60221,7 @@ const FPS = require('yy-fps')
 const Loop = require('yy-loop')
 const exists = require('exists')
 
-class Renderer extends Loop
+class Renderer
 {
     /**
      * Wrapper for a pixi.js Renderer
@@ -60234,7 +60251,6 @@ class Renderer extends Loop
      * @param {boolean|string} [options.debug] false, true, or some combination of 'fps', 'dirty', and 'count' (e.g., 'count-dirty' or 'dirty')
      * @param {object} [options.fpsOptions] options from yy-fps (https://github.com/davidfig/fps)
      *
-     ** from yy-loop:
      * @param {number} [options.maxFrameTime=1000/60] maximum time in milliseconds for a frame
      * @param {object} [options.pauseOnBlur] pause loop when app loses focus, start it when app regains focus
      *
@@ -60245,7 +60261,8 @@ class Renderer extends Loop
     constructor(options)
     {
         options = options || {}
-        super({ pauseOnBlur: options.pauseOnBlur, maxFrameTime: options.maxFrameTime })
+        this.options = options
+        this.loop = new Loop({ pauseOnBlur: options.pauseOnBlur, maxFrameTime: options.maxFrameTime })
         this.canvas = options.canvas
         this.autoResize = options.autoresize
         this.aspectRatio = options.aspectRatio
@@ -60286,12 +60303,11 @@ class Renderer extends Loop
         }
 
         if (options.debug) this.createDebug(options)
-        if (this.autoResize) window.addEventListener('resize', this.resize.bind(this))
+        if (this.autoResize) window.addEventListener('resize', () => this.resize())
         this.time = 0
         this.stage = new PIXI.Container()
         this.dirty = this.alwaysRender = options.alwaysRender || false
         this.resize(true)
-        this.updateRendererID = this.interval(this.updateRenderer.bind(this), this.FPS)
     }
 
     /**
@@ -60363,10 +60379,9 @@ class Renderer extends Loop
     }
 
     /**
-     * render the scene
      * @private
      */
-    updateRenderer()
+    update()
     {
         if (this.fpsMeter)
         {
@@ -60405,7 +60420,7 @@ class Renderer extends Loop
                 return
             }
             total++
-            for (var i = 0; i < object.children.length; i++)
+            for (let i = 0, _i = object.children.length; i < _i; i++)
             {
                 count(object.children[i])
             }
@@ -60535,78 +60550,62 @@ class Renderer extends Loop
     set fps(value)
     {
         this.FPS = 1000 / value
-        this.removeInterval(this.updateRendererID)
-        this.updateRendererID = this.interval(this.updateRenderer.bind(this), this.FPS)
+        if (this.loop)
+        {
+            this.loop.remove(this.loopSave)
+            this.loopSave = this.loop.add(() => this.update(), this.FPS)
+        }
         if (this.fpsMeter)
         {
             this.fpsMeter.fps = value
         }
     }
 
+    /**
+     * Add a listener for a given event to yy-loop
+     * @param {(String|Symbol)} event The event name.
+     * @param {Function} fn The listener function.
+     * @param {*} [context=this] The context to invoke the listener with.
+     * @returns {EventEmitter} `this`.
+     */
+    on()
+    {
+        this.loop.on(...arguments)
+    }
+
+    /**
+     * Add a one-time listener for a given event to yy-loop
+     * @param {(String|Symbol)} event The event name.
+     * @param {Function} fn The listener function.
+     * @param {*} [context=this] The context to invoke the listener with.
+     * @returns {EventEmitter} `this`.
+     * @public
+     */
+    once()
+    {
+        this.loop.once(...arguments)
+    }
 
     /**
      * start the internal loop
-     * @inherited from yy-loop
      * @returns {Renderer} this
      */
-    // start()
+    start()
+    {
+        this.loopSave = this.loop.add(() => this.update(), this.FPS)
+        this.loop.start()
+        return this
+    }
 
     /**
      * stop the internal loop
      * @inherited from yy-loop
      * @returns {Renderer} this
      */
-    // stop()
-
-    /**
-     * loop through updates; can be called manually each frame, or called automatically as part of start()
-     * @inherited from yy-loop
-     */
-    // update()
-
-    /**
-     * adds a callback to the loop
-     * @inherited from yy-loop
-     * @param {function} callback
-     * @param {number} [time=0] in milliseconds to call this update (0=every frame)
-     * @param {number} [count=0] number of times to run this update (0=infinite)
-     * @return {object} entry - used to remove or change the parameters of the update
-     */
-    // interval(callback, time, count)
-
-    /**
-     * adds a one-time callback to the loop
-     * @inherited from yy-loop
-     * @param {function} callback
-     * @param {number} time in milliseconds to call this update
-     * @return {object} entry - used to remove or change the parameters of the update
-     */
-    // timeout(callback, time)
-
-    /**
-     * remove a callback from the loop
-     * @inherited from yy-loop
-     * @param {object} entry - returned by add()
-     */
-    // remove(entry)
-
-    /**
-     * @inherited from yy-loop
-     * removes all callbacks from the loop
-     */
-    // removeAll()
-
-    /**
-     * @inherited from yy-loop
-     * @type {number} count of all animations
-     */
-    // get count()
-
-    /**
-     * @inherited from yy-loop
-     * @type {number} count of running animations
-     */
-    // get countRunning()
+    stop()
+    {
+        this.loop.stop()
+    }
 }
 
 module.exports = Renderer
@@ -60748,6 +60747,7 @@ module.exports = class face extends wait
     }
 }
 },{"./wait":393,"yy-angle":375}],386:[function(require,module,exports){
+const Events = require('eventemitter3')
 const Loop = require('yy-loop')
 
 const Angle = require('./angle')
@@ -60761,25 +60761,29 @@ const To = require('./to')
 const Wait = require('./wait')
 
 /** Helper list for multiple animations */
-module.exports = class List extends Loop
+module.exports = class List extends Events
 {
     /**
      * @param [options]
      * @param {number} [options.maxFrameTime=1000 / 60] maximum time in milliseconds for a frame
      * @param {object} [options.pauseOnBlur] pause loop when app loses focus, start it when app regains focus
+     *
      * @event List#done(List) final animation completed in the list
-     * @event List#each(elapsed, List) each update
+     * @event List#each(elapsed, List) each update after eases are updated
      */
     constructor(options)
     {
-        options = options || {}
-        super(options)
+        super()
+        this.loop = new Loop(options)
+        this.loop.add((elapsed) => this.update(elapsed))
+        this.list = []
         this.empty = true
     }
 
     /**
      * Add animation(s) to animation list
      * @param {object|object[]...} any animation class
+     * @return {object} first animation
      */
     add()
     {
@@ -60806,20 +60810,33 @@ module.exports = class List extends Loop
      * @param {object|array} animate - the animation (or array of animations) to remove; can be null
      * @inherited from yy-loop
      */
-    // remove(animate)
+    remove(animate)
+    {
+        this.list.splice(this.list.indexOf(animate), 1)
+    }
 
     /**
      * remove all animations from list
      * @inherited from yy-loop
      */
-    // removeAll()
+    removeAll()
+    {
+        this.list = []
+    }
 
     /**
      * update frame; can be called manually or automatically with start()
      */
     update(elapsed)
     {
-        super.update(elapsed)
+        for (let entry of this.list)
+        {
+            if (entry.update(elapsed))
+            {
+                this.list.splice(this.list.indexOf(entry), 1)
+            }
+        }
+        this.emit('each', this)
         if (this.list.length === 0 && !this.empty)
         {
             this.emit('done', this)
@@ -60828,29 +60845,47 @@ module.exports = class List extends Loop
     }
 
     /**
-     * @type {number} number of animations
-     * @inherited yy-looop
+     * number of animations
+     * @type {number}
      */
-    // get count()
+    get count()
+    {
+        return this.list.length
+    }
 
     /**
-     * @type {number} number of active animations
-     * @inherited yy-looop
+     * number of active animations
+     * @type {number}
      */
-    // get countRunning()
+    get countRunning()
+    {
+        let count = 0
+        for (let entry of this.list)
+        {
+            if (!entry.pause)
+            {
+                count++
+            }
+        }
+        return count
+    }
 
     /**
-     * starts an automatic requestAnimationFrame() loop based on yy-loop
+     * starts an automatic requestAnimationFrame() loop
      * alternatively, you can call update() manually
-     * @inherited yy-loop
      */
-    // start()
+    start()
+    {
+        this.loop.start()
+    }
 
     /**
      * stops the automatic requestAnimationFrame() loop
-     * @inherited yy-loop
      */
-    // stop()
+    stop()
+    {
+        this.loop.stop()
+    }
 
     /** helper to add to the list a new Ease.to class; see Ease.to class below for parameters */
     to() { return this.add(new To(...arguments)) }
@@ -60878,27 +60913,8 @@ module.exports = class List extends Loop
 
     /** helper to add to the list a new Ease.wait class; see Ease.to class below for parameters */
     wait() { return this.add(new Wait(...arguments)) }
-
-    /** Inherited functions from yy-loop */
-
-    /**
-     * adds an interval
-     * @param {function} callback
-     * @param {number} time
-     * @param {number} count
-     * @inherited from yy-loop
-     */
-    // interval(callback, time, count)
-
-    /**
-     * adds a timeout
-     * @param {function} callback
-     * @param {number} time
-     * @inherited from yy-loop
-     */
-    // timeout(callback, time)
 }
-},{"./angle":384,"./face":385,"./load":387,"./movie":388,"./shake":389,"./target":390,"./tint":391,"./to":392,"./wait":393,"yy-loop":379}],387:[function(require,module,exports){
+},{"./angle":384,"./face":385,"./load":387,"./movie":388,"./shake":389,"./target":390,"./tint":391,"./to":392,"./wait":393,"eventemitter3":6,"yy-loop":379}],387:[function(require,module,exports){
 const wait = require('./wait')
 const to = require('./to')
 const tint = require('./tint')

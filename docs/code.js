@@ -61,7 +61,7 @@ function test()
     }
 
     // render at the end of each loop
-    ease.interval(
+    ease.loop.add(
         function ()
         {
             renderer.update()
