@@ -80,11 +80,13 @@ module.exports = class List extends Events
      */
     update(elapsed)
     {
-        for (let entry of this.list)
+        for (let i = 0, _i = this.list.length; i < _i; i++)
         {
-            if (entry.update(elapsed))
+            if (this.list[i].update(elapsed))
             {
-                this.list.splice(this.list.indexOf(entry), 1)
+                this.list.splice(i, 1)
+                i--
+                _i--
             }
         }
         this.emit('each', this)
