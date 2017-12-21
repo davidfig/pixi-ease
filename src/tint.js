@@ -21,7 +21,6 @@ module.exports = class tint extends wait
             this.object = this.list[0]
         }
         this.duration = duration
-        this.ease = this.options.ease || this.noEase
         if (options.load)
         {
             this.load(options.load)
@@ -39,10 +38,6 @@ module.exports = class tint extends wait
 
     save()
     {
-        if (this.options.cancel)
-        {
-            return null
-        }
         const save = super.save()
         save.start = this.start
         save.to = this.to
@@ -58,7 +53,7 @@ module.exports = class tint extends wait
 
     calculate()
     {
-        const percent = this.ease(this.time, 0, 1, this.duration)
+        const percent = this.options.ease(this.time, 0, 1, this.duration)
         if (this.tints)
         {
             const each = 1 / (this.tints.length - 1)

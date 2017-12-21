@@ -12,11 +12,9 @@ module.exports = class to extends wait
      * @param {boolean} [options.pause] start the animation paused
      * @param {boolean|number} [options.repeat] true: repeat animation forever n: repeat animation n times
      * @param {boolean|number} [options.reverse] true: reverse animation (if combined with repeat, then pulse) n: reverse animation n times
-     * @param {boolean|number} [options.continue] true: continue animation with new starting values n: continue animation n times
      * @param {Function} [options.load] loads an animation using an .save() object note the * parameters below cannot be loaded and must be re-set
      * @param {string|Function} [options.ease] name or function from easing.js (see http://easings.net for examples)
      * @emits to:done animation expires
-     * @emits to:cancel animation is cancelled
      * @emits to:wait each update during a wait
      * @emits to:first first update when animation starts
      * @emits to:each each update while animation is running
@@ -33,7 +31,6 @@ module.exports = class to extends wait
             this.list = object
             this.object = this.list[0]
         }
-        this.ease = options.ease || this.noEase
         if (options.load)
         {
             this.load(options.load)
@@ -61,10 +58,6 @@ module.exports = class to extends wait
 
     save()
     {
-        if (this.options.cancel)
-        {
-            return null
-        }
         const save = super.save()
         save.goto = this.goto
         save.start = this.start
@@ -98,7 +91,7 @@ module.exports = class to extends wait
             // handles keys with one additional level e.g.: goto = {scale: {x: 5, y: 3}}
             if (isNaN(goto[key]))
             {
-                keys[i] = {key: key, children: []}
+                keys[i] = { key: key, children: [] }
                 start[i] = []
                 delta[i] = []
                 let j = 0
@@ -133,12 +126,12 @@ module.exports = class to extends wait
         const delta = this.delta
         const start = this.start
 
-        for (let i = 0; i < keys.length; i++)
+        for (let i = 0, _i = keys.length; i < _i; i++)
         {
             const key = keys[i]
             if (isNaN(goto[key]))
             {
-                for (let j = 0; j < key.children.length; j++)
+                for (let j = 0, _j = key.children.length; j < _j; j++)
                 {
                     delta[i][j] = -delta[i][j]
                     start[i][j] = parseFloat(object[key.key][key.children[j]])
@@ -148,32 +141,6 @@ module.exports = class to extends wait
             else
             {
                 delta[i] = -delta[i]
-                start[i] = parseFloat(object[key])
-                start[i] = isNaN(start[i]) ? 0 : start[i]
-            }
-        }
-    }
-
-    continue()
-    {
-        const object = this.object
-        const keys = this.keys
-        const goto = this.goto
-        const start = this.start
-
-        for (let i = 0; i < keys.length; i++)
-        {
-            const key = keys[i]
-            if (isNaN(goto[key]))
-            {
-                for (let j = 0; j < key.children.length; j++)
-                {
-                    this.start[i][j] = parseFloat(object[key.key][key.children[j]])
-                    this.start[i][j] = isNaN(start[i][j]) ? 0 : start[i][j]
-                }
-            }
-            else
-            {
                 start[i] = parseFloat(object[key])
                 start[i] = isNaN(start[i]) ? 0 : start[i]
             }
@@ -190,20 +157,20 @@ module.exports = class to extends wait
         const start = this.start
         const delta = this.delta
         const duration = this.duration
-        const ease = this.ease
-        for (let i = 0; i < this.keys.length; i++)
+        const ease = this.options.ease
+        for (let i = 0, _i = this.keys.length; i < _i; i++)
         {
             const key = keys[i]
             if (isNaN(goto[key]))
             {
                 const key1 = key.key
-                for (let j = 0; j < key.children.length; j++)
+                for (let j = 0, _j = key.children.length; j < _j; j++)
                 {
                     const key2 = key.children[j]
                     const others = object[key1][key2] = (time >= duration) ? start[i][j] + delta[i][j] : ease(time, start[i][j], delta[i][j], duration)
                     if (list)
                     {
-                        for (let k = 1; k < list.length; k++)
+                        for (let k = 1, _k = list.length; k < _k; k++)
                         {
                             list[k][key1][key2] = others
                         }
@@ -216,7 +183,7 @@ module.exports = class to extends wait
                 const others = object[key] = (time >= duration) ? start[i] + delta[i] : ease(time, start[i], delta[i], duration)
                 if (list)
                 {
-                    for (let j = 1; j < this.list.length; j++)
+                    for (let j = 1, _j = this.list.length; j < _j; j++)
                     {
                         list[j][key] = others
                     }

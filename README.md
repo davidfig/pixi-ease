@@ -47,7 +47,7 @@ https://davidfig.github.io/pixi-ease/
 
 ## API
 ### src/list.js
-```
+```js
 /** Helper list for multiple animations */
 module.exports = class List extends Loop
 {
@@ -82,7 +82,7 @@ module.exports = class List extends Loop
     /**
      * update frame; can be called manually or automatically with start()
      */
-    update()
+    update(elapsed)
 
     /**
      * @type {number} number of animations
@@ -155,9 +155,10 @@ module.exports = class List extends Loop
      * @inherited from yy-loop
      */
     // timeout(callback, time)
+
 ```
 ### src/to.js
-```
+```js
 /** animate any numeric parameter of an object or array of objects */
 module.exports = class to extends wait
 {
@@ -170,11 +171,9 @@ module.exports = class to extends wait
      * @param {boolean} [options.pause] start the animation paused
      * @param {boolean|number} [options.repeat] true: repeat animation forever n: repeat animation n times
      * @param {boolean|number} [options.reverse] true: reverse animation (if combined with repeat, then pulse) n: reverse animation n times
-     * @param {boolean|number} [options.continue] true: continue animation with new starting values n: continue animation n times
      * @param {Function} [options.load] loads an animation using an .save() object note the * parameters below cannot be loaded and must be re-set
      * @param {string|Function} [options.ease] name or function from easing.js (see http://easings.net for examples)
      * @emits to:done animation expires
-     * @emits to:cancel animation is cancelled
      * @emits to:wait each update during a wait
      * @emits to:first first update when animation starts
      * @emits to:each each update while animation is running
@@ -182,9 +181,10 @@ module.exports = class to extends wait
      * @emits to:reverse when animation is reversed
      */
     constructor(object, goto, duration, options)
+
 ```
 ### src/angle.js
-```
+```js
 /** animate object's {x, y} using an angle */
 module.exports = class angle extends wait
 {
@@ -196,9 +196,10 @@ module.exports = class angle extends wait
      * @param {object} [options] @see {@link Wait}
      */
     constructor(object, angle, speed, duration, options)
+
 ```
 ### src/face.js
-```
+```js
 /** Rotates an object to face the target */
 module.exports = class face extends wait
 {
@@ -210,17 +211,19 @@ module.exports = class face extends wait
      * @param {boolean} [options.keepAlive] don't stop animation when complete
      */
     constructor(object, target, speed, options)
+
 ```
 ### src/load.js
-```
+```js
 /**
  * restart an animation = requires a saved state
  * @param {object} object(s) to animate
  */
 module.exports = function load(object, load)
+
 ```
 ### src/movie.js
-```
+```js
 /**
  * animate a movie of textures
  */
@@ -239,7 +242,6 @@ module.exports = class movie extends wait
      * @param {Function} [options.load] loads an animation using a .save() object note the * parameters below cannot be loaded and must be re-set
      * @param {Function} [options.ease] function from easing.js (see http://easings.net for examples)
      * @emits {done} animation expires
-     * @emits {cancel} animation is cancelled
      * @emits {wait} each update during a wait
      * @emits {first} first update when animation starts
      * @emits {each} each update while animation is running
@@ -247,9 +249,10 @@ module.exports = class movie extends wait
      * @emits {reverse} when animation is reversed
      */
     constructor(object, textures, duration, options)
+
 ```
 ### src/shake.js
-```
+```js
 /**
  * shakes an object or list of objects
  */
@@ -262,9 +265,10 @@ module.exports = class shake extends wait
      * @param {object} options (see Animate.wait)
      */
     constructor(object, amount, duration, options)
+
 ```
 ### src/target.js
-```
+```js
 /** move an object to a target's location */
 module.exports = class target extends wait
 {
@@ -277,9 +281,10 @@ module.exports = class target extends wait
      * @param {boolean} [options.keepAlive] don't cancel the animation when target is reached
      */
     constructor(object, target, speed, options)
+
 ```
 ### src/tint.js
-```
+```js
 /** changes the tint of an object */
 module.exports = class tint extends wait
 {
@@ -290,9 +295,10 @@ module.exports = class tint extends wait
      * @param {object} [options] @see {@link Wait}
      */
     constructor(object, tint, duration, options)
+
 ```
 ### src/wait.js
-```
+```js
     /**
      * @param {object|object[]} object or list of objects to animate
      * @param {object} [options]
@@ -300,13 +306,12 @@ module.exports = class tint extends wait
      * @param {boolean} [options.pause] start the animation paused
      * @param {(boolean|number)} [options.repeat] true: repeat animation forever n: repeat animation n times
      * @param {(boolean|number)} [options.reverse] true: reverse animation (if combined with repeat, then pulse) n: reverse animation n times
-     * @param {(boolean|number)} [options.continue] true: continue animation with new starting values n: continue animation n times
+     *
      * @param {number} [options.id] user-generated id (e.g., I use it to properly load animations when an object has multiple animations running)
-     * @param {boolean} [options.orphan] delete animation if .parent of object (or first object in list) is null
      * @param {Function} [options.load] loads an animation using an .save() object note the * parameters below cannot be loaded and must be re-set
      * @param {Function|string} [options.ease] function (or penner function name) from easing.js (see http://easings.net for examples)*
+     *
      * @emits {done} animation expires
-     * @emits {cancel} animation is cancelled
      * @emits {wait} each update during a wait
      * @emits {first} first update when animation starts
      * @emits {each} each update while animation is running
@@ -319,6 +324,7 @@ module.exports = class tint extends wait
      * @type {boolean} pause this entry
      */
     set pause(value)
+
 ```
 ## License 
 MIT License  

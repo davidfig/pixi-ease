@@ -10,7 +10,5 @@ module.exports = {
     angle: require('./src/angle'),
     target: require('./src/target'),
     movie: require('./src/movie'),
-    load: require('./src/load'),
-
-    default: new list()
+    load: require('./src/load')
 }

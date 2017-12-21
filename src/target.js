@@ -29,10 +29,6 @@ module.exports = class target extends wait
 
     save()
     {
-        if (this.options.cancel)
-        {
-            return null
-        }
         const save = super.save()
         save.speed = this.speed
         save.keepAlive = this.options.keepAlive

@@ -29,10 +29,6 @@ module.exports = class angle extends wait
 
     save()
     {
-        if (this.options.cancel)
-        {
-            return null
-        }
         const save = super.save()
         save.angle = this.angle
         save.speed = this.speed

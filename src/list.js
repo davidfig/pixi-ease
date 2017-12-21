@@ -67,9 +67,9 @@ module.exports = class List extends Loop
     /**
      * update frame; can be called manually or automatically with start()
      */
-    update()
+    update(elapsed)
     {
-        super.update()
+        super.update(elapsed)
         if (this.list.length === 0 && !this.empty)
         {
             this.emit('done', this)

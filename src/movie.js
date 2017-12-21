@@ -18,7 +18,6 @@ module.exports = class movie extends wait
      * @param {Function} [options.load] loads an animation using a .save() object note the * parameters below cannot be loaded and must be re-set
      * @param {Function} [options.ease] function from easing.js (see http://easings.net for examples)
      * @emits {done} animation expires
-     * @emits {cancel} animation is cancelled
      * @emits {wait} each update during a wait
      * @emits {first} first update when animation starts
      * @emits {each} each update while animation is running
@@ -35,7 +34,6 @@ module.exports = class movie extends wait
             this.list = object
             this.object = this.list[0]
         }
-        this.ease = options.ease || this.noEase
         if (options.load)
         {
             this.load(options.load)
@@ -54,10 +52,6 @@ module.exports = class movie extends wait
 
     save()
     {
-        if (this.options.cancel)
-        {
-            return null
-        }
         const save = super.save()
         save.goto = this.goto
         save.current = this.current
@@ -88,7 +82,7 @@ module.exports = class movie extends wait
 
     calculate()
     {
-        let index = Math.round(this.ease(this.time, 0, this.length - 1, this.duration))
+        let index = Math.round(this.options.ease(this.time, 0, this.length - 1, this.duration))
         if (this.isReverse)
         {
             index = this.length - 1 - index

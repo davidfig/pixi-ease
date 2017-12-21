@@ -1,7 +1,6 @@
 const PIXI = require('pixi.js')
 const Renderer = require('yy-renderer')
 const Random = require('yy-random')
-const FPS = require('yy-fps')
 const Counter = require('yy-counter')
 
 const Ease = require('..')
@@ -23,8 +22,9 @@ function test()
 
     // create a target animation
     const b = block()
-    b.x = size / 2
-    const target = ease.to(b, { x: window.innerWidth - size / 2 }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true })
+    b.x = blockSize / 2
+    const target = ease.to(b, { x: window.innerWidth - blockSize }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true })
+
     // this is an alternative way to create and add animations to the list
     ease.add(
 
@@ -64,8 +64,7 @@ function test()
     ease.interval(
         function ()
         {
-            app.render()
-            fps.frame()
+            renderer.update()
             counter.log('Eases: ' + ease.count)
         })
 
@@ -75,22 +74,22 @@ function test()
 
 function block(tint)
 {
-    const block = app.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
+    const block = renderer.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
     block.anchor.set(0.5)
-    block.width = block.height = size * 0.9
+    block.width = block.height = blockSize
     block.tint = typeof tint !== 'undefined' ? tint : Random.color()
-    block.x = size / 2
-    block.y = size / 2 + size * (app.stage.children.length - 1)
+    block.x = blockSize / 2
+    block.y = blockSize / 2 + size * (renderer.stage.children.length - 1)
     return block
 }
 
-let app, size, fps, counter
+let renderer, size, blockSize, counter
 
 function init()
 {
-    app = new Renderer()
+    renderer = new Renderer({ debug: true, turnOffTicker: true, turnOffInteraction: true, autoresize: true, alwaysRender: true })
     size = Math.min(window.innerWidth, window.innerHeight) / 11
-    fps = new FPS()
+    blockSize = size * 0.9
     counter = new Counter({ side: 'bottom-left' })
 }
 

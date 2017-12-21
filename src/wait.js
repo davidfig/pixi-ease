@@ -10,13 +10,12 @@ module.exports = class wait extends EventEmitter
      * @param {boolean} [options.pause] start the animation paused
      * @param {(boolean|number)} [options.repeat] true: repeat animation forever n: repeat animation n times
      * @param {(boolean|number)} [options.reverse] true: reverse animation (if combined with repeat, then pulse) n: reverse animation n times
-     * @param {(boolean|number)} [options.continue] true: continue animation with new starting values n: continue animation n times
+     *
      * @param {number} [options.id] user-generated id (e.g., I use it to properly load animations when an object has multiple animations running)
-     * @param {boolean} [options.orphan] delete animation if .parent of object (or first object in list) is null
      * @param {Function} [options.load] loads an animation using an .save() object note the * parameters below cannot be loaded and must be re-set
      * @param {Function|string} [options.ease] function (or penner function name) from easing.js (see http://easings.net for examples)*
+     *
      * @emits {done} animation expires
-     * @emits {cancel} animation is cancelled
      * @emits {wait} each update during a wait
      * @emits {first} first update when animation starts
      * @emits {each} each update while animation is running
@@ -39,6 +38,7 @@ module.exports = class wait extends EventEmitter
         }
         if (this.options.ease && typeof this.options.ease !== 'function')
         {
+            this.options.easeName = this.options.ease
             this.options.ease = Easing[this.options.ease]
         }
         if (!this.options.ease)
@@ -49,11 +49,7 @@ module.exports = class wait extends EventEmitter
 
     save()
     {
-        if (this.options.cancel)
-        {
-            return null
-        }
-        const save = {type: this.type, time: this.time, duration: this.duration}
+        const save = { type: this.type, time: this.time, duration: this.duration, ease: this.options.easeName }
         const options = this.options
         if (options.wait)
         {
@@ -75,14 +71,6 @@ module.exports = class wait extends EventEmitter
         {
             save.reverse = options.reverse
         }
-        if (options.continue)
-        {
-            save.continue = options.continue
-        }
-        if (options.cancel)
-        {
-            save.cancel = options.cancel
-        }
         return save
     }
 
@@ -92,9 +80,17 @@ module.exports = class wait extends EventEmitter
         this.options.pause = load.pause
         this.options.repeat = load.repeat
         this.options.reverse = load.reverse
-        this.options.continue = load.continue
-        this.options.cancel = load.cancel
         this.options.id = load.id
+        this.options.ease = load.ease
+        if (this.options.ease && typeof this.options.ease !== 'function')
+        {
+            this.options.easeName = this.options.ease
+            this.options.ease = Easing[this.options.ease]
+        }
+        if (!this.options.ease)
+        {
+            this.options.ease = Easing['linear']
+        }
         this.time = load.time
         this.duration = load.duration
     }
@@ -109,15 +105,6 @@ module.exports = class wait extends EventEmitter
     get pause()
     {
         return this.options.pause
-    }
-
-    cancel()
-    {
-        this.options.cancel = true
-    }
-
-    done()
-    {
     }
 
     end(leftOver)
@@ -155,16 +142,6 @@ module.exports = class wait extends EventEmitter
             }
             this.emit('loop', this.list || this.object)
         }
-        else if (this.options.continue)
-        {
-            this.continue()
-            this.time = leftOver
-            if (this.options.continue !== true)
-            {
-                this.options.continue--
-            }
-            this.emit('loop', this.list || this.object)
-        }
         else
         {
             this.done()
@@ -176,50 +153,18 @@ module.exports = class wait extends EventEmitter
 
     update(elapsed)
     {
-        if (!this.options)
+        const options = this.options
+        if (options.pause)
         {
             return
         }
-        if (this.options.cancel)
+        if (options.wait)
         {
-            this.emit('cancel', this.list || this.object)
-            return true
-        }
-        if (this.options.orphan)
-        {
-            if (this.list)
+            options.wait -= elapsed
+            if (options.wait <= 0)
             {
-                if (!this.list[0].parent)
-                {
-                    return true
-                }
-            }
-            else if (!this.object.parent)
-            {
-                return true
-            }
-        }
-        if (this.options.restart)
-        {
-            this.restart()
-            this.options.pause = false
-        }
-        if (this.options.original)
-        {
-            this.time = 0
-            this.options.pause = false
-        }
-        if (this.options.pause)
-        {
-            return
-        }
-        if (this.options.wait)
-        {
-            this.options.wait -= elapsed
-            if (this.options.wait <= 0)
-            {
-                elapsed = -this.options.wait
-                this.options.wait = false
+                elapsed = -options.wait
+                options.wait = false
             }
             else
             {
@@ -234,14 +179,16 @@ module.exports = class wait extends EventEmitter
         }
         this.time += elapsed
         let leftOver = 0
-        if (this.duration !== 0 && this.time > this.duration)
+        const duration = this.duration
+        let time = this.time
+        if (duration !== 0 && time > duration)
         {
-            leftOver = this.time - this.duration
-            this.time = this.duration
+            leftOver = time - duration
+            this.time = time = duration
         }
         const allDone = this.calculate(elapsed)
         this.emit('each', elapsed, this.list || this.object, this)
-        if (this.type === 'Wait' || (this.duration !== 0 && this.time === this.duration))
+        if (this.type === 'Wait' || (duration !== 0 && time === duration))
         {
             return this.end(leftOver)
         }
@@ -262,5 +209,7 @@ module.exports = class wait extends EventEmitter
         return value
     }
 
-    calculate() {}
+    reverse() {}
+    calculate() { }
+    done() { }
 }
