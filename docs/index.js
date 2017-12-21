@@ -16,16 +16,16 @@ function test()
     const ease = new Ease.list({ pauseOnBlur: true })
 
     // create a shake animation and add it to the list
-    // ease.shake(block(), 5)
+    ease.shake(block(), 5)
 
     // create a movie with a list of textures and add it to the list
-    // ease.movie(block(), textures, TIME, { repeat: true, reverse: true })
+    ease.movie(block(), textures, TIME, { repeat: true, reverse: true })
 
     // create a target animation
     const b = block()
     b.x = blockSize / 2
-    const target = ease.to(b, { x: window.innerWidth - blockSize / 2 }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true })
-/*
+    const target = ease.to(b, { x: window.innerWidth - blockSize }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true })
+
     // this is an alternative way to create and add animations to the list
     ease.add(
 
@@ -60,13 +60,12 @@ function test()
     {
         to.update(elapsed)
     }
-*/
+
     // render at the end of each loop
     ease.interval(
         function ()
         {
-            renderer.render()
-            fps.frame()
+            renderer.update()
             counter.log('Eases: ' + ease.count)
         })
 
@@ -80,16 +79,16 @@ function block(tint)
     block.anchor.set(0.5)
     block.width = block.height = blockSize
     block.tint = typeof tint !== 'undefined' ? tint : Random.color()
-    block.x = size / 2
-    block.y = size / 2 + size * (renderer.stage.children.length - 1)
+    block.x = blockSize / 2
+    block.y = blockSize / 2 + size * (renderer.stage.children.length - 1)
     return block
 }
 
-let renderer, size, blockSize, fps, counter
+let renderer, size, blockSize, counter
 
 function init()
 {
-    renderer = new Renderer({ debug: true, turnOffTicker: true, turnOffInteraction: true, autoresize: true })
+    renderer = new Renderer({ debug: true, turnOffTicker: true, turnOffInteraction: true, autoresize: true, alwaysRender: true })
     size = Math.min(window.innerWidth, window.innerHeight) / 11
     blockSize = size * 0.9
     counter = new Counter({ side: 'bottom-left' })
@@ -61717,11 +61716,11 @@ module.exports = class wait extends EventEmitter
         this.time += elapsed
         let leftOver = 0
         const duration = this.duration
-        const time = this.time
+        let time = this.time
         if (duration !== 0 && time > duration)
         {
             leftOver = time - duration
-            this.time = duration
+            this.time = time = duration
         }
         const allDone = this.calculate(elapsed)
         this.emit('each', elapsed, this.list || this.object, this)
