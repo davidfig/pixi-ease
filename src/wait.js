@@ -146,7 +146,7 @@ module.exports = class wait extends EventEmitter
         {
             this.done()
             this.emit('done', this.list || this.object, leftOver)
-            this.list = this.object = null
+            // this.list = this.object = null
             return true
         }
     }
@@ -186,16 +186,13 @@ module.exports = class wait extends EventEmitter
             leftOver = time - duration
             this.time = time = duration
         }
-        const allDone = this.calculate(elapsed)
+        this.calculate(elapsed)
         this.emit('each', elapsed, this.list || this.object, this)
         if (this.type === 'Wait' || (duration !== 0 && time === duration))
         {
             return this.end(leftOver)
         }
-        if (allDone)
-        {
-            return true
-        }
+        return time === duration
     }
 
     // correct certain DOM values
