@@ -61035,13 +61035,13 @@ module.exports = class wait extends EventEmitter
             leftOver = time - duration
             this.time = time = duration
         }
-        this.calculate(elapsed)
+        const force = this.calculate(elapsed)
         this.emit('each', elapsed, this.list || this.object, this)
         if (this.type === 'Wait' || (duration !== 0 && time === duration))
         {
             return this.end(leftOver)
         }
-        return time === duration
+        return force || time === duration
     }
 
     // correct certain DOM values
