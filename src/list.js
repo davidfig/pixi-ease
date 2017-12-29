@@ -1,5 +1,5 @@
+const PIXI = require('pixi.js')
 const Events = require('eventemitter3')
-const Loop = require('yy-loop')
 
 const Angle = require('./angle')
 const Face = require('./face')
@@ -11,22 +11,26 @@ const Tint = require('./tint')
 const To = require('./to')
 const Wait = require('./wait')
 
-/** Helper list for multiple animations */
 module.exports = class List extends Events
 {
     /**
-     * @param [options]
-     * @param {number} [options.maxFrameTime=1000 / 60] maximum time in milliseconds for a frame
-     * @param {object} [options.pauseOnBlur] pause loop when app loses focus, start it when app regains focus
+     * Helper list for multiple animations
+     * @param {object} [options]
+     * @param {boolean} [options.noTicker] don't add the update function to PIXI.ticker
+     * @param {PIXI.ticker} [options.ticker=PIXI.ticker.shared] use this PIXI.ticker for the list
      *
      * @event List#done(List) final animation completed in the list
      * @event List#each(elapsed, List) each update after eases are updated
      */
     constructor(options)
     {
+        options = options || {}
         super()
-        this.loop = new Loop(options)
-        this.loop.add((elapsed) => this.update(elapsed))
+        if (!options.noTicker)
+        {
+            const ticker = options.ticker || PIXI.ticker.shared
+            ticker.add(() => this.update(ticker.elapsedMS))
+        }
         this.list = []
         this.empty = true
     }
@@ -76,7 +80,10 @@ module.exports = class List extends Events
     }
 
     /**
-     * update frame; can be called manually or automatically with start()
+     * update frame
+     * this is automatically added to PIXI.ticker unless options.noTicker is set
+     * if using options.noTicker, this should be called manually
+     * @param {number} elasped time in MS since last update
      */
     update(elapsed)
     {
@@ -121,23 +128,6 @@ module.exports = class List extends Events
             }
         }
         return count
-    }
-
-    /**
-     * starts an automatic requestAnimationFrame() loop
-     * alternatively, you can call update() manually
-     */
-    start()
-    {
-        this.loop.start()
-    }
-
-    /**
-     * stops the automatic requestAnimationFrame() loop
-     */
-    stop()
-    {
-        this.loop.stop()
     }
 
     /** helper to add to the list a new Ease.to class; see Ease.to class below for parameters */

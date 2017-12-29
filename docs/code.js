@@ -1,7 +1,7 @@
 const PIXI = require('pixi.js')
-const Renderer = require('yy-renderer')
 const Random = require('yy-random')
 const Counter = require('yy-counter')
+const FPS = require('yy-fps')
 
 const Ease = require('..')
 
@@ -57,18 +57,8 @@ function test()
     function update(elapsed)
     {
         to.update(elapsed)
+        counter.log('Eases: ' + ease.count)
     }
-
-    // render at the end of each loop
-    ease.loop.add(
-        function ()
-        {
-            renderer.update()
-            counter.log('Eases: ' + ease.count)
-        })
-
-    // starts the animations
-    ease.start()
 }
 
 function fall()
@@ -101,14 +91,17 @@ function snow(tint)
     return block
 }
 
-let renderer, size, blockSize, counter
+let renderer, size, blockSize, counter, fps
 
 function init()
 {
-    renderer = new Renderer({ debug: true, turnOffTicker: true, turnOffInteraction: true, autoresize: true, alwaysRender: true })
+    fps = new FPS()
+    renderer = new PIXI.Application({ transparent: true, width: window.innerWidth, height: window.innerHeight, autoResize: true })
+    document.body.appendChild(renderer.view)
     size = Math.min(window.innerWidth, window.innerHeight) / 11
     blockSize = size * 0.9
     counter = new Counter({ side: 'bottom-left' })
+    PIXI.ticker.shared.add(() => fps.frame())
 }
 
 function load()

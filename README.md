@@ -48,13 +48,11 @@ https://davidfig.github.io/pixi-ease/
 ## API
 ### src/list.js
 ```js
-/** Helper list for multiple animations */
-module.exports = class List extends Events
-{
     /**
-     * @param [options]
-     * @param {number} [options.maxFrameTime=1000 / 60] maximum time in milliseconds for a frame
-     * @param {object} [options.pauseOnBlur] pause loop when app loses focus, start it when app regains focus
+     * Helper list for multiple animations
+     * @param {object} [options]
+     * @param {boolean} [options.noTicker] don't add the update function to PIXI.ticker
+     * @param {PIXI.ticker} [options.ticker=PIXI.ticker.shared] use this PIXI.ticker for the list
      *
      * @event List#done(List) final animation completed in the list
      * @event List#each(elapsed, List) each update after eases are updated
@@ -82,7 +80,10 @@ module.exports = class List extends Events
     removeAll()
 
     /**
-     * update frame; can be called manually or automatically with start()
+     * update frame
+     * this is automatically added to PIXI.ticker unless options.noTicker is set
+     * if using options.noTicker, this should be called manually
+     * @param {number} elasped time in MS since last update
      */
     update(elapsed)
 
@@ -97,17 +98,6 @@ module.exports = class List extends Events
      * @type {number}
      */
     get countRunning()
-
-    /**
-     * starts an automatic requestAnimationFrame() loop
-     * alternatively, you can call update() manually
-     */
-    start()
-
-    /**
-     * stops the automatic requestAnimationFrame() loop
-     */
-    stop()
 
     /** helper to add to the list a new Ease.to class; see Ease.to class below for parameters */
     to() { return this.add(new To(...arguments)) }
