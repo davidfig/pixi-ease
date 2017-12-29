@@ -42,9 +42,6 @@ https://davidfig.github.io/pixi-ease/
     // listen for done, then print to console
     to.on('done', () => console.log('Square has finished animating'))
 
-    // start the list's animation loop
-    list.start()
-
 ## API
 ### src/list.js
 ```js
