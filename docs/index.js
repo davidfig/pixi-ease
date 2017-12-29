@@ -60096,22 +60096,28 @@ module.exports = class List extends Events
      */
     add()
     {
+        let first
         for (let arg of arguments)
         {
             if (Array.isArray(arg))
             {
                 for (let entry of arg)
                 {
+                    if (!first)
+                    {
+                        first = entry
+                    }
                     this.list.push(entry)
                 }
             }
             else
             {
+                first = arg
                 this.list.push(arg)
             }
         }
         this.empty = false
-        return arguments[0]
+        return first
     }
 
     /**
@@ -60121,7 +60127,11 @@ module.exports = class List extends Events
      */
     remove(animate)
     {
-        this.list.splice(this.list.indexOf(animate), 1)
+        const index = this.list.indexOf(animate)
+        if (index !== -1)
+        {
+            this.list.splice(index, 1)
+        }
     }
 
     /**
