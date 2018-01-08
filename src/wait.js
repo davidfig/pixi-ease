@@ -1,7 +1,7 @@
 const Easing = require('penner')
 const EventEmitter = require('eventemitter3')
 
-module.exports = class wait extends EventEmitter
+class wait extends EventEmitter
 {
     /**
      * @param {object|object[]} object or list of objects to animate
@@ -96,7 +96,8 @@ module.exports = class wait extends EventEmitter
     }
 
     /**
-     * @type {boolean} pause this entry
+     * pause this entry
+     * @type {boolean}
      */
     set pause(value)
     {
@@ -210,3 +211,5 @@ module.exports = class wait extends EventEmitter
     calculate() { }
     done() { }
 }
+
+module.exports = wait

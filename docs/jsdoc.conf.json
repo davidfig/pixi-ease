@@ -1,0 +1,48 @@
+{
+    "applicationName": "pixi-ease",
+    "disqus": "",
+    "googleAnalytics": "",
+    "openGraph": {
+        "title": "",
+        "type": "website",
+        "image": "",
+        "site_name": "",
+        "url": ""
+    },
+    "meta": {
+        "title": "pixi-ease",
+        "description": "",
+        "keyword": ""
+    },
+    "linenums": true,
+    "source": {
+        "include": [
+            "./src",
+            "./node_modules/eventemitter3"
+        ],
+        "includePattern": ".+\\.js(doc)?$",
+        "excludePattern": "(^|\\/|\\\\)_"
+    },
+    "opts": {
+        "readme": "./README.md",
+        "encoding": "utf8",
+        "recurse": true,
+        "private": false,
+        "lenient": true,
+        "destination": "./docs/jsdoc",
+        "template": "./node_modules/@pixi/jsdoc-template"
+    },
+    "templates": {
+        "default": {
+            "outputSourceFiles": true
+        },
+        "applicationName": "pixi-ease",
+        "footer"        : "by YOPEY YOPEY LLC (yopeyopey.com)",
+        "copyright"     : "Copyright © 2018 YOPEY YOPEY LLC.",
+        "meta": {
+            "title": "pixi-ease API Documentation",
+            "description": "Documentation for pixi-ease library",
+            "keyword": "docs, documentation, html5, javascript, jsdoc, dom, ease, animate"
+        }
+    }
+}

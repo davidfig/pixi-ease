@@ -13,7 +13,7 @@ Additionally, I used eventemitter3 to create a more robust event system, replaci
     npm i pixi-ease
 
 ## Live Demo
-https://davidfig.github.io/pixi-ease/
+[https://davidfig.github.io/pixi-ease/](https://davidfig.github.io/pixi-ease/)
     
 ## Simple Usage
 

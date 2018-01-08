@@ -1,8 +1,7 @@
 const Color = require('yy-color')
 const wait = require('./wait')
 
-/** changes the tint of an object */
-module.exports = class tint extends wait
+class tint extends wait
 {
     /**
      * @param {PIXI.DisplayObject|PIXI.DisplayObject[]} object
@@ -115,3 +114,5 @@ module.exports = class tint extends wait
         }
     }
 }
+
+module.exports = tint

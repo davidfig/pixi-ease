@@ -1,7 +1,7 @@
 const wait = require('./wait')
 
 /** move an object to a target's location */
-module.exports = class target extends wait
+class target extends wait
 {
     /**
      * move to a target
@@ -70,3 +70,5 @@ module.exports = class target extends wait
         }
     }
 }
+
+module.exports = target

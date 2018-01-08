@@ -3,7 +3,7 @@ const wait = require('./wait')
 /**
  * shakes an object or list of objects
  */
-module.exports = class shake extends wait
+class shake extends wait
 {
     /**
      * @param {object|array} object or list of objects to shake
@@ -102,3 +102,5 @@ module.exports = class shake extends wait
         }
     }
 }
+
+module.exports = shake

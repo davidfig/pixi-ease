@@ -11,7 +11,7 @@ const movie = require('./movie')
  * restart an animation = requires a saved state
  * @param {object} object(s) to animate
  */
-module.exports = function load(object, load)
+function load(object, load)
 {
     if (!load)
     {
@@ -38,3 +38,5 @@ module.exports = function load(object, load)
             return new movie(object, object[1], null, options)
     }
 }
+
+module.exports = load

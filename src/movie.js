@@ -3,7 +3,7 @@ const wait = require('./wait')
 /**
  * animate a movie of textures
  */
-module.exports = class movie extends wait
+class movie extends wait
 {
     /**
      * @param {object} object to animate
@@ -100,3 +100,5 @@ module.exports = class movie extends wait
         }
     }
 }
+
+module.exports = movie

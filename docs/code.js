@@ -3,7 +3,7 @@ const Random = require('yy-random')
 const Counter = require('yy-counter')
 const FPS = require('yy-fps')
 
-const Ease = require('..')
+const Ease = require('../src')
 
 const TIME = 1000
 const SNOW_FALL = [2000, 8000]

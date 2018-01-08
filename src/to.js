@@ -1,7 +1,7 @@
 const wait = require('./wait')
 
 /** animate any numeric parameter of an object or array of objects */
-module.exports = class to extends wait
+class to extends wait
 {
     /**
      * @param {object} object to animate
@@ -192,3 +192,5 @@ module.exports = class to extends wait
         }
     }
 }
+
+module.exports = to

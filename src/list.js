@@ -11,16 +11,15 @@ const Tint = require('./tint')
 const To = require('./to')
 const Wait = require('./wait')
 
-module.exports = class List extends Events
+class List extends Events
 {
     /**
      * Helper list for multiple animations
      * @param {object} [options]
      * @param {boolean} [options.noTicker] don't add the update function to PIXI.ticker
      * @param {PIXI.ticker} [options.ticker=PIXI.ticker.shared] use this PIXI.ticker for the list
-     *
-     * @event List#done(List) final animation completed in the list
-     * @event List#each(elapsed, List) each update after eases are updated
+     * @fire done
+     * @fire each
      */
     constructor(options)
     {
@@ -37,7 +36,7 @@ module.exports = class List extends Events
 
     /**
      * Add animation(s) to animation list
-     * @param {object|object[]...} any animation class
+     * @param {(object|object[])} any animation class
      * @return {object} first animation
      */
     add()
@@ -167,3 +166,5 @@ module.exports = class List extends Events
     /** helper to add to the list a new Ease.wait class; see Ease.to class below for parameters */
     wait() { return this.add(new Wait(...arguments)) }
 }
+
+module.exports = List

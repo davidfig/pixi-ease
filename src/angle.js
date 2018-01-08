@@ -1,7 +1,7 @@
 const wait = require('./wait')
 
 /** animate object's {x, y} using an angle */
-module.exports = class angle extends wait
+class angle extends wait
 {
     /**
      * @param {object} object to animate
@@ -64,3 +64,5 @@ module.exports = class angle extends wait
         this.angle += Math.PI
     }
 }
+
+module.exports = angle

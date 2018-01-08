@@ -2,7 +2,7 @@ const Angle = require('yy-angle')
 const wait = require('./wait')
 
 /** Rotates an object to face the target */
-module.exports = class face extends wait
+class face extends wait
 {
     /**
      * @param {object} object
@@ -67,3 +67,5 @@ module.exports = class face extends wait
         }
     }
 }
+
+module.exports = face
