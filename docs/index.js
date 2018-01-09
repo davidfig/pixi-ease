@@ -59898,7 +59898,7 @@ module.exports = new Random()
 const wait = require('./wait')
 
 /** animate object's {x, y} using an angle */
-module.exports = class angle extends wait
+class angle extends wait
 {
     /**
      * @param {object} object to animate
@@ -59961,12 +59961,14 @@ module.exports = class angle extends wait
         this.angle += Math.PI
     }
 }
+
+module.exports = angle
 },{"./wait":388}],379:[function(require,module,exports){
 const Angle = require('yy-angle')
 const wait = require('./wait')
 
 /** Rotates an object to face the target */
-module.exports = class face extends wait
+class face extends wait
 {
     /**
      * @param {object} object
@@ -60031,6 +60033,8 @@ module.exports = class face extends wait
         }
     }
 }
+
+module.exports = face
 },{"./wait":388,"yy-angle":373}],380:[function(require,module,exports){
 const list = require('./list')
 
@@ -60060,16 +60064,15 @@ const Tint = require('./tint')
 const To = require('./to')
 const Wait = require('./wait')
 
-module.exports = class List extends Events
+class List extends Events
 {
     /**
      * Helper list for multiple animations
      * @param {object} [options]
      * @param {boolean} [options.noTicker] don't add the update function to PIXI.ticker
      * @param {PIXI.ticker} [options.ticker=PIXI.ticker.shared] use this PIXI.ticker for the list
-     *
-     * @event List#done(List) final animation completed in the list
-     * @event List#each(elapsed, List) each update after eases are updated
+     * @fire done
+     * @fire each
      */
     constructor(options)
     {
@@ -60086,7 +60089,7 @@ module.exports = class List extends Events
 
     /**
      * Add animation(s) to animation list
-     * @param {object|object[]...} any animation class
+     * @param {(object|object[])} any animation class
      * @return {object} first animation
      */
     add()
@@ -60216,6 +60219,8 @@ module.exports = class List extends Events
     /** helper to add to the list a new Ease.wait class; see Ease.to class below for parameters */
     wait() { return this.add(new Wait(...arguments)) }
 }
+
+module.exports = List
 },{"./angle":378,"./face":379,"./load":382,"./movie":383,"./shake":384,"./target":385,"./tint":386,"./to":387,"./wait":388,"eventemitter3":5,"pixi.js":322}],382:[function(require,module,exports){
 const wait = require('./wait')
 const to = require('./to')
@@ -60230,7 +60235,7 @@ const movie = require('./movie')
  * restart an animation = requires a saved state
  * @param {object} object(s) to animate
  */
-module.exports = function load(object, load)
+function load(object, load)
 {
     if (!load)
     {
@@ -60257,13 +60262,15 @@ module.exports = function load(object, load)
             return new movie(object, object[1], null, options)
     }
 }
+
+module.exports = load
 },{"./angle":378,"./face":379,"./movie":383,"./shake":384,"./target":385,"./tint":386,"./to":387,"./wait":388}],383:[function(require,module,exports){
 const wait = require('./wait')
 
 /**
  * animate a movie of textures
  */
-module.exports = class movie extends wait
+class movie extends wait
 {
     /**
      * @param {object} object to animate
@@ -60360,13 +60367,15 @@ module.exports = class movie extends wait
         }
     }
 }
+
+module.exports = movie
 },{"./wait":388}],384:[function(require,module,exports){
 const wait = require('./wait')
 
 /**
  * shakes an object or list of objects
  */
-module.exports = class shake extends wait
+class shake extends wait
 {
     /**
      * @param {object|array} object or list of objects to shake
@@ -60465,11 +60474,13 @@ module.exports = class shake extends wait
         }
     }
 }
+
+module.exports = shake
 },{"./wait":388}],385:[function(require,module,exports){
 const wait = require('./wait')
 
 /** move an object to a target's location */
-module.exports = class target extends wait
+class target extends wait
 {
     /**
      * move to a target
@@ -60538,12 +60549,13 @@ module.exports = class target extends wait
         }
     }
 }
+
+module.exports = target
 },{"./wait":388}],386:[function(require,module,exports){
 const Color = require('yy-color')
 const wait = require('./wait')
 
-/** changes the tint of an object */
-module.exports = class tint extends wait
+class tint extends wait
 {
     /**
      * @param {PIXI.DisplayObject|PIXI.DisplayObject[]} object
@@ -60656,11 +60668,13 @@ module.exports = class tint extends wait
         }
     }
 }
+
+module.exports = tint
 },{"./wait":388,"yy-color":374}],387:[function(require,module,exports){
 const wait = require('./wait')
 
 /** animate any numeric parameter of an object or array of objects */
-module.exports = class to extends wait
+class to extends wait
 {
     /**
      * @param {object} object to animate
@@ -60851,11 +60865,13 @@ module.exports = class to extends wait
         }
     }
 }
+
+module.exports = to
 },{"./wait":388}],388:[function(require,module,exports){
 const Easing = require('penner')
 const EventEmitter = require('eventemitter3')
 
-module.exports = class wait extends EventEmitter
+class wait extends EventEmitter
 {
     /**
      * @param {object|object[]} object or list of objects to animate
@@ -60950,7 +60966,8 @@ module.exports = class wait extends EventEmitter
     }
 
     /**
-     * @type {boolean} pause this entry
+     * pause this entry
+     * @type {boolean}
      */
     set pause(value)
     {
@@ -61064,6 +61081,8 @@ module.exports = class wait extends EventEmitter
     calculate() { }
     done() { }
 }
+
+module.exports = wait
 },{"eventemitter3":5,"penner":189}],389:[function(require,module,exports){
 
 },{}],390:[function(require,module,exports){

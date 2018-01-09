@@ -30,7 +30,7 @@
         "private": false,
         "lenient": true,
         "destination": "./docs/jsdoc",
-        "template": "./node_modules/@pixi/jsdoc-template"
+        "template": "../yy-jsdoc-template"
     },
     "templates": {
         "default": {
