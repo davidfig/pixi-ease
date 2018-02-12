@@ -4,6 +4,7 @@ const wait = require('./wait')
 class to extends wait
 {
     /**
+     * @private
      * @param {object} object to animate
      * @param {object} goto - parameters to animate, e.g.: {alpha: 5, scale: {3, 5}, scale: 5, rotation: Math.PI}
      * @param {number} duration - time to run

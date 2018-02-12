@@ -11,13 +11,14 @@ const Tint = require('./tint')
 const To = require('./to')
 const Wait = require('./wait')
 
-class List extends Events
+class Ease extends Events
 {
     /**
-     * Helper list for multiple animations
+     * Main class for creating eases
      * @param {object} [options]
      * @param {boolean} [options.noTicker] don't add the update function to PIXI.ticker
      * @param {PIXI.ticker} [options.ticker=PIXI.ticker.shared] use this PIXI.ticker for the list
+     * @extends eventemitter
      * @fire done
      * @fire each
      */
@@ -32,6 +33,8 @@ class List extends Events
         }
         this.list = []
         this.empty = true
+        this.removeWaiting = []
+        this.removeAllWaiting = false
     }
 
     /**
@@ -68,14 +71,20 @@ class List extends Events
     /**
      * remove animation(s)
      * @param {object|array} animate - the animation (or array of animations) to remove; can be null
-     * @inherited from yy-loop
      */
     remove(animate)
     {
-        const index = this.list.indexOf(animate)
-        if (index !== -1)
+        if (this.inUpdate)
         {
-            this.list.splice(index, 1)
+            this.removeWaiting.push(animate)
+        }
+        else
+        {
+            const index = this.list.indexOf(animate)
+            if (index !== -1)
+            {
+                this.list.splice(index, 1)
+            }
         }
     }
 
@@ -85,7 +94,14 @@ class List extends Events
      */
     removeAll()
     {
-        this.list = []
+        if (this.inUpdate)
+        {
+            this.removeAllWaiting = true
+        }
+        else
+        {
+            this.list = []
+        }
     }
 
     /**
@@ -96,9 +112,10 @@ class List extends Events
      */
     update(elapsed)
     {
+        this.inUpdate = true
         for (let i = 0, _i = this.list.length; i < _i; i++)
         {
-            if (this.list[i].update(elapsed))
+            if (this.list[i] && this.list[i].update(elapsed))
             {
                 this.list.splice(i, 1)
                 i--
@@ -110,6 +127,16 @@ class List extends Events
         {
             this.emit('done', this)
             this.empty = true
+        }
+        this.inUpdate = false
+        if (this.removeAllWaiting)
+        {
+            this.removeAll()
+            this.removeAllWaiting = false
+        }
+        while (this.removeWaiting.length)
+        {
+            this.remove(this.removeWaiting.pop())
         }
     }
 
@@ -139,10 +166,40 @@ class List extends Events
         return count
     }
 
-    /** helper to add to the list a new Ease.to class; see Ease.to class below for parameters */
+    /**
+     * default options for all eases
+     * @typedef {object} EaseOptions
+     * @param {object} [EaseOptions.options]
+     * @param {number} [EaseOptions.options.wait=0] n milliseconds before starting animation (can also be used to pause animation for a length of time)
+     * @param {boolean} [EaseOptions.options.pause] start the animation paused
+     * @param {boolean|number} [EaseOptions.options.repeat] true: repeat animation forever n: repeat animation n times
+     * @param {boolean|number} [EaseOptions.options.reverse] true: reverse animation (if combined with repeat, then pulse) n: reverse animation n times
+     * @param {Function} [EaseOptions.options.load] loads an animation using an .save() object note the * parameters below cannot be loaded and must be re-set
+     * @param {string|Function} [EaseOptions.options.ease] name or function from easing.js (see http://easings.net for examples)
+     */
+
+    /**
+     * ease parameters of object
+     * @param {PIXI.DisplayObject} object to animate
+     * @param {object} goto - parameters to animate, e.g.: {alpha: 5, scale: {3, 5}, scale: 5, rotation: Math.PI}
+     * @param {number} duration - time to run
+     * @fires done
+     * @fires wait
+     * @fires first
+     * @fires each
+     * @fires loop
+     * @fires reverse
+     */
     to() { return this.add(new To(...arguments)) }
 
-    /** helper to add to the list a new Ease.angle class; see Ease.to class below for parameters */
+    /**
+     * animate object's {x, y} using an angle
+     * @param {object} object to animate
+     * @param {number} angle in radians
+     * @param {number} speed in pixels/millisecond
+     * @param {number} [duration=0] in milliseconds; if 0, then continues forever
+     * @param {object} [options] @see {@link Wait}
+     */
     angle() { return this.add(new Angle(...arguments)) }
 
     /** helper to add to the list a new Ease.face class; see Ease.to class below for parameters */
@@ -167,4 +224,4 @@ class List extends Events
     wait() { return this.add(new Wait(...arguments)) }
 }
 
-module.exports = List
+module.exports = Ease

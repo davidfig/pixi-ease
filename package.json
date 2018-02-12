@@ -1,13 +1,13 @@
 {
     "name": "pixi-ease",
-    "version": "0.16.0",
+    "version": "0.18.0",
     "description": "pixi.js animation library using easing functions",
     "main": "dist/index.js",
     "scripts": {
-        "test": "budo docs/code.js:index.js --live --dir docs",
-        "build-demo": "browserify docs/code.js -o docs/index.js",
+        "test": "./node_modules/.bin/budo docs/code.js:index.js --live --dir docs",
+        "build-demo": "./node_modules/.bin/browserify docs/code.js -o docs/index.js",
         "transpile": "./node_modules/.bin/babel src/ --out-dir dist --source-maps inline",
-        "docs": "jsdoc -c docs/jsdoc.conf.json",
+        "docs": "./node_modules/.bin/jsdoc -c .jsdoc.json",
         "prepublishOnly": "npm run transpile && npm run build-demo && npm run docs"
     },
     "repository": {
@@ -21,8 +21,6 @@
     },
     "homepage": "https://github.com/davidfig/pixi-ease#readme",
     "dependencies": {
-        "babel-cli": "^6.26.0",
-        "babel-preset-env": "^1.6.1",
         "eventemitter3": "^3.0.0",
         "penner": "^0.1.3",
         "yy-angle": "^1.2.0",
@@ -32,11 +30,18 @@
         "pixi.js": ">=4.6.0"
     },
     "devDependencies": {
+        "babel-cli": "^6.26.0",
+        "babel-preset-env": "^1.6.1",
+        "babelify": "^8.0.0",
+        "browserify": "^15.2.0",
+        "budo": "^10.0.4",
         "fork-me-github": "^1.0.3",
         "highlight.js": "^9.12.0",
-        "pixi.js": "^4.6.2",
+        "jsdoc": "^3.5.5",
+        "pixi.js": "^4.7.0",
         "yy-counter": "^2.1.0",
         "yy-fps": "^0.6.0",
+        "yy-jsdoc-template": "^1.3.0",
         "yy-random": "^1.6.0"
     }
 }

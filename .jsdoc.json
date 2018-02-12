@@ -43,6 +43,10 @@
             "title": "pixi-ease API Documentation",
             "description": "Documentation for pixi-ease library",
             "keyword": "docs, documentation, html5, javascript, jsdoc, dom, ease, animate"
+        },
+        "matomo": {
+            "url": "https://analytics.yopeyopey.com/piwik/",
+            "id": 16
         }
     }
 }

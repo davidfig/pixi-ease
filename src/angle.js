@@ -1,9 +1,10 @@
 const wait = require('./wait')
 
-/** animate object's {x, y} using an angle */
 class angle extends wait
 {
     /**
+     * @private
+     * animate object's {x, y} using an angle
      * @param {object} object to animate
      * @param {number} angle in radians
      * @param {number} speed in pixels/millisecond
