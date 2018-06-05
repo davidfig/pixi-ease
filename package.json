@@ -1,6 +1,6 @@
 {
     "name": "pixi-ease",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "pixi.js animation library using easing functions",
     "browser": "dist/index.js",
     "scripts": {
@@ -8,7 +8,7 @@
         "build-demo": "browserify -o docs/index.js ./node_modules/pixi.js/dist/pixi.min.js docs/code.js ",
         "transpile": "babel src/ --out-dir dist --source-maps inline",
         "docs": "jsdoc -c .jsdoc.json",
-        "bundle": "browserify src/index.js -o dist/pixi-ease.js && babel -mc -o dist/pixi-ease.min.js dist/pixi-ease.js",
+        "bundle": "browserify dist/index.js -o bundle/pixi-ease.js && uglifyjs -mc -o bundle/pixi-ease.min.js bundle/pixi-ease.js",
         "prepublishOnly": "npm run transpile && npm run build-demo && npm run bundle && npm run docs"
     },
     "repository": {
