@@ -1,7 +1,5 @@
-const list = require('./list')
-
-module.exports = {
-    list,
+const Ease = {
+    list: require('./list'),
     wait: require('./wait'),
     to: require('./to'),
     shake: require('./shake'),
@@ -12,3 +10,7 @@ module.exports = {
     movie: require('./movie'),
     load: require('./load')
 }
+
+PIXI.extras.Ease = Ease
+
+module.exports = Ease
