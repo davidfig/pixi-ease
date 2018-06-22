@@ -61198,7 +61198,7 @@ class Ease extends Events
         if (!options.noTicker)
         {
             const ticker = options.ticker || PIXI.ticker.shared
-            ticker.add(() => this.update(ticker.deltaTime))
+            ticker.add(() => this.update(ticker.deltaTime * 16.66))
         }
         this.list = []
         this.empty = true

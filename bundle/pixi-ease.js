@@ -238,7 +238,7 @@ var Ease = function (_Events) {
         if (!options.noTicker) {
             var ticker = options.ticker || PIXI.ticker.shared;
             ticker.add(function () {
-                return _this.update(ticker.deltaTime);
+                return _this.update(ticker.deltaTime * 16.66);
             });
         }
         _this.list = [];
