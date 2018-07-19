@@ -330,9 +330,39 @@ var Ease = function (_Events) {
             if (this.inUpdate) {
                 this.removeWaiting.push(animate);
             } else {
-                var index = this.list.indexOf(animate);
-                if (index !== -1) {
-                    this.list.splice(index, 1);
+                if (Array.isArray(animate)) {
+                    var _iteratorNormalCompletion3 = true;
+                    var _didIteratorError3 = false;
+                    var _iteratorError3 = undefined;
+
+                    try {
+                        for (var _iterator3 = animate[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                            var each = _step3.value;
+
+                            var index = this.list.indexOf(each);
+                            if (index !== -1) {
+                                this.list.splice(index, 1);
+                            }
+                        }
+                    } catch (err) {
+                        _didIteratorError3 = true;
+                        _iteratorError3 = err;
+                    } finally {
+                        try {
+                            if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                                _iterator3.return();
+                            }
+                        } finally {
+                            if (_didIteratorError3) {
+                                throw _iteratorError3;
+                            }
+                        }
+                    }
+                } else {
+                    var _index = this.list.indexOf(animate);
+                    if (_index !== -1) {
+                        this.list.splice(_index, 1);
+                    }
                 }
             }
         }
@@ -507,29 +537,29 @@ var Ease = function (_Events) {
         key: 'countRunning',
         get: function get() {
             var count = 0;
-            var _iteratorNormalCompletion3 = true;
-            var _didIteratorError3 = false;
-            var _iteratorError3 = undefined;
+            var _iteratorNormalCompletion4 = true;
+            var _didIteratorError4 = false;
+            var _iteratorError4 = undefined;
 
             try {
-                for (var _iterator3 = this.list[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                    var entry = _step3.value;
+                for (var _iterator4 = this.list[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                    var entry = _step4.value;
 
                     if (!entry.pause) {
                         count++;
                     }
                 }
             } catch (err) {
-                _didIteratorError3 = true;
-                _iteratorError3 = err;
+                _didIteratorError4 = true;
+                _iteratorError4 = err;
             } finally {
                 try {
-                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                        _iterator3.return();
+                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                        _iterator4.return();
                     }
                 } finally {
-                    if (_didIteratorError3) {
-                        throw _iteratorError3;
+                    if (_didIteratorError4) {
+                        throw _iteratorError4;
                     }
                 }
             }
@@ -3666,7 +3696,7 @@ var Random = function () {
      * @param {number} seed
      * @param {object} [options]
      * @param {string} [PRNG="alea"] - name of algorithm, see https://github.com/davidbau/seedrandom
-     * @param {boolean} [save=true]
+     * @param {(boolean|string)} [state] - can include the state returned from save()
      */
 
 
@@ -3680,7 +3710,7 @@ var Random = function () {
 
         /**
          * saves the state of the random generator
-         * can only be used after Random.seed() is called
+         * can only be used after Random.seed() is called with options.state = true
          * @returns {number} state
          */
 

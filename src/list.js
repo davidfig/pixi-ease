@@ -79,10 +79,24 @@ class Ease extends Events
         }
         else
         {
-            const index = this.list.indexOf(animate)
-            if (index !== -1)
+            if (Array.isArray(animate))
             {
-                this.list.splice(index, 1)
+                for (let each of animate)
+                {
+                    const index = this.list.indexOf(each)
+                    if (index !== -1)
+                    {
+                        this.list.splice(index, 1)
+                    }
+                }
+            }
+            else
+            {
+                const index = this.list.indexOf(animate)
+                if (index !== -1)
+                {
+                    this.list.splice(index, 1)
+                }
             }
         }
     }
