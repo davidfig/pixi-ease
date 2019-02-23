@@ -1,6 +1,6 @@
 {
     "name": "pixi-ease",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "pixi.js animation library using easing functions",
     "main": "dist/index.js",
     "scripts": {
