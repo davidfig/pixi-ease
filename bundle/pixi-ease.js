@@ -231,7 +231,7 @@ var Ease = function (_Events) {
      * Main class for creating eases
      * @param {object} [options]
      * @param {boolean} [options.noTicker] don't add the update function to PIXI.ticker
-     * @param {PIXI.ticker} [options.ticker=PIXI.ticker.shared] use this PIXI.ticker for the list
+     * @param {PIXI.ticker} [options.ticker=PIXI.ticker.shared|PIXI.Ticker.shared] use this PIXI.ticker for the list
      * @extends eventemitter
      * @fire done
      * @fire each
@@ -244,7 +244,7 @@ var Ease = function (_Events) {
         var _this = _possibleConstructorReturn(this, (Ease.__proto__ || Object.getPrototypeOf(Ease)).call(this));
 
         if (!options.noTicker) {
-            var ticker = options.ticker || PIXI.ticker.shared;
+            var ticker = options.ticker || (PIXI.Ticker ? PIXI.Ticker.shared : PIXI.ticker.shared);
             ticker.add(function () {
                 return _this.update(ticker.deltaTime * 16.66);
             });

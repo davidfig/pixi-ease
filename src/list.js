@@ -16,7 +16,7 @@ class Ease extends Events
      * Main class for creating eases
      * @param {object} [options]
      * @param {boolean} [options.noTicker] don't add the update function to PIXI.ticker
-     * @param {PIXI.ticker} [options.ticker=PIXI.ticker.shared] use this PIXI.ticker for the list
+     * @param {PIXI.ticker} [options.ticker=PIXI.ticker.shared|PIXI.Ticker.shared] use this PIXI.ticker for the list
      * @extends eventemitter
      * @fire done
      * @fire each
@@ -27,7 +27,7 @@ class Ease extends Events
         super()
         if (!options.noTicker)
         {
-            const ticker = options.ticker || PIXI.ticker.shared
+            const ticker = options.ticker || (PIXI.Ticker ? PIXI.Ticker.shared : PIXI.ticker.shared)
             ticker.add(() => this.update(ticker.deltaTime * 16.66))
         }
         this.list = []
