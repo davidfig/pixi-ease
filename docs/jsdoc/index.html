@@ -483,7 +483,8 @@ to.on('done', () => console.log('Square has finished animating'))</code></pre><h
     target() { return this.add(new Target(...arguments)) }
 
     /** helper to add to the list a new Ease.angle tint; see Ease.to class below for parameters */
-    tint() { return this.add(new Tint(...arguments)) }</code></pre><h3>src/to.js</h3><pre class="prettyprint source lang-js"><code>/** animate any numeric parameter of an object or array of objects */
+    tint() { return this.add(new Tint(...arguments)) }
+</code></pre><h3>src/to.js</h3><pre class="prettyprint source lang-js"><code>/** animate any numeric parameter of an object or array of objects */
 module.exports = class to extends wait
 {
     /**
@@ -504,7 +505,8 @@ module.exports = class to extends wait
      * @emits to:loop when animation is repeated
      * @emits to:reverse when animation is reversed
      */
-    constructor(object, goto, duration, options)</code></pre><h3>src/angle.js</h3><pre class="prettyprint source lang-js"><code>/** animate object's {x, y} using an angle */
+    constructor(object, goto, duration, options)
+</code></pre><h3>src/angle.js</h3><pre class="prettyprint source lang-js"><code>/** animate object's {x, y} using an angle */
 module.exports = class angle extends wait
 {
     /**
@@ -514,7 +516,8 @@ module.exports = class angle extends wait
      * @param {number} [duration=0] in milliseconds; if 0, then continues forever
      * @param {object} [options] @see Wait
      */
-    constructor(object, angle, speed, duration, options)</code></pre><h3>src/face.js</h3><pre class="prettyprint source lang-js"><code>/** Rotates an object to face the target */
+    constructor(object, angle, speed, duration, options)
+</code></pre><h3>src/face.js</h3><pre class="prettyprint source lang-js"><code>/** Rotates an object to face the target */
 module.exports = class face extends wait
 {
     /**
@@ -524,11 +527,13 @@ module.exports = class face extends wait
      * @param {object} [options] @see Wait
      * @param {boolean} [options.keepAlive] don't stop animation when complete
      */
-    constructor(object, target, speed, options)</code></pre><h3>src/load.js</h3><pre class="prettyprint source lang-js"><code>/**
+    constructor(object, target, speed, options)
+</code></pre><h3>src/load.js</h3><pre class="prettyprint source lang-js"><code>/**
  * restart an animation = requires a saved state
  * @param {object} object(s) to animate
  */
-module.exports = function load(object, load)</code></pre><h3>src/movie.js</h3><pre class="prettyprint source lang-js"><code>/**
+module.exports = function load(object, load)
+</code></pre><h3>src/movie.js</h3><pre class="prettyprint source lang-js"><code>/**
  * animate a movie of textures
  */
 module.exports = class movie extends wait
@@ -552,7 +557,8 @@ module.exports = class movie extends wait
      * @emits {loop} when animation is repeated
      * @emits {reverse} when animation is reversed
      */
-    constructor(object, textures, duration, options)</code></pre><h3>src/shake.js</h3><pre class="prettyprint source lang-js"><code>/**
+    constructor(object, textures, duration, options)
+</code></pre><h3>src/shake.js</h3><pre class="prettyprint source lang-js"><code>/**
  * shakes an object or list of objects
  */
 module.exports = class shake extends wait
@@ -563,7 +569,8 @@ module.exports = class shake extends wait
      * @param {number} duration (in milliseconds) to shake
      * @param {object} options (see Animate.wait)
      */
-    constructor(object, amount, duration, options)</code></pre><h3>src/target.js</h3><pre class="prettyprint source lang-js"><code>/** move an object to a target's location */
+    constructor(object, amount, duration, options)
+</code></pre><h3>src/target.js</h3><pre class="prettyprint source lang-js"><code>/** move an object to a target's location */
 module.exports = class target extends wait
 {
     /**
@@ -574,7 +581,8 @@ module.exports = class target extends wait
      * @param {object} [options] @see Wait
      * @param {boolean} [options.keepAlive] don't cancel the animation when target is reached
      */
-    constructor(object, target, speed, options)</code></pre><h3>src/tint.js</h3><pre class="prettyprint source lang-js"><code>/** changes the tint of an object */
+    constructor(object, target, speed, options)
+</code></pre><h3>src/tint.js</h3><pre class="prettyprint source lang-js"><code>/** changes the tint of an object */
 module.exports = class tint extends wait
 {
     /**
@@ -583,7 +591,8 @@ module.exports = class tint extends wait
      * @param {number} [duration] in milliseconds
      * @param {object} [options] @see Wait
      */
-    constructor(object, tint, duration, options)</code></pre><h3>src/wait.js</h3><pre class="prettyprint source lang-js"><code>    /**
+    constructor(object, tint, duration, options)
+</code></pre><h3>src/wait.js</h3><pre class="prettyprint source lang-js"><code>    /**
      * @param {object|object[]} object or list of objects to animate
      * @param {object} [options]
      * @param {number} [options.wait=0] n milliseconds before starting animation (can also be used to pause animation for a length of time)
@@ -607,7 +616,8 @@ module.exports = class tint extends wait
     /**
      * @type {boolean} pause this entry
      */
-    set pause(value)</code></pre><h2>License</h2><p>MIT License<br>(c) 2017 <a target="_blank" href="https://yopeyopey.com/">YOPEY YOPEY LLC</a> by <a target="_blank" href="https://twitter.com/yopey_yopey/">David Figatner</a></p></article>
+    set pause(value)
+</code></pre><h2>License</h2><p>MIT License<br>(c) 2017 <a target="_blank" href="https://yopeyopey.com/">YOPEY YOPEY LLC</a> by <a target="_blank" href="https://twitter.com/yopey_yopey/">David Figatner</a></p></article>
     </section>
 
 
@@ -619,7 +629,7 @@ module.exports = class tint extends wait
 
         <footer class="content-size">
             <div class="footer">
-                Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Jul 19 2018 15:57:42 GMT-0400 (DST)
+                Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Feb 23 2019 10:27:42 GMT+0800 (GMT+08:00)
             </div>
         </footer>
     </div>

@@ -11,6 +11,16 @@ const Ease = {
     load: require('./load')
 }
 
-PIXI.extras.Ease = Ease
+if (PIXI)
+{
+    if (PIXI.extras)
+    {
+        PIXI.extras.Ease = Ease
+    }
+    else
+    {
+        PIXI.extras = { Ease }
+    }
+}
 
 module.exports = Ease

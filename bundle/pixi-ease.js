@@ -1,4 +1,6 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+
+},{}],2:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -86,7 +88,7 @@ var angle = function (_wait) {
 
 module.exports = angle;
 
-},{"./wait":11}],2:[function(require,module,exports){
+},{"./wait":12}],3:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -173,7 +175,7 @@ var face = function (_wait) {
 
 module.exports = face;
 
-},{"./wait":11,"yy-angle":22}],3:[function(require,module,exports){
+},{"./wait":12,"yy-angle":23}],4:[function(require,module,exports){
 'use strict';
 
 var Ease = {
@@ -189,11 +191,17 @@ var Ease = {
     load: require('./load')
 };
 
-PIXI.extras.Ease = Ease;
+if (PIXI) {
+    if (PIXI.extras) {
+        PIXI.extras.Ease = Ease;
+    } else {
+        PIXI.extras = { Ease: Ease };
+    }
+}
 
 module.exports = Ease;
 
-},{"./angle":1,"./face":2,"./list":4,"./load":5,"./movie":6,"./shake":7,"./target":8,"./tint":9,"./to":10,"./wait":11}],4:[function(require,module,exports){
+},{"./angle":2,"./face":3,"./list":5,"./load":6,"./movie":7,"./shake":8,"./target":9,"./tint":10,"./to":11,"./wait":12}],5:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -573,7 +581,7 @@ var Ease = function (_Events) {
 
 module.exports = Ease;
 
-},{"./angle":1,"./face":2,"./load":5,"./movie":6,"./shake":7,"./target":8,"./tint":9,"./to":10,"./wait":11,"eventemitter3":12}],5:[function(require,module,exports){
+},{"./angle":2,"./face":3,"./load":6,"./movie":7,"./shake":8,"./target":9,"./tint":10,"./to":11,"./wait":12,"eventemitter3":13}],6:[function(require,module,exports){
 'use strict';
 
 var wait = require('./wait');
@@ -616,7 +624,7 @@ function load(object, load) {
 
 module.exports = load;
 
-},{"./angle":1,"./face":2,"./movie":6,"./shake":7,"./target":8,"./tint":9,"./to":10,"./wait":11}],6:[function(require,module,exports){
+},{"./angle":2,"./face":3,"./movie":7,"./shake":8,"./target":9,"./tint":10,"./to":11,"./wait":12}],7:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -735,7 +743,7 @@ var movie = function (_wait) {
 
 module.exports = movie;
 
-},{"./wait":11}],7:[function(require,module,exports){
+},{"./wait":12}],8:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -851,7 +859,7 @@ var shake = function (_wait) {
 
 module.exports = shake;
 
-},{"./wait":11}],8:[function(require,module,exports){
+},{"./wait":12}],9:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -940,7 +948,7 @@ var target = function (_wait) {
 
 module.exports = target;
 
-},{"./wait":11}],9:[function(require,module,exports){
+},{"./wait":12}],10:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1102,7 +1110,7 @@ var tint = function (_wait) {
 
 module.exports = tint;
 
-},{"./wait":11,"yy-color":23}],10:[function(require,module,exports){
+},{"./wait":12,"yy-color":24}],11:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1301,7 +1309,7 @@ var to = function (_wait) {
 
 module.exports = to;
 
-},{"./wait":11}],11:[function(require,module,exports){
+},{"./wait":12}],12:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1510,7 +1518,7 @@ var wait = function (_EventEmitter) {
 
 module.exports = wait;
 
-},{"eventemitter3":12,"penner":13}],12:[function(require,module,exports){
+},{"eventemitter3":13,"penner":14}],13:[function(require,module,exports){
 'use strict';
 
 var has = Object.prototype.hasOwnProperty
@@ -1848,7 +1856,7 @@ if ('undefined' !== typeof module) {
   module.exports = EventEmitter;
 }
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 
 /*
 	Copyright © 2001 Robert Penner
@@ -2116,7 +2124,7 @@ if ('undefined' !== typeof module) {
 
 }).call(this);
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 // A library of seedable RNGs implemented in Javascript.
 //
 // Usage:
@@ -2178,7 +2186,7 @@ sr.tychei = tychei;
 
 module.exports = sr;
 
-},{"./lib/alea":15,"./lib/tychei":16,"./lib/xor128":17,"./lib/xor4096":18,"./lib/xorshift7":19,"./lib/xorwow":20,"./seedrandom":21}],15:[function(require,module,exports){
+},{"./lib/alea":16,"./lib/tychei":17,"./lib/xor128":18,"./lib/xor4096":19,"./lib/xorshift7":20,"./lib/xorwow":21,"./seedrandom":22}],16:[function(require,module,exports){
 // A port of an algorithm by Johannes Baagøe <baagoe@baagoe.com>, 2010
 // http://baagoe.com/en/RandomMusings/javascript/
 // https://github.com/nquinlan/better-random-numbers-for-javascript-mirror
@@ -2294,7 +2302,7 @@ if (module && module.exports) {
 
 
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 // A Javascript implementaion of the "Tyche-i" prng algorithm by
 // Samuel Neves and Filipe Araujo.
 // See https://eden.dei.uc.pt/~sneves/pubs/2011-snfa2.pdf
@@ -2399,7 +2407,7 @@ if (module && module.exports) {
 
 
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 // A Javascript implementaion of the "xor128" prng algorithm by
 // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
 
@@ -2482,7 +2490,7 @@ if (module && module.exports) {
 
 
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 // A Javascript implementaion of Richard Brent's Xorgens xor4096 algorithm.
 //
 // This fast non-cryptographic random number generator is designed for
@@ -2630,7 +2638,7 @@ if (module && module.exports) {
   (typeof define) == 'function' && define   // present with an AMD loader
 );
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 // A Javascript implementaion of the "xorshift7" algorithm by
 // François Panneton and Pierre L'ecuyer:
 // "On the Xorgshift Random Number Generators"
@@ -2729,7 +2737,7 @@ if (module && module.exports) {
 );
 
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 // A Javascript implementaion of the "xorwow" prng algorithm by
 // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
 
@@ -2817,7 +2825,7 @@ if (module && module.exports) {
 
 
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 /*
 Copyright 2014 David Bau.
 
@@ -3066,7 +3074,7 @@ if ((typeof module) == 'object' && module.exports) {
   Math    // math: package containing random, pow, and seedrandom
 );
 
-},{"crypto":25}],22:[function(require,module,exports){
+},{"crypto":1}],23:[function(require,module,exports){
 // angle.js <https://github.com/davidfig/anglejs>
 // Released under MIT license <https://github.com/davidfig/angle/blob/master/LICENSE>
 // Author: David Figatner
@@ -3349,7 +3357,7 @@ module.exports = {
     equals: equals,
     explain: explain
 }
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 // yy-color
 // by David Figatner
 // MIT License
@@ -3669,7 +3677,7 @@ module.exports = {
     randomHSL: randomHSL,
     randomGoldenRatioHSL: randomGoldenRatioHSL
 }
-},{"yy-random":24}],24:[function(require,module,exports){
+},{"yy-random":25}],25:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -4115,6 +4123,4 @@ var Random = function () {
 
 module.exports = new Random();
 
-},{"seedrandom":14}],25:[function(require,module,exports){
-
-},{}]},{},[3]);
+},{"seedrandom":15}]},{},[4]);
