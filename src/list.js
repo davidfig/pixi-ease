@@ -1,3 +1,4 @@
+const PIXI = require('pixi.js')
 const Events = require('eventemitter3')
 
 const Angle = require('./angle')

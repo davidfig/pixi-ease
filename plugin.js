@@ -1,6 +1,6 @@
-if (!PIXI)
+if (typeof PIXI === 'undefined')
 {
-    console.error('pixi.js must be included before pixi.viewport')
+    console.error('pixi.js must be included before pixi-ease')
 }
 
 const Ease = require('./src/index')

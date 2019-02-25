@@ -101,7 +101,8 @@ function init()
     size = Math.min(window.innerWidth, window.innerHeight) / 11
     blockSize = size * 0.9
     counter = new Counter({ side: 'bottom-left' })
-    PIXI.ticker.shared.add(() => fps.frame())
+    const ticker = PIXI.ticker ? PIXI.ticker : PIXI.Ticker
+    ticker.shared.add(() => fps.frame())
 }
 
 function load()
@@ -109,7 +110,7 @@ function load()
     const textures = []
     for (let i = 1; i <= 5; i++)
     {
-        textures.push(PIXI.Texture.fromImage('images/' + i + '.png'))
+        textures.push(PIXI.Texture.from('images/' + i + '.png'))
     }
     return textures
 }
