@@ -10,7 +10,7 @@
         "url": ""
     },
     "meta": {
-        "title": "PixiEase",
+        "title": "pixi-ease",
         "description": "",
         "keyword": ""
     },
@@ -39,11 +39,11 @@
         },
         "applicationName": "pixi-ease",
         "footer"        : "by YOPEY YOPEY LLC (yopeyopey.com)",
-        "copyright"     : "Copyright © 2018 YOPEY YOPEY LLC.",
+        "copyright"     : "Copyright © 2019 YOPEY YOPEY LLC.",
         "meta": {
             "title": "pixi-ease API Documentation",
-            "description": "Documentation for dom-ease library",
-            "keyword": "docs, documentation, html5, javascript, jsdoc, dom, ease, animate"
+            "description": "Documentation for pixi-ease library",
+            "keyword": "docs, documentation, javascript, ease, animate, pixi.js"
         }
     }
 }

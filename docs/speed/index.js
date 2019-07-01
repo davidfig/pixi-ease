@@ -598,7 +598,6 @@
             {
                 window.Int32Array = Array;
             }
-            //# sourceMappingURL=polyfill.es.js.map
 
             var isMobile_min = createCommonjsModule(function (module) {
             !function(e){var n=/iPhone/i,t=/iPod/i,r=/iPad/i,a=/\bAndroid(?:.+)Mobile\b/i,p=/Android/i,b=/\bAndroid(?:.+)SD4930UR\b/i,l=/\bAndroid(?:.+)(?:KF[A-Z]{2,4})\b/i,f=/Windows Phone/i,s=/\bWindows(?:.+)ARM\b/i,u=/BlackBerry/i,c=/BB10/i,h=/Opera Mini/i,v=/\b(CriOS|Chrome)(?:.+)Mobile/i,w=/Mobile(?:.+)Firefox\b/i;function m(e,i){return e.test(i)}function i(e){var i=e||("undefined"!=typeof navigator?navigator.userAgent:""),o=i.split("[FBAN");void 0!==o[1]&&(i=o[0]),void 0!==(o=i.split("Twitter"))[1]&&(i=o[0]);var d={apple:{phone:m(n,i)&&!m(f,i),ipod:m(t,i),tablet:!m(n,i)&&m(r,i)&&!m(f,i),device:(m(n,i)||m(t,i)||m(r,i))&&!m(f,i)},amazon:{phone:m(b,i),tablet:!m(b,i)&&m(l,i),device:m(b,i)||m(l,i)},android:{phone:!m(f,i)&&m(b,i)||!m(f,i)&&m(a,i),tablet:!m(f,i)&&!m(b,i)&&!m(a,i)&&(m(l,i)||m(p,i)),device:!m(f,i)&&(m(b,i)||m(l,i)||m(a,i)||m(p,i))||m(/\bokhttp\b/i,i)},windows:{phone:m(f,i),tablet:m(s,i),device:m(f,i)||m(s,i)},other:{blackberry:m(u,i),blackberry10:m(c,i),opera:m(h,i),firefox:m(w,i),chrome:m(v,i),device:m(u,i)||m(c,i)||m(h,i)||m(w,i)||m(v,i)}};return d.any=d.apple.device||d.android.device||d.windows.device||d.other.device,d.phone=d.apple.phone||d.android.phone||d.windows.phone,d.tablet=d.apple.tablet||d.android.tablet||d.windows.tablet,d}module.exports&&"undefined"==typeof window?module.exports=i:module.exports&&"undefined"!=typeof window?(module.exports=i(),module.exports.isMobile=i):e.isMobile=i();}(commonjsGlobal);
@@ -904,7 +903,6 @@
                  */
                 ROUND_PIXELS: false,
             };
-            //# sourceMappingURL=settings.es.js.map
 
             var eventemitter3 = createCommonjsModule(function (module) {
 
@@ -5359,7 +5357,6 @@
                 MEDIUM: 'mediump',
                 HIGH: 'highp',
             };
-            //# sourceMappingURL=constants.es.js.map
 
             /*!
              * @pixi/utils - v5.0.4
@@ -6292,7 +6289,6 @@
 
                 warnings[message] = true;
             }
-            //# sourceMappingURL=utils.es.js.map
 
             var utils_es = /*#__PURE__*/Object.freeze({
                         BaseTextureCache: BaseTextureCache,
@@ -8143,7 +8139,6 @@
 
                 return false;
             };
-            //# sourceMappingURL=math.es.js.map
 
             /*!
              * @pixi/display - v5.0.4
@@ -9932,7 +9927,6 @@
 
             // performance increase to avoid using call.. (10x faster)
             Container.prototype.containerUpdateTransform = Container.prototype.updateTransform;
-            //# sourceMappingURL=display.es.js.map
 
             /*!
              * @pixi/accessibility - v5.0.4
@@ -10563,7 +10557,6 @@
                 this.children = null;
                 this.renderer = null;
             };
-            //# sourceMappingURL=accessibility.es.js.map
 
             var accessibility_es = /*#__PURE__*/Object.freeze({
                         AccessibilityManager: AccessibilityManager,
@@ -10761,7 +10754,6 @@
              * @see PIXI.Runner#emit
              */
             Runner.prototype.run = Runner.prototype.emit;
-            //# sourceMappingURL=runner.es.js.map
 
             /*!
              * @pixi/ticker - v5.0.4
@@ -11701,7 +11693,6 @@
                     oldTicker.destroy();
                 }
             };
-            //# sourceMappingURL=ticker.es.js.map
 
             /*!
              * @pixi/core - v5.0.4
@@ -23334,7 +23325,6 @@
 
                 return BatchRenderer;
             }(ObjectRenderer));
-            //# sourceMappingURL=core.es.js.map
 
             /*!
              * @pixi/extract - v5.0.4
@@ -23576,7 +23566,6 @@
                 this.renderer.extract = null;
                 this.renderer = null;
             };
-            //# sourceMappingURL=extract.es.js.map
 
             var extract_es = /*#__PURE__*/Object.freeze({
                         Extract: Extract
@@ -25939,7 +25928,6 @@
 
                 return InteractionManager;
             }(eventemitter3));
-            //# sourceMappingURL=interaction.es.js.map
 
             var interaction_es = /*#__PURE__*/Object.freeze({
                         InteractionData: InteractionData,
@@ -29343,7 +29331,6 @@
              * @member {PIXI.Point}
              */
             Graphics._TEMP_POINT = new Point();
-            //# sourceMappingURL=graphics.es.js.map
 
             /*!
              * @pixi/sprite - v5.0.4
@@ -29996,7 +29983,6 @@
 
                 return Sprite;
             }(Container));
-            //# sourceMappingURL=sprite.es.js.map
 
             /*!
              * @pixi/text - v5.0.4
@@ -32239,7 +32225,6 @@
 
                 return Text;
             }(Sprite));
-            //# sourceMappingURL=text.es.js.map
 
             /*!
              * @pixi/prepare - v5.0.4
@@ -32924,7 +32909,6 @@
             {
                 return Date.now() - this.frameStart < this.maxMilliseconds;
             };
-            //# sourceMappingURL=prepare.es.js.map
 
             var prepare_es = /*#__PURE__*/Object.freeze({
                         BasePrepare: BasePrepare,
@@ -33157,7 +33141,6 @@
             };
 
             Application.registerPlugin(ResizePlugin);
-            //# sourceMappingURL=app.es.js.map
 
             var miniSignals = createCommonjsModule(function (module, exports) {
 
@@ -33577,7 +33560,7 @@
 
                 return q;
             }
-            //# sourceMappingURL=async.js.map
+
             });
 
             unwrapExports(async);
@@ -34831,7 +34814,7 @@
             {
                 module.exports.default = Resource; // eslint-disable-line no-undef
             }
-            //# sourceMappingURL=Resource.js.map
+
             });
 
             unwrapExports(Resource_1);
@@ -35596,7 +35579,7 @@
 
                 return Loader;
             };
-            //# sourceMappingURL=Loader.js.map
+
             });
 
             unwrapExports(Loader_1);
@@ -35679,7 +35662,7 @@
             {
                 module.exports.default = encodeBinary; // eslint-disable-line no-undef
             }
-            //# sourceMappingURL=b64.js.map
+
             });
 
             unwrapExports(b64);
@@ -37663,7 +37646,6 @@
              * @memberof PIXI
              */
             var LoaderResource = lib_1;
-            //# sourceMappingURL=loaders.es.js.map
 
             /*!
              * @pixi/particles - v5.0.4
@@ -38632,7 +38614,6 @@
 
                 return ParticleRenderer;
             }(ObjectRenderer));
-            //# sourceMappingURL=particles.es.js.map
 
             /*!
              * @pixi/spritesheet - v5.0.4
@@ -39041,7 +39022,6 @@
 
                 return url.resolve(resource.url.replace(baseUrl, ''), resource.data.meta.image);
             };
-            //# sourceMappingURL=spritesheet.es.js.map
 
             /*!
              * @pixi/sprite-tiling - v5.0.4
@@ -39538,7 +39518,6 @@
 
                 return TilingSpriteRenderer;
             }(ObjectRenderer));
-            //# sourceMappingURL=sprite-tiling.es.js.map
 
             /*!
              * @pixi/text-bitmap - v5.0.4
@@ -40364,7 +40343,6 @@
                     }
                 }
             };
-            //# sourceMappingURL=text-bitmap.es.js.map
 
             /*!
              * @pixi/filter-alpha - v5.0.4
@@ -40429,7 +40407,6 @@
 
                 return AlphaFilter;
             }(Filter));
-            //# sourceMappingURL=filter-alpha.es.js.map
 
             /*!
              * @pixi/filter-blur - v5.0.4
@@ -40855,7 +40832,6 @@
 
                 return BlurFilter;
             }(Filter));
-            //# sourceMappingURL=filter-blur.es.js.map
 
             /*!
              * @pixi/filter-color-matrix - v5.0.4
@@ -41454,7 +41430,6 @@
 
             // Americanized alias
             ColorMatrixFilter.prototype.grayscale = ColorMatrixFilter.prototype.greyscale;
-            //# sourceMappingURL=filter-color-matrix.es.js.map
 
             /*!
              * @pixi/filter-displacement - v5.0.4
@@ -41572,7 +41547,6 @@
 
                 return DisplacementFilter;
             }(Filter));
-            //# sourceMappingURL=filter-displacement.es.js.map
 
             /*!
              * @pixi/filter-fxaa - v5.0.4
@@ -41610,7 +41584,6 @@
 
                 return FXAAFilter;
             }(Filter));
-            //# sourceMappingURL=filter-fxaa.es.js.map
 
             /*!
              * @pixi/filter-noise - v5.0.4
@@ -41690,7 +41663,6 @@
 
                 return NoiseFilter;
             }(Filter));
-            //# sourceMappingURL=filter-noise.es.js.map
 
             /*!
              * @pixi/mixin-cache-as-bitmap - v5.0.4
@@ -42112,7 +42084,6 @@
                 this.cacheAsBitmap = false;
                 this.destroy(options);
             };
-            //# sourceMappingURL=mixin-cache-as-bitmap.es.js.map
 
             /*!
              * @pixi/mixin-get-child-by-name - v5.0.4
@@ -42150,7 +42121,6 @@
 
                 return null;
             };
-            //# sourceMappingURL=mixin-get-child-by-name.es.js.map
 
             /*!
              * @pixi/mixin-get-global-position - v5.0.4
@@ -42188,7 +42158,6 @@
 
                 return point;
             };
-            //# sourceMappingURL=mixin-get-global-position.es.js.map
 
             /*!
              * @pixi/mesh - v5.0.4
@@ -42966,7 +42935,6 @@
 
                 return MeshGeometry;
             }(Geometry));
-            //# sourceMappingURL=mesh.es.js.map
 
             /*!
              * @pixi/mesh-extras - v5.0.4
@@ -43722,7 +43690,6 @@
 
                 return NineSlicePlane;
             }(SimplePlane));
-            //# sourceMappingURL=mesh-extras.es.js.map
 
             /*!
              * @pixi/sprite-animated - v5.0.4
@@ -44165,7 +44132,6 @@
 
                 return AnimatedSprite;
             }(Sprite));
-            //# sourceMappingURL=sprite-animated.es.js.map
 
             /*!
              * pixi.js - v5.0.4
@@ -45347,7 +45313,6 @@
                 FXAAFilter: FXAAFilter,
                 NoiseFilter: NoiseFilter,
             };
-            //# sourceMappingURL=pixi.es.js.map
 
             var PIXI = /*#__PURE__*/Object.freeze({
                         accessibility: accessibility_es,
@@ -49905,18 +49870,6 @@
                     let start, to, delta, update, name;
                     switch (entry)
                     {
-                        case 'x':
-                        case 'y':
-                        case 'alpha':
-                        case 'width':
-                        case 'height':
-                        case 'rotation':
-                            start = this.element[entry];
-                            to = param;
-                            delta = param - start;
-                            update = (ease) => this.updateOne(ease, entry);
-                            break
-
                         case 'scaleX':
                         case 'skewX':
                             name = entry.substr(0, entry.length - 1);
@@ -49954,8 +49907,12 @@
                             break
 
                         default:
-                            console.warn(entry + ' is not defined in easeElement.');
+                            start = this.element[entry];
+                            to = param;
+                            delta = param - start;
+                            update = (ease) => this.updateOne(ease, entry);
                     }
+
                     const eases = this.eases;
                     let i;
                     for (i = 0; i < eases.length; i++)
@@ -50206,9 +50163,8 @@
 
             const easeOptions = {
                 duration: 1000,
-                ease: 'linear',
-                useTicker: true,
-                ticker: penner.linear
+                ease: penner.easeInOutSine,
+                useTicker: true
             };
 
             /**
@@ -50216,21 +50172,29 @@
              * @extends EventEmitter
              * @example
              * import * as PIXI from 'pixi.js'
-             * import { Ease } from 'pixi-ease'
+             * import { Ease, ease } from 'pixi-ease'
              *
              * const app = new PIXI.Application()
-             * const ease = new Ease({ duration: 3000, ease: 'easeInOutSine' })
              * const test = app.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
              *
              * const move = ease.add(test, { x: 20, y: 15, alpha: 0.25 }, { reverse: true })
              * move.once('complete', () => console.log('move ease complete.'))
+             *
+             * test.generic = 25
+             * const generic = ease.add(test, { generic: 0 }, { duration: 1500, ease: 'easeOutQuad' })
+             * generic.on('each', () => console.log(test.generic))
+             *
+             * const secondEase = new Ease({ duration: 3000, ease: 'easeInBack' })
+             * const test2 = app.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
+             * test2.tint = 0x0000ff
+             * secondEase.add(test2, { tintBlend: [0xff0000, 0x00ff00], scale: 2 })
              */
             class Ease$2 extends eventemitter3$2
             {
                 /**
                  * @param {object} [options]
                  * @param {number} [options.duration=1000] default duration if not set
-                 * @param {(string|function)} [options.ease=Penner.linear] default ease function if not set (see {@link https://www.npmjs.com/package/penner} for names of easing functions)
+                 * @param {(string|function)} [options.ease=Penner.easeInOutSine] default ease function if not set (see {@link https://www.npmjs.com/package/penner} for names of easing functions)
                  * @param {boolean} [options.useTicker=true] attach updates to a PIXI.Ticker
                  * @param {PIXI.Ticker} [options.ticker=PIXI.ticker.shared || PIXI.Ticker.shared] which PIXI.Ticker to use
                  * @fires Ease#complete
@@ -50245,34 +50209,31 @@
                     if (this.options.useTicker === true)
                     {
                         // weird code to ensure pixi.js v4 support (which changed from PIXI.ticker.shared to PIXI.Ticker.shared)
-                        if (options.ticker)
+                        if (this.options.ticker)
                         {
-                            this.options.ticker = options.ticker;
+                            this.ticker = this.options.ticker;
                         }
                         else
                         {
                             // to avoid Rollup transforming our import, save pixi namespace in a variable
                             // from here: https://github.com/pixijs/pixi.js/issues/5757
-                            let ticker;
                             const pixiNS = PIXI;
                             if (parseInt(/^(\d+)\./.exec(VERSION$1)[1]) < 5)
                             {
-                                ticker = pixiNS.ticker.shared;
+                                this.ticker = pixiNS.ticker.shared;
                             }
                             else
                             {
-                                ticker = pixiNS.Ticker.shared;
+                                this.ticker = pixiNS.Ticker.shared;
                             }
-                            this.options.ticker = options.ticker || ticker;
                         }
-                        this.ticker = this.options.ticker;
                         this.ticker.add(this.update, this);
                     }
                     this.key = `__ease_${Ease$2.id++}`;
                 }
 
                 /**
-                 * removes all DisplayObjects and tickers
+                 * removes all eases and tickers
                  */
                 destroy()
                 {
@@ -50303,6 +50264,8 @@
                  * @param {number} [params.skewY]
                  * @param {(number|number[])} [params.tint] this includes the current tint (or 0xffffff) as the first color
                  * @param {(number|number[])} [params.tintBlend] tint by blending between colors
+                 * @param {number} [params.shake] moves
+                 * @param {number} [params.*] generic number parameter
                  * @param {object} [options]
                  * @param {number} [options.duration]
                  * @param {(string|function)} [options.ease]
@@ -50456,10 +50419,44 @@
                     }
                     return count
                 }
+
+                /**
+                 * default duration for eases.add() (only applies to newly added eases)
+                 * @type {number}
+                 */
+                set duration(duration)
+                {
+                    this.options.duration = duration;
+                }
+                get duration()
+                {
+                    return this.options.duration
+                }
+
+                /**
+                 * default ease for eases.add() (only applies to newly added eases)
+                 * @type {(string|Function)}
+                 */
+                set ease(ease)
+                {
+                    this.options.ease = ease;
+                }
+                get ease()
+                {
+                    return this.options.ease
+                }
             }
 
             // manages the ids used to define the DisplayObject ease variable (enabled multiple eases attached to the same object)
             Ease$2.id = 0;
+
+            /**
+             * default instantiated Ease class
+             * @type {Ease}
+             */
+            let ease = new Ease$2();
+
+            Ease$2.ease = ease;
 
             /**
              * fires when there are no more eases
@@ -50474,26 +50471,22 @@
              */
 
             const SIZE = 10;
-            let renderer, stage, count = 10000;
+            let app, count = 10000;
 
             function setup()
             {
-                renderer = new Renderer({ width: window.innerWidth, height: window.innerHeight, resolution: window.devicePixelRatio, autoResize: true, transparent: true });
-                stage = new Container();
-                document.body.appendChild(renderer.view);
-                renderer.view.style.position = 'absolute';
+                app = new Application({ width: window.innerWidth, height: window.innerHeight, resolution: window.devicePixelRatio, autoResize: true, transparent: true });
+                document.body.appendChild(app.view);
 
                 setupBoxes();
                 setupButtons();
-
-                Ticker.shared.add(() => renderer.render(stage));
             }
 
             function setupBoxes()
             {
                 for (let i = 0; i < count; i++)
                 {
-                    const box = stage.addChild(new Sprite(Texture.WHITE));
+                    const box = app.stage.addChild(new Sprite(Texture.WHITE));
                     box.anchor.set(0.5);
                     box.width = box.height = SIZE;
                     box.position.set(yyRandom.get(window.innerWidth), yyRandom.get(window.innerHeight));
@@ -50507,9 +50500,9 @@
                 time[0] = performance.now();
                 const ease = new Ease$2({ duration: 1000 });
                 time[1] = performance.now();
-                for (let i = 0, _i = stage.children.length; i < _i; i++)
+                for (let i = 0, _i = app.stage.children.length; i < _i; i++)
                 {
-                    const sprite = stage.children[i];
+                    const sprite = app.stage.children[i];
                     ease.add(sprite, { x: yyRandom.get(window.innerWidth), y: yyRandom.get(window.innerHeight), rotation: yyRandom.angle() }, { reverse: true });
                 }
                 time[2] = performance.now();
@@ -50527,9 +50520,9 @@
                 const ease = new dist.list();
                 time[1] = performance.now();
                 let done;
-                for (let i = 0, _i = stage.children.length; i < _i; i++)
+                for (let i = 0, _i = app.stage.children.length; i < _i; i++)
                 {
-                    const sprite = stage.children[i];
+                    const sprite = app.stage.children[i];
                     done = ease.to(sprite, { x: yyRandom.get(window.innerWidth), y: yyRandom.get(window.innerHeight), rotation: yyRandom.angle() }, 1000, { reverse: true });
                 }
                 time[2] = performance.now();
@@ -50558,10 +50551,10 @@
 
             function setupButtons()
             {
-                const buttons = html({ parent: document.body, styles: { position: 'fixed', top: 0, margin: '0.75em' } });
-                const fast = html({ parent: buttons, margin: '0.5em', type: 'button', html: 'run pixi-ease (v1.0.0)' });
+                const buttons = html({ parent: document.body, styles: { position: 'fixed', top: '50%', margin: '0.75em' } });
+                const fast = html({ parent: buttons, styles: { padding: '0.5rem', margin: '0.5em', }, type: 'button', html: 'run pixi-ease (v2.0.0)' });
                 fast.onclick = runFast;
-                const ease = html({ parent: buttons, margin: '0.5em', type: 'button', html: 'run pixi-ease (v0.1+)' });
+                const ease = html({ parent: buttons, styles: { padding: '0.5rem', margin: '0.5em', }, type: 'button', html: 'run pixi-ease (v1.3.0)' });
                 ease.onclick = runEase;
                 buttons.style.left = window.innerWidth / 2 - buttons.offsetWidth / 2 + 'px';
             }
