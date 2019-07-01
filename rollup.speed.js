@@ -30,7 +30,6 @@ export default
     ],
     output:
     {
-        name: 'Ease',
         file: 'docs/speed/index.js',
         format: 'iife',
         sourcemap: true

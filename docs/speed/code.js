@@ -94,7 +94,4 @@ function setupButtons()
     buttons.style.left = window.innerWidth / 2 - buttons.offsetWidth / 2 + 'px'
 }
 
-window.onload = function ()
-{
-    setup()
-}
+window.onload = setup
