@@ -1,5 +1,6 @@
-// shows the code in the demo
-module.exports = function highlight()
+import hl from 'highlight.js'
+
+export function highlight()
 {
     var client = new XMLHttpRequest()
     client.open('GET', 'code.js')
@@ -7,7 +8,7 @@ module.exports = function highlight()
     {
         var code = document.getElementById('code')
         code.innerHTML = client.responseText
-        require('highlight.js').highlightBlock(code)
+        hl.highlightBlock(code)
     }
     client.send()
 }

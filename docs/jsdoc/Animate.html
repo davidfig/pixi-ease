@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Class: Animate</title>
+    
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <script src="scripts/jquery.min.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link href="https://fonts.googleapis.com/css?family=Libre+Franklin:400,700" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/main.css">
+    
+    
+    <script>
+    var config = {"monospaceLinks":false,"cleverLinks":false,"default":{}};
+    </script>
+    
+
+    
+</head>
+<body>
+<div id="wrap" class="clearfix">
+    
+<div class="navigation">
+    <h3 class="applicationName"><a href="index.html"></a></h3>
+    <button id="menuToggle" class="btn btn-link btn-lg menu-toggle">
+        <span class="glyphicon glyphicon-menu-hamburger"></span>
+    </button>
+    <div class="search">
+        <input id="search" type="text" class="form-control input-md" placeholder="Search...">
+    </div>
+    <ul class="list">
+    
+        <li class="item" data-name="Animate">
+            <span class="title  ">
+                
+                <a href="Animate.html">Animate</a>
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li class="parent" data-name="Animate#event:complete-*"><a href="Animate.html#event:complete-*">complete-*</a></li>
+            
+                <li class="parent" data-name="Animate#event:each-*"><a href="Animate.html#event:each-*">each-*</a></li>
+            
+                <li class="parent" data-name="Animate#event:loop-*"><a href="Animate.html#event:loop-*">loop-*</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="DomEase">
+            <span class="title  ">
+                
+                <a href="DomEase.html">DomEase</a>
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li class="parent  " data-name="DomEase#add"><a href="DomEase.html#add">add</a></li>
+            
+                <li class="parent  " data-name="DomEase#countElements"><a href="DomEase.html#countElements">countElements</a></li>
+            
+                <li class="parent  " data-name="DomEase#countRunning"><a href="DomEase.html#countRunning">countRunning</a></li>
+            
+                <li class="parent  " data-name="DomEase#remove"><a href="DomEase.html#remove">remove</a></li>
+            
+                <li class="parent  " data-name="DomEase#removeAll"><a href="DomEase.html#removeAll">removeAll</a></li>
+            
+                <li class="parent  " data-name="DomEase#start"><a href="DomEase.html#start">start</a></li>
+            
+                <li class="parent  " data-name="DomEase#stop"><a href="DomEase.html#stop">stop</a></li>
+            
+                <li class="parent  " data-name="DomEase#update"><a href="DomEase.html#update">update</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li class="parent" data-name="DomEase#event:complete"><a href="DomEase.html#event:complete">complete</a></li>
+            
+                <li class="parent" data-name="DomEase#event:each"><a href="DomEase.html#event:each">each</a></li>
+            
+            </ul>
+        </li>
+    
+    </ul>
+</div>
+    <div class="main">
+        <h1 class="page-title" data-filename="Animate.html">Class: Animate</h1>
+        
+
+
+
+<section>
+    
+<header>
+    <div class="header content-size">
+        <h2>Animate
+        </h2>
+        
+    </div>
+</header>  
+
+<article class="content-size">
+    <div class="container-overview">
+    
+    
+    
+        
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="Animate">
+            <a class="share-icon" href="#Animate"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                new Animate
+            </span>
+            <span class="signature">()</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        each DOM element has its own Animate object returned by add() or accessed through HTMLElement.__domEase
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+    <h5>Fires:</h5>
+    <ul>
+        <li><a href="Animate.html#event:each-*">Animate#event:each-*</a></li>
+    
+        <li><a href="Animate.html#event:complete-*">Animate#event:complete-*</a></li>
+    
+        <li>Animate#event:loop-* - called when animation repeats or reverses</li>
+    </ul>
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+        <h3 class="subsection-title">Events</h3>
+        
+        <dl class="list-events">
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:complete-*">
+            <a class="share-icon" href="#event:complete-*"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                complete-*
+            </span>
+            
+            
+            
+            
+            
+        </h4>
+    
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        fires when there are no more animationswhere name is the name of the element being animated (e.g., complete-left fires when left finishes animating)
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type"><a href="Animate.html">Animate</a></span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:each-*">
+            <a class="share-icon" href="#event:each-*"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                each-*
+            </span>
+            
+            
+            
+            
+            
+        </h4>
+    
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        fires on each loop where there are animationswhere name is the name of the element being animated (e.g., complete-left fires when left finishes animating)
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type"><a href="Animate.html">Animate</a></span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:loop-*">
+            <a class="share-icon" href="#event:loop-*"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                loop-*
+            </span>
+            
+            
+            
+            
+            
+        </h4>
+    
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        fires when an animation repeats or reverseswhere name is the name of the element being animated (e.g., complete-left fires when left finishes animating)
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type"><a href="Animate.html">Animate</a></span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        </dl>
+    
+</article>
+
+</section>  
+
+
+
+
+
+        
+
+        <footer class="content-size">
+            <div class="footer">
+                Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Jan 08 2018 11:12:08 GMT+0800 (DST)
+            </div>
+        </footer>
+    </div>
+</div>
+<script>prettyPrint();</script>
+<script src="scripts/main.js"></script>
+</body>
+</html>

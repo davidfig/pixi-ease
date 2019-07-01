@@ -1,295 +1,87 @@
-## pixi-ease
-pixi.js animation library using easing functions
+# pixi-ease
+a simple and powerful pixi.js easing/tweening/animating library
 
-## rationale
-This is a rewrite API for [YY-Animate](https://github.com/davidfig/animate). It provides an easy way to animate object parameters. It is optimized for use with pixi.js. 
-
-YY-Animate used a global Animate object, which worked well, but created clean-up issues (e.g., when destroying a level, I had to be careful to destroy all the animations connected to that level). pixi-ease uses separate list objects, that can be created, updated, and destroyed independently of other lists. 
-
-Additionally, I used eventemitter3 to create a more robust event system, replacing the onDone, onLoop, etc. options from YY-Animate.
-
-## Installation
-
-    npm i pixi-ease
+## features
+* ease any pixi.js parameter, including tint (using a blend function or stepped)
+* use any Penner function by name or any user-defined function
+* support for generic number parameters
+* change scale or skew using one parameter (e.g., scale: 5 changes both scale.x and scale.y)
+* set default durations and easing function for all eases
+* uses eventemitter3 for events for both the easing lists and individual eases
+* tracks eases on DisplayObject and cleans up when DisplayObject is destroyed
+* includes a default easing list so you don't have to instantiate for simple cases
+* includes a shake paramter
 
 ## Live Demo
 [https://davidfig.github.io/pixi-ease/](https://davidfig.github.io/pixi-ease/)
-    
+
+## Migrating from pixi-ease v1 to v2
+
+```js
+// v1 code
+// -------
+const Ease = require('pixi-ease')
+const ease = new Ease.list()
+const moveSquare = ease.to(square, { x: 20, y: 55 }, 2000, { reverse: true })
+moveSquare.on('done', () => console.log('ease complete.'))
+
+// v2 code
+//--------
+import { ease } from 'pixi-ease'
+// or const ease = require('pixi-ease').ease
+
+const moveSquare = ease.add(square, { x: 20, y: 55 }, { duration: 2000, reverse: true })
+moveSquare.on('complete', () => console.log('ease complete.'))
+
+// you can also create separate easing groups, similar to how Ease.List worked, and include default settings
+import { Ease } from 'pixi-ease'
+// or const Ease = require('pixi-ease').Ease
+
+const easeList = new Ease({ duration: 1000, ease: 'easeOutQuad' })
+easeList.add('square', { tintBlend: [0xff0000, 0x00ff00] })
+```
+
+## Installation
+
+    yarn add pixi-ease
+
+or [grab the latest release](https://github.com/davidfig/pixi-ease/releases/) and use it:
+
+```html
+<script src="/directory-to-file/pixi.js"></script>
+<script src="/directory-to-file/pixi-ease.js"></script>
+<!-- or <script type="module" src="/directory-to-file/pixi-ease.es.js"></script> -->
+<script>
+    const ease = new Ease.Ease(options)
+    Ease.add(...)
+    // or Ease.ease.add(...)
+</script> 
+```
+
+## API Documentation
+[https://davidfig.github.io/dom-ease/jsdoc/](https://davidfig.github.io/dom-ease/jsdoc)
+
 ## Simple Usage
-
-    const PIXI = require('pixi.js')
-    const Ease = require('pixi-ease')
-
-    // initialize pixi.js
-    const app = new PIXI.Application()
-    document.body.appendChild(app.view)
-
-    // create a square sprite
-    const square = app.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
-    square.position.set(400, 300)
-    square.tint = 0x0000ff
-    square.width = square.height = 20
-
-    // create list of animations
-    const list = new Ease.list()
-
-    // change square's tint from blue to red over 2 seconds; reverse and repeat
-    list.tint(square, 0xff0000, 2000, { repeat: true, reverse: true }))
-
-    // change square's location to (20, 55) over 2 seconds, and then return to the middle (uses alternative creation method)
-    const to = list.add(new Ease.to(square, { x: 20, y: 55 }, 2000, { reverse: true })))
-
-    // listen for done, then print to console
-    to.on('done', () => console.log('Square has finished animating'))
-
-## API
-### src/list.js
 ```js
-    /**
-     * Helper list for multiple animations
-     * @param {object} [options]
-     * @param {boolean} [options.noTicker] don't add the update function to PIXI.ticker
-     * @param {PIXI.ticker} [options.ticker=PIXI.ticker.shared] use this PIXI.ticker for the list
-     *
-     * @event List#done(List) final animation completed in the list
-     * @event List#each(elapsed, List) each update after eases are updated
-     */
-    constructor(options)
+import * as PIXI from 'pixi.js'
+import { Ease, ease } from 'pixi-ease'
 
-    /**
-     * Add animation(s) to animation list
-     * @param {object|object[]...} any animation class
-     * @return {object} first animation
-     */
-    add()
+const app = new PIXI.Application()
+const test = app.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
 
-    /**
-     * remove animation(s)
-     * @param {object|array} animate - the animation (or array of animations) to remove; can be null
-     * @inherited from yy-loop
-     */
-    remove(animate)
+const move = ease.add(test, { x: 20, y: 15, alpha: 0.25 }, { reverse: true })
+move.once('complete', () => console.log('move ease complete.'))
 
-    /**
-     * remove all animations from list
-     * @inherited from yy-loop
-     */
-    removeAll()
+test.generic = 25
+const generic = ease.add(test, { generic: 0 }, { duration: 1500, ease: 'easeOutQuad' })
+generic.on('each', () => console.log(test.generic))
 
-    /**
-     * update frame
-     * this is automatically added to PIXI.ticker unless options.noTicker is set
-     * if using options.noTicker, this should be called manually
-     * @param {number} elasped time in MS since last update
-     */
-    update(elapsed)
-
-    /**
-     * number of animations
-     * @type {number}
-     */
-    get count()
-
-    /**
-     * number of active animations
-     * @type {number}
-     */
-    get countRunning()
-
-    /** helper to add to the list a new Ease.to class; see Ease.to class below for parameters */
-    to() { return this.add(new To(...arguments)) }
-
-    /** helper to add to the list a new Ease.angle class; see Ease.to class below for parameters */
-    angle() { return this.add(new Angle(...arguments)) }
-
-    /** helper to add to the list a new Ease.face class; see Ease.to class below for parameters */
-    face() { return this.add(new Face(...arguments)) }
-
-    /** helper to add to the list a new Ease.load class; see Ease.to class below for parameters */
-    load() { return this.add(new Load(...arguments)) }
-
-    /** helper to add to the list a new Ease.movie class; see Ease.to class below for parameters */
-    movie() { return this.add(new Movie(...arguments)) }
-
-    /** helper to add to the list a new Ease.shake class; see Ease.to class below for parameters */
-    shake() { return this.add(new Shake(...arguments)) }
-
-    /** helper to add to the list a new Ease.target class; see Ease.to class below for parameters */
-    target() { return this.add(new Target(...arguments)) }
-
-    /** helper to add to the list a new Ease.angle tint; see Ease.to class below for parameters */
-    tint() { return this.add(new Tint(...arguments)) }
-
+const secondEase = new Ease({ duration: 3000, ease: 'easeInBack' })
+const test2 = app.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
+test2.tint = 0x0000ff
+secondEase.add(test2, { tintBlend: [0xff0000, 0x00ff00], scale: 2 })
 ```
-### src/to.js
-```js
-/** animate any numeric parameter of an object or array of objects */
-module.exports = class to extends wait
-{
-    /**
-     * @param {object} object to animate
-     * @param {object} goto - parameters to animate, e.g.: {alpha: 5, scale: {3, 5}, scale: 5, rotation: Math.PI}
-     * @param {number} duration - time to run
-     * @param {object} [options]
-     * @param {number} [options.wait=0] n milliseconds before starting animation (can also be used to pause animation for a length of time)
-     * @param {boolean} [options.pause] start the animation paused
-     * @param {boolean|number} [options.repeat] true: repeat animation forever n: repeat animation n times
-     * @param {boolean|number} [options.reverse] true: reverse animation (if combined with repeat, then pulse) n: reverse animation n times
-     * @param {Function} [options.load] loads an animation using an .save() object note the * parameters below cannot be loaded and must be re-set
-     * @param {string|Function} [options.ease] name or function from easing.js (see http://easings.net for examples)
-     * @emits to:done animation expires
-     * @emits to:wait each update during a wait
-     * @emits to:first first update when animation starts
-     * @emits to:each each update while animation is running
-     * @emits to:loop when animation is repeated
-     * @emits to:reverse when animation is reversed
-     */
-    constructor(object, goto, duration, options)
 
-```
-### src/angle.js
-```js
-/** animate object's {x, y} using an angle */
-module.exports = class angle extends wait
-{
-    /**
-     * @param {object} object to animate
-     * @param {number} angle in radians
-     * @param {number} speed in pixels/millisecond
-     * @param {number} [duration=0] in milliseconds; if 0, then continues forever
-     * @param {object} [options] @see {@link Wait}
-     */
-    constructor(object, angle, speed, duration, options)
-
-```
-### src/face.js
-```js
-/** Rotates an object to face the target */
-module.exports = class face extends wait
-{
-    /**
-     * @param {object} object
-     * @param {Point} target
-     * @param {number} speed in radians/millisecond
-     * @param {object} [options] @see {@link Wait}
-     * @param {boolean} [options.keepAlive] don't stop animation when complete
-     */
-    constructor(object, target, speed, options)
-
-```
-### src/load.js
-```js
-/**
- * restart an animation = requires a saved state
- * @param {object} object(s) to animate
- */
-module.exports = function load(object, load)
-
-```
-### src/movie.js
-```js
-/**
- * animate a movie of textures
- */
-module.exports = class movie extends wait
-
-    /**
-     * @param {object} object to animate
-     * @param {PIXI.Texture[]} textures
-     * @param {number} [duration=0] time to run (use 0 for infinite duration--should only be used with customized easing functions)
-     * @param {object} [options]
-     * @param {number} [options.wait=0] n milliseconds before starting animation (can also be used to pause animation for a length of time)
-     * @param {boolean} [options.pause] start the animation paused
-     * @param {(boolean|number)} [options.repeat] true: repeat animation forever n: repeat animation n times
-     * @param {(boolean|number)} [options.reverse] true: reverse animation (if combined with repeat, then pulse) n: reverse animation n times
-     * @param {(boolean|number)} [options.continue] true: continue animation with new starting values n: continue animation n times
-     * @param {Function} [options.load] loads an animation using a .save() object note the * parameters below cannot be loaded and must be re-set
-     * @param {Function} [options.ease] function from easing.js (see http://easings.net for examples)
-     * @emits {done} animation expires
-     * @emits {wait} each update during a wait
-     * @emits {first} first update when animation starts
-     * @emits {each} each update while animation is running
-     * @emits {loop} when animation is repeated
-     * @emits {reverse} when animation is reversed
-     */
-    constructor(object, textures, duration, options)
-
-```
-### src/shake.js
-```js
-/**
- * shakes an object or list of objects
- */
-module.exports = class shake extends wait
-
-    /**
-     * @param {object|array} object or list of objects to shake
-     * @param {number} amount to shake
-     * @param {number} duration (in milliseconds) to shake
-     * @param {object} options (see Animate.wait)
-     */
-    constructor(object, amount, duration, options)
-
-```
-### src/target.js
-```js
-/** move an object to a target's location */
-module.exports = class target extends wait
-{
-    /**
-     * move to a target
-     * @param {object} object - object to animate
-     * @param {object} target - object needs to contain {x: x, y: y}
-     * @param {number} speed - number of pixels to move per millisecond
-     * @param {object} [options] @see {@link Wait}
-     * @param {boolean} [options.keepAlive] don't cancel the animation when target is reached
-     */
-    constructor(object, target, speed, options)
-
-```
-### src/tint.js
-```js
-/** changes the tint of an object */
-module.exports = class tint extends wait
-{
-    /**
-     * @param {PIXI.DisplayObject|PIXI.DisplayObject[]} object
-     * @param {number|number[]} tint
-     * @param {number} [duration] in milliseconds
-     * @param {object} [options] @see {@link Wait}
-     */
-    constructor(object, tint, duration, options)
-
-```
-### src/wait.js
-```js
-    /**
-     * @param {object|object[]} object or list of objects to animate
-     * @param {object} [options]
-     * @param {number} [options.wait=0] n milliseconds before starting animation (can also be used to pause animation for a length of time)
-     * @param {boolean} [options.pause] start the animation paused
-     * @param {(boolean|number)} [options.repeat] true: repeat animation forever n: repeat animation n times
-     * @param {(boolean|number)} [options.reverse] true: reverse animation (if combined with repeat, then pulse) n: reverse animation n times
-     *
-     * @param {number} [options.id] user-generated id (e.g., I use it to properly load animations when an object has multiple animations running)
-     * @param {Function} [options.load] loads an animation using an .save() object note the * parameters below cannot be loaded and must be re-set
-     * @param {Function|string} [options.ease] function (or penner function name) from easing.js (see http://easings.net for examples)*
-     *
-     * @emits {done} animation expires
-     * @emits {wait} each update during a wait
-     * @emits {first} first update when animation starts
-     * @emits {each} each update while animation is running
-     * @emits {loop} when animation is repeated
-     * @emits {reverse} when animation is reversed
-     */
-    constructor(object, options)
-
-    /**
-     * @type {boolean} pause this entry
-     */
-    set pause(value)
-
-```
 ## License 
 MIT License  
-(c) 2017 [YOPEY YOPEY LLC](https://yopeyopey.com/) by [David Figatner](https://twitter.com/yopey_yopey/)
+(c) 2019 [YOPEY YOPEY LLC](https://yopeyopey.com/) by [David Figatner](https://twitter.com/yopey_yopey/)

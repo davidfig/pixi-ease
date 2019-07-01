@@ -1,126 +1,121 @@
-const PIXI = require('pixi.js')
-const Random = require('yy-random')
-const Counter = require('yy-counter')
-const FPS = require('yy-fps')
+import * as PIXI from 'pixi.js'
+import Random from 'yy-random'
+import FPS from 'yy-fps'
+import fork from 'fork-me-github'
 
-const Ease = require('../src')
+import { html } from './html'
+import { highlight } from './highlight'
+import { ease } from '../src/ease'
 
-const TIME = 1000
-const SNOW_FALL = [2000, 8000]
+const SIZE = 50
+let app, y = 0,
+    fps = new FPS(),
+    boxes = []
 
-let ease
-
-function test()
+function setup()
 {
-    const textures = load()
+    app = new PIXI.Application({ view: document.querySelector('.view'), width: window.innerWidth, height: window.innerHeight, resolution: window.devicePixelRatio, autoResize: true, transparent: true })
+    ease.duration = 2000
 
-    // initialize a list of animations
-    ease = new Ease.list({ pauseOnBlur: true })
+    // track fps in the ticker
+    PIXI.Ticker.shared.add(() => fps.frame())
 
-    // create a shake animation and add it to the list
-    ease.shake(block(), 5)
+    startEases()
+    setupButtons()
+}
 
-    // create a movie with a list of textures and add it to the list
-    ease.movie(block(), textures, TIME, { repeat: true, reverse: true })
+function startEases()
+{
+    resetEases()
 
-    // create a target animation
-    const b = block()
-    b.x = blockSize / 2
-    const target = ease.to(b, { x: window.innerWidth - blockSize }, TIME, { ease: 'easeInOutSine', reverse: true, repeat: true })
+    y = 0
+    ease.add(box('scaleX'), { scaleX: 2 }, { repeat: true })
+    ease.add(box('scaleY'), { scaleY: 2 }, { repeat: true, reverse: true })
+    ease.add(box('scale'), { scale: 0 }, { repeat: true, reverse: true })
+    ease.add(box('x/y'), { x: window.innerWidth / 2, y: window.innerHeight / 2 }, { repeat: true, reverse: true })
+    ease.add(box('target'), { target: { x: window.innerWidth / 2, y: 0 } }, { repeat: true, reverse: true })
+    ease.add(box('tint').sprite, { tint: [0xff0000, 0x00ff00, 0x0000ff] }, { repeat: true, ease: 'linear' })
+    ease.add(box('tintBlend').sprite, { tintBlend: [0xff0000, 0x00ff00, 0x0000ff] }, { repeat: true, duration: 5000, ease: 'linear' })
+    ease.add(box('shake'), { shake: 5 }, { repeat: true })
+    ease.add(box('alpha'), { alpha: 0 }, { repeat: true, reverse: true })
+    ease.add(box('width'), { width: SIZE * 2 }, { repeat: true, reverse: true })
+    ease.add(box('height'), { height: 0 }, { repeat: true, reverse: true })
+    ease.add(box('rotation'), { rotation: 2 * Math.PI }, { repeat: true, reverse: true })
+    ease.add(box('skew'), { skew: 2 * Math.PI }, { repeat: true, reverse: true })
+    ease.add(box('skewX'), { skewX: 2 * Math.PI }, { repeat: true, reverse: true })
+    ease.add(box('skewY'), { skewY: 2 * Math.PI }, { repeat: true, reverse: true })
+    ease.add(box('all'), { scale: 2, target: { x: window.innerWidth / 2, y: window.innerHeight / 2 }, alpha: 0.5, skew: 2 * Math.PI, rotation: 2 * Math.PI }, { repeat: true, reverse: true })
+}
 
-    // keeps the block facing the target (keepAlive means don't end the animation when the face is complete)
-    ease.face(block(), target.object, 0.01, { keepAlive: true }),
-
-    // moves the block toward a moving target (keepAlive means don't end the animation when the target is reached)
-    ease.target(block(), target.object, 0.1, { keepAlive: true }),
-
-    // full spin, and then reversed spin, etc.
-    ease.to(block(), { rotation: Math.PI * 2 }, TIME * 3, { ease: 'easeInOutQuad', reverse: true, repeat: true }),
-
-    // tint a block from current color to a new color, and then reverse and repeat
-    ease.tint(block(), 0x888888, TIME, { repeat: true, reverse: true }),
-
-    // tint a block through a series of colors starting at the current color; reverse and repeat
-    ease.tint(block(), [0x00ff00, 0xff0000, 0x0000ff], TIME * 10, { repeat: true, reverse: true })
-
-    // initialize without adding it to the list; will manually update it in the update function below
-    // NOTE: scale may be called as { scale: number } or { scale: {x: number, y: number }}
-    const to = new Ease.to(block(), { scale: 0 }, TIME, { repeat: true, reverse: true })
-
-    // this sends a block off at an angle after waiting 1 second before starting
-    ease.angle(block(), -0.1, 0.4, TIME, { repeat: true, reverse: true, wait: 1000 })
-
-    // all lists and animation types have EventEmitters
-    ease.on('each', update)
-
-    // you can manually update individual animations without using Ease.list if you prefer
-    function update(elapsed)
+function resetEases()
+{
+    while (boxes.length)
     {
-        to.update(elapsed)
-        counter.log('Eases: ' + ease.count)
+        const box = boxes.pop()
+        app.stage.removeChild(box)
     }
 }
 
-function fall()
+function setupButtons()
 {
-    const block = snow()
-    block.position.set(Random.get(window.innerWidth), -blockSize)
-    const to = ease.to(block, { y: window.innerHeight + blockSize }, Random.range(SNOW_FALL[0], SNOW_FALL[1]))
-    to.on('done', () => block.parent.removeChild(block))
-}
-
-function block(tint)
-{
-    const block = renderer.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
-    block.anchor.set(0.5)
-    block.width = block.height = blockSize
-    block.tint = typeof tint !== 'undefined' ? tint : Random.color()
-    block.x = blockSize / 2
-    block.y = blockSize / 2 + size * (renderer.stage.children.length - 1)
-    return block
-}
-
-function snow(tint)
-{
-    const block = renderer.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
-    block.anchor.set(0.5)
-    block.width = block.height = blockSize * 0.1
-    block.alpha = 0.2
-    block.rotation = Random.angle()
-    block.tint = typeof tint !== 'undefined' ? tint : Random.color()
-    return block
-}
-
-let renderer, size, blockSize, counter, fps
-
-function init()
-{
-    fps = new FPS()
-    renderer = new PIXI.Application({ transparent: true, width: window.innerWidth, height: window.innerHeight, autoResize: true })
-    document.body.appendChild(renderer.view)
-    size = Math.min(window.innerWidth, window.innerHeight) / 11
-    blockSize = size * 0.9
-    counter = new Counter({ side: 'bottom-left' })
-    const ticker = PIXI.ticker ? PIXI.ticker : PIXI.Ticker
-    ticker.shared.add(() => fps.frame())
-}
-
-function load()
-{
-    const textures = []
-    for (let i = 1; i <= 5; i++)
+    const buttons = html({ parent: document.body, styles: { position: 'fixed', bottom: 0, left: 0, margin: '0.75em' } })
+    const remove = html({ parent: buttons, type: 'button', styles: { margin: '5px' }, html: 'cancel all animations' })
+    remove.onclick = () =>
     {
-        textures.push(PIXI.Texture.from('images/' + i + '.png'))
+        if (remove.innerHTML === 'cancel all animations')
+        {
+            ease.removeAll()
+            remove.innerHTML = 'add all animations'
+        }
+        else
+        {
+            ease.add(boxes[0], { scaleX: 2 }, { repeat: true })
+            ease.add(boxes[1], { scaleY: 2 }, { repeat: true, reverse: true })
+            ease.add(boxes[2], { scale: 0 }, { repeat: true, reverse: true })
+            ease.add(boxes[3], { x: window.innerWidth / 2, y: window.innerHeight / 2 }, { repeat: true, reverse: true })
+            ease.add(boxes[4], { target: { x: window.innerWidth / 2, y: 0 } }, { repeat: true, reverse: true })
+            ease.add(boxes[5].sprite, { tint: [0xff0000, 0x00ff00, 0x0000ff] }, { repeat: true, ease: 'linear' })
+            ease.add(boxes[6].sprite, { tintBlend: [0xff0000, 0x00ff00, 0x0000ff] }, { repeat: true, duration: 5000, ease: 'linear' })
+            ease.add(boxes[7], { shake: 5 }, { repeat: true })
+            ease.add(boxes[8], { alpha: 0 }, { repeat: true, reverse: true })
+            ease.add(boxes[9], { width: SIZE * 2 }, { repeat: true, reverse: true })
+            ease.add(boxes[10], { height: 0 }, { repeat: true, reverse: true })
+            ease.add(boxes[11], { rotation: 2 * Math.PI }, { repeat: true, reverse: true })
+            ease.add(boxes[12], { skew: 2 * Math.PI }, { repeat: true, reverse: true })
+            ease.add(boxes[13], { skewX: 2 * Math.PI }, { repeat: true, reverse: true })
+            ease.add(boxes[14], { skewY: 2 * Math.PI }, { repeat: true, reverse: true })
+            ease.add(boxes[15], { scale: 2, target: { x: window.innerWidth / 2, y: window.innerHeight / 2 }, alpha: 0.5, skew: 2 * Math.PI, rotation: 2 * Math.PI }, { repeat: true, reverse: true })
+            remove.innerHTML = 'cancel all animations'
+        }
     }
-    return textures
+    const reset = html({ parent: buttons, type: 'button', styles: { margin: '5px' }, html: 'reset boxes' })
+    reset.onclick = () => startEases()
+
+    const api = html({ parent: buttons, type: 'button', styles: { margin: '5px' }, html: 'API documentation' })
+    api.onclick = () => window.location.href = 'jsdoc/'
 }
 
-window.onload = function ()
+function box(words)
 {
-    init()
-    test()
-    ease.on('each', fall)
+    const container = app.stage.addChild(new PIXI.Container())
+    container.position.set(SIZE, y)
+    const sprite = container.sprite = container.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
+    sprite.width = sprite.height = SIZE
+    sprite.tint = Random.color()
+    if (words)
+    {
+        const text = container.addChild(new PIXI.Text(words, { fill: 'white', fontSize: '1.25em' }))
+        text.anchor.set(0.5)
+        text.position.set(SIZE / 2, SIZE / 2)
+    }
+    y += SIZE
+    boxes.push(container)
+    return container
+}
 
-    require('fork-me-github')('https://github.com/davidfig/pixi-ease')
-    require('./highlight')()
+window.onload = function()
+{
+    setup()
+    fork()
+    highlight()
 }
