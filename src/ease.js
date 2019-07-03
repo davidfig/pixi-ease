@@ -7,7 +7,8 @@ import { EaseDisplayObject } from './easeDisplayObject'
 const easeOptions = {
     duration: 1000,
     ease: Penner.easeInOutSine,
-    useTicker: true
+    useTicker: true,
+    maxFrame: 1000 / 60
 }
 
 /**
@@ -40,6 +41,7 @@ export class Ease extends Events
      * @param {(string|function)} [options.ease=Penner.easeInOutSine] default ease function if not set (see {@link https://www.npmjs.com/package/penner} for names of easing functions)
      * @param {boolean} [options.useTicker=true] attach updates to a PIXI.Ticker
      * @param {PIXI.Ticker} [options.ticker=PIXI.ticker.shared || PIXI.Ticker.shared] which PIXI.Ticker to use
+     * @param {number} [options.maxFrame=1000/60] maximum frame time (set to Infinity to ignore)
      * @fires Ease#complete
      * @fires Ease#each
      */
@@ -221,7 +223,7 @@ export class Ease extends Events
     {
         if (!this.empty)
         {
-            const elapsed = Math.max(this.ticker.elapsedMS, 1000 / 60)
+            const elapsed = Math.max(this.ticker.elapsedMS, this.options.maxFrame)
             for (let i = 0, _i = this.list.length; i < _i; i++)
             {
                 if (this.list[i].update(elapsed))
