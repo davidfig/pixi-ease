@@ -50,6 +50,8 @@ export class Ease extends Events
         super()
         this.options = Object.assign({}, easeOptions, options)
         this.list = []
+        this.waitRemoveEase = []
+        this.waitRemoveAllEases = []
         this.empty = true
         if (this.options.useTicker === true)
         {
@@ -92,6 +94,7 @@ export class Ease extends Events
     /**
      * add animation(s) to a PIXI.DisplayObject element
      * @param {(PIXI.DisplayObject|PIXI.DisplayObject[])} element
+     *
      * @param {object} params
      * @param {number} [params.x]
      * @param {number} [params.y]
@@ -111,12 +114,14 @@ export class Ease extends Events
      * @param {(number|number[])} [params.tintBlend] tint by blending between colors
      * @param {number} [params.shake] moves
      * @param {number} [params.*] generic number parameter
+     *
      * @param {object} [options]
      * @param {number} [options.duration]
      * @param {(string|function)} [options.ease]
      * @param {(boolean|number)} [options.repeat]
      * @param {boolean} [options.reverse]
      * @param {number} [options.wait] wait this number of milliseconds before ease starts
+     *
      * @returns {EaseDisplayObject}
      */
     add(element, params, options)
@@ -168,14 +173,21 @@ export class Ease extends Events
      */
     removeAllEases(object)
     {
-        if (object[this.key])
+        if (this.inUpdate)
         {
-            const index = this.list.indexOf(object[this.key])
-            if (index !== -1)
+            this.waitRemoveAllEases.push(object)
+        }
+        else
+        {
+            if (object[this.key])
             {
-                this.list.splice(index, 1)
+                const index = this.list.indexOf(object[this.key])
+                if (index !== -1)
+                {
+                    this.list.splice(index, 1)
+                }
+                delete object[this.key]
             }
-            delete object[this.key]
         }
     }
 
@@ -186,16 +198,23 @@ export class Ease extends Events
      */
     removeEase(object, param)
     {
-        const ease = object[this.key]
-        if (ease)
+        if (this.inUpdate)
         {
-            if (Array.isArray(param))
+            this.waitRemoveEase.push({ object, param })
+        }
+        else
+        {
+            const ease = object[this.key]
+            if (ease)
             {
-                param.forEach((entry) => ease.remove(entry))
-            }
-            else
-            {
-                ease.remove(param)
+                if (Array.isArray(param))
+                {
+                    param.forEach((entry) => ease.remove(entry))
+                }
+                else
+                {
+                    ease.remove(param)
+                }
             }
         }
     }
@@ -205,12 +224,19 @@ export class Ease extends Events
      */
     removeAll()
     {
-        while (this.list.length)
+        if (this.inUpdate)
         {
-            const easeDisplayObject = this.list.pop()
-            if (easeDisplayObject.element[this.key])
+            this.waitRemoveAll = true
+        }
+        else
+        {
+            while (this.list.length)
             {
-                delete easeDisplayObject.element[this.key]
+                const easeDisplayObject = this.list.pop()
+                if (easeDisplayObject.element[this.key])
+                {
+                    delete easeDisplayObject.element[this.key]
+                }
             }
         }
     }
@@ -223,6 +249,7 @@ export class Ease extends Events
     {
         if (!this.empty)
         {
+            this.inUpdate = true
             const elapsed = Math.max(this.ticker.elapsedMS, this.options.maxFrame)
             for (let i = 0, _i = this.list.length; i < _i; i++)
             {
@@ -238,6 +265,21 @@ export class Ease extends Events
             {
                 this.empty = true
                 this.emit('complete', this)
+            }
+            this.inUpdate = false
+            while (this.waitRemoveEase.length)
+            {
+                const remove = this.waitRemoveEase.pop()
+                this.removeEase(remove.object, remove.param)
+            }
+            while (this.waitRemoveAllEases.length)
+            {
+                this.removeAllEases(this.waitRemoveAllEases.pop())
+            }
+            if (this.waitRemoveAll)
+            {
+                this.removeAll()
+                this.waitRemoveAll = false
             }
         }
     }
