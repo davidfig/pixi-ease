@@ -39,6 +39,16 @@ import { Ease } from 'pixi-ease'
 
 const easeList = new Ease({ duration: 1000, ease: 'easeOutQuad' })
 easeList.add('square', { tintBlend: [0xff0000, 0x00ff00] })
+
+// DURATION MOVED INTO OPTIONS
+// -------------------------------
+// v1 code
+// -------
+ease.to(square, { x: 20 }, 200, { ease: 'easeInOutSine' })
+
+// v2 code
+// -------
+ease.add(square, { x: 20 }, { duration: 200, ease: 'easeInOutSine' })
 ```
 
 ## Installation
