@@ -706,13 +706,13 @@ class EaseDisplayObject extends eventemitter3
 
     add(params, options)
     {
-        for (let entry in params)
+        if (options.removeExisting)
         {
-            if (options.removeExisting)
+            const skew = ['skewX', 'skewY', 'skew'];
+            const scale = ['scaleX', 'scaleY', 'scale'];
+            const position = ['position', 'x', 'y'];
+            for (let entry in params)
             {
-                const skew = ['skewX', 'skewY', 'skew'];
-                const scale = ['scaleX', 'scaleY', 'scale'];
-                const position = ['position', 'x', 'y'];
                 if (skew.indexOf(entry) !== -1)
                 {
                     this.remove(skew);
@@ -721,15 +721,26 @@ class EaseDisplayObject extends eventemitter3
                 {
                     this.remove(scale);
                 }
-                else if (position.indexOf(entry) !== -1)
+                else if (entry === 'position')
                 {
                     this.remove(position);
+                }
+                else if (entry === 'x')
+                {
+                    this.remove(['x', 'position']);
+                }
+                else if (entry === 'y')
+                {
+                    this.remove(['y', 'position']);
                 }
                 else
                 {
                     this.remove(entry);
                 }
             }
+        }
+        for (let entry in params)
+        {
             const opts = { ease: options.ease, duration: options.duration, repeat: options.repeat, reverse: options.reverse, wait: options.wait };
             this.addParam(entry, params[entry], opts);
         }
@@ -774,14 +785,6 @@ class EaseDisplayObject extends eventemitter3
         const percent = calc - index;
         const color1 = colors[index];
         const color2 = colors[next];
-        if (percent === 0)
-        {
-            return color1
-        }
-        if (percent === 1)
-        {
-            return color2
-        }
         const r1 = color1 >> 16;
         const g1 = color1 >> 8 & 0x0000ff;
         const b1 = color1 & 0x0000ff;
@@ -803,6 +806,15 @@ class EaseDisplayObject extends eventemitter3
         }
         this.element.x = ease.start.x + random(ease.to);
         this.element.y = ease.start.y + random(ease.to);
+    }
+
+    complete(ease)
+    {
+        if (ease.entry === 'shake')
+        {
+            this.element.x = ease.start.x;
+            this.element.y = ease.start.y;
+        }
     }
 
     reverse(ease)
@@ -943,11 +955,7 @@ class EaseDisplayObject extends eventemitter3
                 }
                 else
                 {
-                    if (ease.entry === 'shake')
-                    {
-                        this.element.x = ease.start.x;
-                        this.element.y = ease.start.y;
-                    }
+                    this.complete(ease);
                     this.emit(`complete-${ease.entry}`, this.element);
                     eases.splice(i, 1);
                     i--;
@@ -1145,23 +1153,25 @@ class Ease extends eventemitter3
      * @param {boolean} [options.reverse]
      * @param {number} [options.wait] wait this number of milliseconds before ease starts
      * @param {boolean} [options.removeExisting] removes existing eases on the element of the same type (including x,y/position, skewX,skewY/skew, scaleX,scaleY/scale)
-     * @returns {EaseDisplayObject}
+     * @returns {(EaseDisplayObject|EaseDisplayObject[])}
      */
     add(element, params, options)
     {
         if (Array.isArray(element))
         {
+            const easeDisplayObjects = [];
             for (let i = 0; i < element.length; i++)
             {
                 if (i === element.length - 1)
                 {
-                    return this.add(element[i], params, options)
+                    easeDisplayObjects.push(this.add(element[i], params, options));
                 }
                 else
                 {
-                    this.add(element[i], params, options);
+                    easeDisplayObjects.push(this.add(element[i], params, options));
                 }
             }
+            return easeDisplayObjects
         }
 
         options = options || {};
@@ -1182,7 +1192,7 @@ class Ease extends eventemitter3
         }
         else
         {
-            ease = element[this.key] = new EaseDisplayObject(element);
+            ease = element[this.key] = new EaseDisplayObject(element, this);
             this.list.push(ease);
         }
         ease.add(params, options);

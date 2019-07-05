@@ -11,7 +11,7 @@ a simple and powerful pixi.js easing/tweening/animating library
 * tracks eases on DisplayObject and cleans up when DisplayObject is destroyed
 * includes a default easing list so you don't have to instantiate for simple cases
 * includes a shake paramter
-* test coverage of 63%
+* full test coverage
 
 ## Live Demo
 [https://davidfig.github.io/pixi-ease/](https://davidfig.github.io/pixi-ease/)

@@ -231,7 +231,7 @@
 
         
         <div class="tag-source">
-            <a href="src_ease.js.html#line46">ease.js:46</a>
+            <a href="src_ease.js.html#line48">ease.js:48</a>
         </div>
         
     </div>
@@ -461,6 +461,42 @@
         </tr>
 	
 	
+	
+        <tr>
+            
+                <td class="name"><code>maxFrame</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    1000/60
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                maximum frame time (set to Infinity to ignore)</td>
+        </tr>
+	
+	
 	</tbody>
 </table>
             </td>
@@ -517,7 +553,7 @@
         
 
     
-    <pre class="prettyprint"><code>import * as PIXI from 'pixi.js'import { Ease, ease } from 'pixi-ease'const app = new PIXI.Application()const test = app.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))const move = ease.add(test, { x: 20, y: 15, alpha: 0.25 }, { reverse: true })move.once('complete', () => console.log('move ease complete.'))test.generic = 25const generic = ease.add(test, { generic: 0 }, { duration: 1500, ease: 'easeOutQuad' })generic.on('each', () => console.log(test.generic))const secondEase = new Ease({ duration: 3000, ease: 'easeInBack' })const test2 = app.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))test2.tint = 0x0000ffsecondEase.add(test2, { tintBlend: [0xff0000, 0x00ff00], scale: 2 })</code></pre>
+    <pre class="prettyprint"><code>import * as PIXI from 'pixi.js'import { Ease, ease } from 'pixi-ease'const app = new PIXI.Application()const test = app.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))const move = ease.add(test, { x: 20, y: 15, alpha: 0.25 }, { reverse: true })move.once('complete', () => console.log('move ease complete.'))test.generic = 25const generic = ease.add(test, { generic: 0 }, { duration: 1500, ease: 'easeOutQuad' })generic.on('each', () => console.log(test.generic))const secondEase = new Ease({ duration: 3000, ease: 'easeInBack' })const test2 = app.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))test2.tint = 0x0000ffsecondEase.add(test2, { blend: [0xff0000, 0x00ff00], scale: 2 })</code></pre>
     
 
     
@@ -669,7 +705,7 @@
             <span class="">
                 add
             </span>
-            <span class="signature">(element, params, <span class="optional">options</span>)</span><span class="type-signature"><a href="EaseDisplayObject.html">EaseDisplayObject</a></span>
+            <span class="signature">(element, params, <span class="optional">options</span>)</span><span class="type-signature"><a href="EaseDisplayObject.html">EaseDisplayObject</a> | Array.&lt;<a href="EaseDisplayObject.html">EaseDisplayObject</a>></span>
             
             
             
@@ -678,7 +714,7 @@
 
         
         <div class="tag-source">
-            <a href="src_ease.js.html#line120">ease.js:120</a>
+            <a href="src_ease.js.html#line127">ease.js:127</a>
         </div>
         
     </div>
@@ -855,7 +891,7 @@
 	
         <tr>
             
-                <td class="name"><code>target</code></td>
+                <td class="name"><code>position</code></td>
             
             
             <td class="type">
@@ -1098,13 +1134,16 @@
 	
         <tr>
             
-                <td class="name"><code>rotationFace</code></td>
+                <td class="name"><code>face</code></td>
             
             
             <td class="type">
             
                 
-<span class="param-type">number</span>
+<span class="param-type">PIXI.DisplayObject</span>
+|
+
+<span class="param-type">PIXI.Point</span>
 
 
             
@@ -1121,7 +1160,7 @@
                         
                     
                 
-                rotate to face a DisplayObject using the closest angle</td>
+                rotate the element to face a DisplayObject using the closest angle</td>
         </tr>
 	
 	
@@ -1244,14 +1283,14 @@
                         
                     
                 
-                this includes the current tint (or 0xffffff) as the first color</td>
+                cycle through colors - if number is provided then it cycles between current tint and number; if number[] is provided is cycles only between tints in the number[]</td>
         </tr>
 	
 	
 	
         <tr>
             
-                <td class="name"><code>tintBlend</code></td>
+                <td class="name"><code>blend</code></td>
             
             
             <td class="type">
@@ -1277,7 +1316,7 @@
                         
                     
                 
-                tint by blending between colors</td>
+                blend between colors - if number is provided then it blends current tint to number; if number[] is provided then it blends between the tints in the number[]</td>
         </tr>
 	
 	
@@ -1549,6 +1588,36 @@
         </tr>
 	
 	
+	
+        <tr>
+            
+                <td class="name"><code>removeExisting</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                removes existing eases on the element of the same type (including x,y/position, skewX,skewY/skew, scaleX,scaleY/scale)</td>
+        </tr>
+	
+	
 	</tbody>
 </table>
             </td>
@@ -1611,6 +1680,9 @@
             <td class="type">
             
                         <a href="EaseDisplayObject.html">EaseDisplayObject</a>
+                         | 
+                    
+                        Array.&lt;<a href="EaseDisplayObject.html">EaseDisplayObject</a>>
                         
                     
             </td>
@@ -1643,7 +1715,7 @@
 
         
         <div class="tag-source">
-            <a href="src_ease.js.html#line247">ease.js:247</a>
+            <a href="src_ease.js.html#line294">ease.js:294</a>
         </div>
         
     </div>
@@ -1748,7 +1820,7 @@
 
         
         <div class="tag-source">
-            <a href="src_ease.js.html#line256">ease.js:256</a>
+            <a href="src_ease.js.html#line303">ease.js:303</a>
         </div>
         
     </div>
@@ -1853,7 +1925,7 @@
 
         
         <div class="tag-source">
-            <a href="src_ease.js.html#line81">ease.js:81</a>
+            <a href="src_ease.js.html#line85">ease.js:85</a>
         </div>
         
     </div>
@@ -2973,7 +3045,7 @@ listeners.
             <span class="">
                 removeAll
             </span>
-            <span class="signature">()</span>
+            <span class="signature">(<span class="optional">force</span>)</span>
             
             
             
@@ -2982,7 +3054,7 @@ listeners.
 
         
         <div class="tag-source">
-            <a href="src_ease.js.html#line204">ease.js:204</a>
+            <a href="src_ease.js.html#line228">ease.js:228</a>
         </div>
         
     </div>
@@ -3001,6 +3073,58 @@ listeners.
 
     
 
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>force</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                remove all eases even if called within update loop (setting this to true may cause unexpected problems)</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
     
 
     
@@ -3058,7 +3182,7 @@ listeners.
 
         
         <div class="tag-source">
-            <a href="src_ease.js.html#line167">ease.js:167</a>
+            <a href="src_ease.js.html#line176">ease.js:176</a>
         </div>
         
     </div>
@@ -3343,7 +3467,7 @@ listeners.
 
         
         <div class="tag-source">
-            <a href="src_ease.js.html#line185">ease.js:185</a>
+            <a href="src_ease.js.html#line201">ease.js:201</a>
         </div>
         
     </div>
@@ -3716,7 +3840,7 @@ listeners.
 
         
         <div class="tag-source">
-            <a href="src_ease.js.html#line220">ease.js:220</a>
+            <a href="src_ease.js.html#line251">ease.js:251</a>
         </div>
         
     </div>
@@ -3847,7 +3971,7 @@ listeners.
 
         
         <div class="tag-source">
-            <a href="src_ease.js.html#line312">ease.js:312</a>
+            <a href="src_ease.js.html#line359">ease.js:359</a>
         </div>
         
     </div>
@@ -3933,7 +4057,7 @@ listeners.
 
         
         <div class="tag-source">
-            <a href="src_ease.js.html#line318">ease.js:318</a>
+            <a href="src_ease.js.html#line365">ease.js:365</a>
         </div>
         
     </div>
@@ -4015,7 +4139,7 @@ listeners.
 
         <footer class="content-size">
             <div class="footer">
-                Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.2</a> on Tue Jul 02 2019 21:10:28 GMT-0400 (Eastern Daylight Time)
+                Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.2</a> on Fri Jul 05 2019 08:19:34 GMT-0400 (Eastern Daylight Time)
             </div>
         </footer>
     </div>

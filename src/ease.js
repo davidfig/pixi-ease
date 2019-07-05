@@ -67,11 +67,11 @@ export class Ease extends Events
                 const pixiNS = PIXI
                 if (parseInt(/^(\d+)\./.exec(PIXI.VERSION)[1]) < 5)
                 {
-                    this.ticker = pixiNS.ticker.shared;
+                    this.ticker = pixiNS.ticker.shared
                 }
                 else
                 {
-                    this.ticker = pixiNS.Ticker.shared;
+                    this.ticker = pixiNS.Ticker.shared
                 }
             }
             this.ticker.add(this.update, this)
@@ -122,23 +122,25 @@ export class Ease extends Events
      * @param {boolean} [options.reverse]
      * @param {number} [options.wait] wait this number of milliseconds before ease starts
      * @param {boolean} [options.removeExisting] removes existing eases on the element of the same type (including x,y/position, skewX,skewY/skew, scaleX,scaleY/scale)
-     * @returns {EaseDisplayObject}
+     * @returns {(EaseDisplayObject|EaseDisplayObject[])}
      */
     add(element, params, options)
     {
         if (Array.isArray(element))
         {
+            const easeDisplayObjects = []
             for (let i = 0; i < element.length; i++)
             {
                 if (i === element.length - 1)
                 {
-                    return this.add(element[i], params, options)
+                    easeDisplayObjects.push(this.add(element[i], params, options))
                 }
                 else
                 {
-                    this.add(element[i], params, options)
+                    easeDisplayObjects.push(this.add(element[i], params, options))
                 }
             }
+            return easeDisplayObjects
         }
 
         options = options || {}

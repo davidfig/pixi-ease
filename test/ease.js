@@ -4,6 +4,8 @@ const assert = require('chai').assert
 require('./node-shim')
 const Ease = require('../dist/ease.js')
 
+const CLOSE_TO = 0.0000001
+
 describe('pixi-ease', () =>
 {
     it('contructor with default options', () =>
@@ -16,9 +18,10 @@ describe('pixi-ease', () =>
         ease.destroy()
     })
 
-    it('construction with options', () => {
+    it('constructor with options', () => {
         const penner = Penner.easeInOutQuad
-        const ease = new Ease.Ease({ duration: 3000, ease: penner, useTicker: true, maxFrame: Infinity })
+        const ticker = { add: () => {}, remove: () => {} }
+        const ease = new Ease.Ease({ duration: 3000, ease: penner, useTicker: true, maxFrame: Infinity, ticker })
         assert.equal(ease.options.duration, 3000)
         assert.equal(ease.options.ease, penner)
         assert.equal(ease.options.useTicker, true)
@@ -26,17 +29,29 @@ describe('pixi-ease', () =>
         ease.destroy()
     })
 
+    it('constructor with no ticker', () => {
+        const ease = new Ease.Ease({ useTicker: false })
+        const e = ease.add({ x: 5 }, { x: 10 })
+        let each = false
+        e.on('each-x', () => each = true)
+        requestAnimationFrame(() => {
+            assert.isFalse(each)
+        })
+    })
+
     it('x, y', () => {
         const ease = new Ease.Ease()
         const object = { x: 0, y: 0 }
-        const e = ease.add(object, { x: 10, y: 20 }, { ease: 'linear' })
+        const e = ease.add(object, { x: 10, y: 20 }, { ease: 'linear', repeat: 1 })
+        assert.equal(e.element, object)
+        assert.equal(e.ease, ease)
         e.on('each-x', results => {
             const percent = results.time / 1000
-            assert.closeTo(object.x, 10 * percent, 0.01)
+            assert.closeTo(object.x, 10 * percent, CLOSE_TO)
         })
         e.on('each-y', results => {
             const percent = results.time / 1000
-            assert.closeTo(object.y, 20 * percent, 0.01)
+            assert.closeTo(object.y, 20 * percent, CLOSE_TO)
         })
         ease.on('complete', () => ease.destroy())
     })
@@ -44,13 +59,18 @@ describe('pixi-ease', () =>
     it('position', () => {
         const ease = new Ease.Ease()
         const object = { x: 0, y: 0 }
-        const e = ease.add(object, { position: { x: 20, y: 10 } }, { ease: 'linear', repeat: 1 })
+        const e = ease.add(object, { position: { x: 20, y: 10 } }, { ease: 'linear', reverse: true })
+        let reversed = false
+        e.on('reverse-position', () => reversed = true)
         e.on('each-position', results => {
             const percent = results.time / 1000
-            assert.closeTo(object.x, 20 * percent, 0.01)
-            assert.closeTo(object.y, 10 * percent, 0.01)
+            assert.closeTo(object.x, 20 * (reversed ? 1 - percent : percent), CLOSE_TO)
+            assert.closeTo(object.y, 10 * (reversed ? 1 - percent : percent), CLOSE_TO)
         })
-        ease.on('complete', () => ease.destroy())
+        ease.on('complete', () => {
+            assert.isTrue(reversed)
+            ease.destroy()
+        })
     })
 
     it('width, height', () => {
@@ -59,11 +79,11 @@ describe('pixi-ease', () =>
         const e = ease.add(object, { width: 20, height: 30 }, { ease: 'linear' })
         e.on('each-width', results => {
             const percent = results.time / 1000
-            assert.closeTo(object.width, 20 * percent, 0.01)
+            assert.closeTo(object.width, 20 * percent, CLOSE_TO)
         })
         e.on('each-height', results => {
             const percent = results.time / 1000
-            assert.closeTo(object.height, 30 * percent, 0.01)
+            assert.closeTo(object.height, 30 * percent, CLOSE_TO)
         })
         ease.on('complete', () => ease.destroy())
     })
@@ -74,8 +94,8 @@ describe('pixi-ease', () =>
         const e = ease.add(object, { scale: 10 }, { ease: 'linear', repeat: 1 })
         e.on('each-scale', results => {
             const percent = results.time / 1000
-            assert.closeTo(object.scale.x, 10 * percent, 0.01)
-            assert.closeTo(object.scale.y, 10 * percent, 0.01)
+            assert.closeTo(object.scale.x, 10 * percent, CLOSE_TO)
+            assert.closeTo(object.scale.y, 10 * percent, CLOSE_TO)
         })
         ease.on('complete', () => ease.destroy())
     })
@@ -86,11 +106,11 @@ describe('pixi-ease', () =>
         const e = ease.add(object, { scaleX: 10, scaleY: 20 }, { ease: 'linear', repeat: 1 })
         e.on('each-scaleX', results => {
             const percent = results.time / 1000
-            assert.closeTo(object.scale.x, 10 * percent, 0.01)
+            assert.closeTo(object.scale.x, 10 * percent, CLOSE_TO)
         })
         e.on('each-scaleY', results => {
             const percent = results.time / 1000
-            assert.closeTo(object.scale.y, 20 * percent, 0.01)
+            assert.closeTo(object.scale.y, 20 * percent, CLOSE_TO)
         })
         ease.on('complete', () => ease.destroy())
     })
@@ -101,7 +121,7 @@ describe('pixi-ease', () =>
         const e = ease.add(object, { alpha: 0 }, { ease: 'linear' })
         e.on('each-alpha', results => {
             const percent = results.time / 1000
-            assert.closeTo(object.alpha, 1 - percent, 0.01)
+            assert.closeTo(object.alpha, 1 - percent, CLOSE_TO)
         })
         ease.on('complete', () => ease.destroy())
     })
@@ -112,12 +132,12 @@ describe('pixi-ease', () =>
         const e = ease.add(object, { rotation: Math.PI }, { ease: 'linear', reverse: true })
         e.on('each-rotation', results => {
             const percent = results.time / 1000
-            assert.closeTo(object.rotation, reverseCalled ? Math.PI * (1 - percent) : Math.PI * percent, 0.01)
+            assert.closeTo(object.rotation, reversed ? Math.PI * (1 - percent) : Math.PI * percent, CLOSE_TO)
         })
-        let reverseCalled = false
-        e.on('reverse-rotation', () => reverseCalled = true)
+        let reversed = false
+        e.on('reverse-rotation', () => reversed = true)
         ease.on('complete', () => {
-            assert.isTrue(reverseCalled)
+            assert.isTrue(reversed)
             ease.destroy()
         })
     })
@@ -130,7 +150,7 @@ describe('pixi-ease', () =>
         const face = Math.atan2(target.y - object.y, target.x - object.x)
         e.on('each-face', results => {
             const percent = results.time / 1000
-            assert.closeTo(object.rotation, face * percent, 0.01)
+            assert.closeTo(object.rotation, face * percent, CLOSE_TO)
         })
         ease.on('complete', () => ease.destroy())
     })
@@ -141,8 +161,8 @@ describe('pixi-ease', () =>
         const e = ease.add(object, { skew: 10 }, { ease: 'linear', repeat: 1 })
         e.on('each-skew', results => {
             const percent = results.time / 1000
-            assert.closeTo(object.skew.x, 10 * percent, 0.01)
-            assert.closeTo(object.skew.y, 10 * percent, 0.01)
+            assert.closeTo(object.skew.x, 10 * percent, CLOSE_TO)
+            assert.closeTo(object.skew.y, 10 * percent, CLOSE_TO)
         })
         ease.on('complete', () => ease.destroy())
     })
@@ -153,11 +173,11 @@ describe('pixi-ease', () =>
         const e = ease.add(object, { skewX: 10, skewY: 20 }, { ease: 'linear', repeat: 1 })
         e.on('each-skewX', results => {
             const percent = results.time / 1000
-            assert.closeTo(object.skew.x, 10 * percent, 0.01)
+            assert.closeTo(object.skew.x, 10 * percent, CLOSE_TO)
         })
         e.on('each-skewY', results => {
             const percent = results.time / 1000
-            assert.closeTo(object.skew.y, 20 * percent, 0.01)
+            assert.closeTo(object.skew.y, 20 * percent, CLOSE_TO)
         })
         ease.on('complete', () => ease.destroy())
     })
@@ -200,7 +220,7 @@ describe('pixi-ease', () =>
         const e = ease.add(object, { generic: 10 }, { repeat: 2 })
         e.on('each-generic', results => {
             const percent = results.time / 1000
-            assert.closeTo(object.generic, percent * 10, 0.01)
+            assert.closeTo(object.generic, percent * 10, CLOSE_TO)
         })
         let count = 0
         e.on('repeat-generic', () => count++)
@@ -220,7 +240,7 @@ describe('pixi-ease', () =>
         e.on('wait-end-generic', () => waitEndGeneric = true)
         e.on('each-generic', results => {
             const percent = results.time / 1000
-            assert.closeTo(object.generic, percent * 10, 0.01)
+            assert.closeTo(object.generic, percent * 10, CLOSE_TO)
         })
         ease.on('complete', () => {
             assert.isTrue(waitGeneric)
@@ -270,5 +290,138 @@ describe('pixi-ease', () =>
         assert.equal(e.eases[0].options.duration, 500)
         assert.isFunction(e.eases[0].options.ease)
         ease.destroy()
+    })
+
+    it('waitForRemoveAll', () => {
+        const ease = new Ease.Ease()
+        const e = ease.add({ x: 0 }, { x: 5 })
+        assert.equal(e.count, 1)
+        e.once('each-x', () => {
+            ease.removeAll()
+        })
+        requestAnimationFrame(() =>
+        {
+            assert.equal(ease.countRunning(), 0)
+            ease.destroy()
+        })
+    })
+
+    it('removeEase', () => {
+        const ease = new Ease.Ease()
+        const object = { x: 0, rotation: 0 }
+        const e = ease.add(object, { x: 5, rotation: Math.PI })
+        assert.equal(e.count, 2)
+        ease.removeEase(object, ['x', 'rotation'])
+        assert.equal(e.count, 0)
+        ease.destroy()
+    })
+
+    it('waitForRemoveEase', () => {
+        const ease = new Ease.Ease()
+        const object = { x: 0 }
+        const e = ease.add(object, { x: 5 })
+        assert.equal(e.count, 1)
+        e.once('each-x', () => {
+            ease.removeEase(object, 'x')
+        })
+        requestAnimationFrame(() =>
+        {
+            assert.equal(ease.countRunning(), 0)
+            ease.destroy()
+        })
+    })
+
+    it('waitRemoveAllEases', () => {
+        const ease = new Ease.Ease()
+        const object = { x: 0 }
+        const e = ease.add(object, { x: 5 })
+        assert.equal(e.count, 1)
+        e.once('each-x', () => {
+            ease.removeAllEases(object)
+        })
+        requestAnimationFrame(() =>
+        {
+            assert.equal(ease.countRunning(), 0)
+            ease.destroy()
+        })
+    })
+
+    it('multiple object eases', () => {
+        const ease = new Ease.Ease()
+        const object1 = { x: 0, y: 0 }
+        const object2 = { x: 10, y: 10 }
+        const e = ease.add([object1, object2], { position: { x: 20, y: 30 } }, { ease: 'linear', repeat: 1 })
+        e[0].on('each-position', results => {
+            const percent = results.time / 1000
+            assert.closeTo(object1.x, 20 * percent, CLOSE_TO)
+            assert.closeTo(object1.y, 30 * percent, CLOSE_TO)
+        })
+        e[1].on('each-position', results => {
+            const percent = results.time / 1000
+            assert.closeTo(object2.x, 10 + 10 * percent, CLOSE_TO)
+            assert.closeTo(object2.y, 10 + 20 * percent, CLOSE_TO)
+        })
+        let complete1 = false
+        let complete2 = false
+        e[0].on('complete-position', () => complete1 = true)
+        e[1].on('complete-position', () => complete2 = true)
+        ease.on('complete', () => {
+            assert.isTrue(complete1)
+            assert.isTrue(complete2)
+            ease.destroy()
+        })
+    })
+
+    it('Ease.list deprecated message', () => {
+        new Ease.List()
+    })
+
+    it('multiple eases on same object', () => {
+        const ease = new Ease.Ease({ ease: 'linear' })
+        const object = { x: 0, y: 0 }
+        const e1 = ease.add(object, { x: 10 })
+        e1.on('each-x', results => {
+            const percent = results.time / 1000
+            assert.closeTo(object.x, percent * 10, CLOSE_TO)
+        })
+        requestAnimationFrame(() =>
+        {
+            const e2 = ease.add(object, { y: 20 })
+            assert.equal(e1, e2)
+            e1.on('each-y', results => {
+                const percent = results.time / 1000
+                assert.closeTo(object.y, percent * 20, CLOSE_TO)
+            })
+        })
+        ease.on('complete', () => ease.destroy())
+    })
+
+    it('removeExisting', () => {
+        const ease = new Ease.Ease({ ease: 'linear' })
+        const object = { x: 5, y: 6, scale: { x: 10, y: 11 }, skew: { x: 2, y: 3} }
+        ease.add(object, { x: 10, y: 8, scale: 4, skew: 3 })
+        ease.add(object, { x: 2, y: 1, scale: 0, skew: 2 }, { duration: 500, removeExisting: true })
+        ease.on('complete', () => {
+            assert.equal(object.x, 2)
+            assert.equal(object.y, 1)
+            assert.equal(object.scale.x, 0)
+            assert.equal(object.scale.y, 0)
+            assert.equal(object.skew.x, 2)
+            assert.equal(object.skew.y, 2)
+            ease.destroy()
+        })
+    })
+
+    it('destroyed element', () => {
+        const ease = new Ease.Ease()
+        const object = { x: 0 }
+        ease.add(object, { x: 10 })
+        requestAnimationFrame(() => {
+            object._destroyed = true
+            requestAnimationFrame(() => {
+                assert.equal(ease.countRunning(), 0)
+                ease.destroy()
+            })
+        })
     })
 })

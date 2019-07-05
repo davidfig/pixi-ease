@@ -115,13 +115,13 @@ export class EaseDisplayObject extends Events
 
     add(params, options)
     {
-        for (let entry in params)
+        if (options.removeExisting)
         {
-            if (options.removeExisting)
+            const skew = ['skewX', 'skewY', 'skew']
+            const scale = ['scaleX', 'scaleY', 'scale']
+            const position = ['position', 'x', 'y']
+            for (let entry in params)
             {
-                const skew = ['skewX', 'skewY', 'skew']
-                const scale = ['scaleX', 'scaleY', 'scale']
-                const position = ['position', 'x', 'y']
                 if (skew.indexOf(entry) !== -1)
                 {
                     this.remove(skew)
@@ -130,15 +130,26 @@ export class EaseDisplayObject extends Events
                 {
                     this.remove(scale)
                 }
-                else if (position.indexOf(entry) !== -1)
+                else if (entry === 'position')
                 {
                     this.remove(position)
+                }
+                else if (entry === 'x')
+                {
+                    this.remove(['x', 'position'])
+                }
+                else if (entry === 'y')
+                {
+                    this.remove(['y', 'position'])
                 }
                 else
                 {
                     this.remove(entry)
                 }
             }
+        }
+        for (let entry in params)
+        {
             const opts = { ease: options.ease, duration: options.duration, repeat: options.repeat, reverse: options.reverse, wait: options.wait }
             this.addParam(entry, params[entry], opts)
         }
@@ -183,14 +194,6 @@ export class EaseDisplayObject extends Events
         const percent = calc - index
         const color1 = colors[index]
         const color2 = colors[next]
-        if (percent === 0)
-        {
-            return color1
-        }
-        if (percent === 1)
-        {
-            return color2
-        }
         const r1 = color1 >> 16
         const g1 = color1 >> 8 & 0x0000ff
         const b1 = color1 & 0x0000ff
@@ -212,6 +215,15 @@ export class EaseDisplayObject extends Events
         }
         this.element.x = ease.start.x + random(ease.to)
         this.element.y = ease.start.y + random(ease.to)
+    }
+
+    complete(ease)
+    {
+        if (ease.entry === 'shake')
+        {
+            this.element.x = ease.start.x
+            this.element.y = ease.start.y
+        }
     }
 
     reverse(ease)
@@ -352,11 +364,7 @@ export class EaseDisplayObject extends Events
                 }
                 else
                 {
-                    if (ease.entry === 'shake')
-                    {
-                        this.element.x = ease.start.x
-                        this.element.y = ease.start.y
-                    }
+                    this.complete(ease)
                     this.emit(`complete-${ease.entry}`, this.element)
                     eases.splice(i, 1)
                     i--
