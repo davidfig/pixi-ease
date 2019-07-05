@@ -10,7 +10,7 @@ a simple and powerful pixi.js easing/tweening/animating library
 * uses eventemitter3 for events for both the easing lists and individual eases
 * tracks eases on DisplayObject and cleans up when DisplayObject is destroyed
 * includes a default easing list so you don't have to instantiate for simple cases
-* includes a shake paramter
+* includes a shake parameter
 * full test coverage
 
 ## Live Demo
