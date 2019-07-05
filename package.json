@@ -1,6 +1,6 @@
 {
     "name": "pixi-ease",
-    "version": "2.0.2",
+    "version": "2.1.0",
     "description": "an animation library using easing functions",
     "main": "dist/ease.js",
     "scripts": {
@@ -11,7 +11,7 @@
         "build": "rollup -c",
         "test-speed": "budo docs/speed/code.js:index.js --live --dir docs/speed",
         "build-demos": "rollup -c rollup.demo.js",
-        "prepublishOnly": "yarn build && yarn build-demos && yarn docs",
+        "prepublishOnly": "yarn build && yarn build-demos && yarn docs && yarn test",
         "docs": "jsdoc -c docs/jsdoc.conf.json",
         "upgrade": "yarn upgrade-interactive --latest"
     },
