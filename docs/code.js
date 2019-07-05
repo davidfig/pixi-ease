@@ -33,9 +33,9 @@ function startEases()
     ease.add(box('scaleY'), { scaleY: 2 }, { repeat: true, reverse: true })
     ease.add(box('scale'), { scale: 0 }, { repeat: true, reverse: true })
     ease.add(box('x/y'), { x: window.innerWidth / 2, y: window.innerHeight / 2 }, { repeat: true, reverse: true })
-    ease.add(box('target'), { target: { x: window.innerWidth / 2, y: 0 } }, { repeat: true, reverse: true })
+    ease.add(box('position'), { position: { x: window.innerWidth / 2, y: 0 } }, { repeat: true, reverse: true })
     ease.add(box('tint').sprite, { tint: [0xff0000, 0x00ff00, 0x0000ff] }, { repeat: true, ease: 'linear' })
-    ease.add(box('tintBlend').sprite, { tintBlend: [0xff0000, 0x00ff00, 0x0000ff] }, { repeat: true, duration: 5000, ease: 'linear' })
+    ease.add(box('blend').sprite, { blend: [0xff0000, 0x00ff00, 0x0000ff] }, { repeat: true, duration: 5000, ease: 'linear' })
     ease.add(box('shake'), { shake: 5 }, { repeat: true })
     ease.add(box('alpha'), { alpha: 0 }, { repeat: true, reverse: true })
     ease.add(box('width'), { width: SIZE * 2 }, { repeat: true, reverse: true })
@@ -44,7 +44,7 @@ function startEases()
     ease.add(box('skew'), { skew: 2 * Math.PI }, { repeat: true, reverse: true })
     ease.add(box('skewX'), { skewX: 2 * Math.PI }, { repeat: true, reverse: true })
     ease.add(box('skewY'), { skewY: 2 * Math.PI }, { repeat: true, reverse: true })
-    ease.add(box('all'), { scale: 2, target: { x: window.innerWidth / 2, y: window.innerHeight / 2 }, alpha: 0.5, skew: 2 * Math.PI, rotation: 2 * Math.PI }, { repeat: true, reverse: true })
+    ease.add(box('all'), { scale: 2, position: { x: window.innerWidth / 2, y: window.innerHeight / 2 }, alpha: 0.5, skew: 2 * Math.PI, rotation: 2 * Math.PI }, { repeat: true, reverse: true })
 }
 
 function resetEases()
@@ -95,20 +95,21 @@ function setupButtons()
     api.onclick = () => window.location.href = 'jsdoc/'
 }
 
-function box(words)
+function box(words, size)
 {
+    size = size || SIZE
     const container = app.stage.addChild(new PIXI.Container())
-    container.position.set(SIZE, y)
+    container.position.set(size, y)
     const sprite = container.sprite = container.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
-    sprite.width = sprite.height = SIZE
+    sprite.width = sprite.height = size
     sprite.tint = Random.color()
     if (words)
     {
         const text = container.addChild(new PIXI.Text(words, { fill: 'white', fontSize: '1.25em' }))
         text.anchor.set(0.5)
-        text.position.set(SIZE / 2, SIZE / 2)
+        text.position.set(size / 2, size / 2)
     }
-    y += SIZE
+    y += size
     boxes.push(container)
     return container
 }

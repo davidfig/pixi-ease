@@ -31,7 +31,7 @@ const easeOptions = {
  * const secondEase = new Ease({ duration: 3000, ease: 'easeInBack' })
  * const test2 = app.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
  * test2.tint = 0x0000ff
- * secondEase.add(test2, { tintBlend: [0xff0000, 0x00ff00], scale: 2 })
+ * secondEase.add(test2, { blend: [0xff0000, 0x00ff00], scale: 2 })
  */
 export class Ease extends Events
 {
@@ -84,7 +84,7 @@ export class Ease extends Events
      */
     destroy()
     {
-        this.removeAll()
+        this.removeAll(true)
         if (this.options.useTicker === true)
         {
             this.ticker.remove(this.update, this)
@@ -98,7 +98,7 @@ export class Ease extends Events
      * @param {object} params
      * @param {number} [params.x]
      * @param {number} [params.y]
-     * @param {(PIXI.DisplayObject|PIXI.Point)} [params.target] changes both x and y
+     * @param {(PIXI.DisplayObject|PIXI.Point)} [params.position] changes both x and y
      * @param {number} [params.width]
      * @param {number} [params.height]
      * @param {number} [params.scale] changes both scale.x and scale.y
@@ -106,12 +106,12 @@ export class Ease extends Events
      * @param {number} [params.scaleY]
      * @param {number} [params.alpha]
      * @param {number} [params.rotation]
-     * @param {number} [params.rotationFace] rotate to face a DisplayObject using the closest angle
+     * @param {(PIXI.DisplayObject|PIXI.Point)} [params.face] rotate the element to face a DisplayObject using the closest angle
      * @param {number} [params.skew] changes both skew.x and skew.y
      * @param {number} [params.skewX]
      * @param {number} [params.skewY]
-     * @param {(number|number[])} [params.tint] this includes the current tint (or 0xffffff) as the first color
-     * @param {(number|number[])} [params.tintBlend] tint by blending between colors
+     * @param {(number|number[])} [params.tint] cycle through colors - if number is provided then it cycles between current tint and number; if number[] is provided is cycles only between tints in the number[]
+     * @param {(number|number[])} [params.blend] blend between colors - if number is provided then it blends current tint to number; if number[] is provided then it blends between the tints in the number[]
      * @param {number} [params.shake] moves
      * @param {number} [params.*] generic number parameter
      *
@@ -121,7 +121,7 @@ export class Ease extends Events
      * @param {(boolean|number)} [options.repeat]
      * @param {boolean} [options.reverse]
      * @param {number} [options.wait] wait this number of milliseconds before ease starts
-     *
+     * @param {boolean} [options.removeExisting] removes existing eases on the element of the same type (including x,y/position, skewX,skewY/skew, scaleX,scaleY/scale)
      * @returns {EaseDisplayObject}
      */
     add(element, params, options)
@@ -159,7 +159,7 @@ export class Ease extends Events
         }
         else
         {
-            ease = element[this.key] = new EaseDisplayObject(element)
+            ease = element[this.key] = new EaseDisplayObject(element, this)
             this.list.push(ease)
         }
         ease.add(params, options)
@@ -209,7 +209,7 @@ export class Ease extends Events
             {
                 if (Array.isArray(param))
                 {
-                    param.forEach((entry) => ease.remove(entry))
+                    param.forEach(entry => ease.remove(entry))
                 }
                 else
                 {
@@ -221,10 +221,11 @@ export class Ease extends Events
 
     /**
      * remove all animations for all DisplayObjects
+     * @param {boolean} [force] remove all eases even if called within update loop (setting this to true may cause unexpected problems)
      */
-    removeAll()
+    removeAll(force)
     {
-        if (this.inUpdate)
+        if (!force && this.inUpdate)
         {
             this.waitRemoveAll = true
         }

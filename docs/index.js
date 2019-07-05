@@ -71822,7 +71822,8 @@
                  * @fires EaseElement#complete
                  * @fires EaseElement#each-*
                  * @fires EaseElement#complete-*
-                 * @fires EaseElement#loop-*
+                 * @fires EaseElement#reverse-*
+                 * @fires EaseElement#repeat-*
                  * @fires EaseElement#wait-*
                  * @fires EaseElement#wait-end-*
                  */
@@ -71842,7 +71843,7 @@
 
                 addParam(entry, param, options)
                 {
-                    let start, to, delta, update, name;
+                    let start, to, delta, update, name = entry;
                     switch (entry)
                     {
                         case 'scaleX':
@@ -71851,7 +71852,7 @@
                             start = this.element[name].x;
                             to = param;
                             delta = param - start;
-                            update = (ease) => this.updateCoord(ease, entry, name, 'x');
+                            update = ease => this.updateCoord(ease, entry, name, 'x');
                             break
 
                         case 'scaleY':
@@ -71860,76 +71861,100 @@
                             start = this.element[name].y;
                             to = param;
                             delta = param - start;
-                            update = (ease) => this.updateCoord(ease, entry, name, 'y');
+                            update = ease => this.updateCoord(ease, entry, name, 'y');
                             break
 
                         case 'tint':
-                        case 'tintBlend':
+                        case 'blend':
+                            const colors = Array.isArray(param) ? param : [this.element.tint, param];
                             start = 0;
-                            to = 1;
-                            delta = 1;
-                            const colors = !Array.isArray(param) ? [param] : param;
-                            const tint = this.element.tint;
-                            colors.unshift(tint ? tint : 0xffffff);
-                            const interval = 1 / colors.length;
-                            update = (entry === 'tint') ? (ease) => this.updateTint(ease, entry, colors, interval) : (ease) => this.updateBlend(ease, entry, colors, interval);
+                            to = colors.length;
+                            delta = to;
+                            update = (entry === 'tint') ? ease => this.updateTint(ease, entry, colors) : ease => this.updateBlend(ease, entry, colors);
                             break
 
                         case 'shake':
                             start = { x: this.element.x, y: this.element.y };
                             to = param;
-                            update = (ease) => this.updateShake(ease);
+                            update = ease => this.updateShake(ease);
+                            break
+
+                        case 'position':
+                            start = { x: this.element.x, y: this.element.y };
+                            to = { x: param.x, y: param.y };
+                            delta = { x: to.x - start.x, y: to.y - start.y };
+                            update = ease => this.updatePosition(ease);
+                            break
+
+                        case 'skew':
+                        case 'scale':
+                            start = this.element[entry].x;
+                            to = param;
+                            delta = param - start;
+                            update = ease => this.updatePoint(ease, entry);
+                            break
+
+                        case 'face':
+                            start = this.element.rotation;
+                            to = Math.atan2(param.y - this.element.y, param.x - this.element.x);
+                            delta = to - start;
+                            update = ease => this.updateOne(ease, 'rotation');
                             break
 
                         default:
                             start = this.element[entry];
                             to = param;
                             delta = param - start;
-                            update = (ease) => this.updateOne(ease, entry);
+                            update = ease => this.updateOne(ease, entry);
                     }
+                    this.eases.push({ entry, options, update, start, to, delta, time: 0, wait: options.wait || 0 });
+                }
 
-                    const eases = this.eases;
-                    let i;
-                    for (i = 0; i < eases.length; i++)
+                /**
+                 * remove all matching parameters from element
+                 * @param {(string|string[])} params
+                 */
+                remove(params)
+                {
+                    params = typeof params === 'string' ? [params] : params;
+                    for (let i = 0; i < this.eases.length; i++)
                     {
-                        if (eases[i].entry === entry)
+                        if (params.indexOf(this.eases[i].entry) !== -1)
                         {
-                            break
+                            this.eases.splice(i, 1);
+                            i--;
                         }
                     }
-                    const add = { entry, options, update, start, to, delta, time: 0, wait: options.wait || 0 };
-                    if (i !== eases.length)
-                    {
-                        this.eases[i] = add;
-                    }
-                    this.eases.push(add);
                 }
 
                 add(params, options)
                 {
                     for (let entry in params)
                     {
+                        if (options.removeExisting)
+                        {
+                            const skew = ['skewX', 'skewY', 'skew'];
+                            const scale = ['scaleX', 'scaleY', 'scale'];
+                            const position = ['position', 'x', 'y'];
+                            if (skew.indexOf(entry) !== -1)
+                            {
+                                this.remove(skew);
+                            }
+                            else if (scale.indexOf(entry) !== -1)
+                            {
+                                this.remove(scale);
+                            }
+                            else if (position.indexOf(entry) !== -1)
+                            {
+                                this.remove(position);
+                            }
+                            else
+                            {
+                                this.remove(entry);
+                            }
+                        }
                         const opts = { ease: options.ease, duration: options.duration, repeat: options.repeat, reverse: options.reverse };
-                        const param = params[entry];
-                        if (entry === 'scale')
-                        {
-                            this.addParam('scaleX', param, opts);
-                            this.addParam('scaleY', param, opts);
-                        }
-                        else if (entry === 'skew')
-                        {
-                            this.addParam('skewX', param, opts);
-                            this.addParam('skewY', param, opts);
-                        }
-                        else if (entry === 'target')
-                        {
-                            this.addParam('x', param.x, opts);
-                            this.addParam('y', param.y, opts);
-                        }
-                        else
-                        {
-                            this.addParam(entry, param, opts);
-                        }
+                        this.addParam(entry, params[entry], opts);
                     }
                 }
 
@@ -71938,49 +71963,58 @@
                     this.element[entry] = ease.options.ease(ease.time, ease.start, ease.delta, ease.options.duration);
                 }
 
+                updatePoint(ease, entry)
+                {
+                    this.element[entry].x = this.element[entry].y = ease.options.ease(ease.time, ease.start, ease.delta, ease.options.duration);
+                }
+
+                updatePosition(ease)
+                {
+                    this.element.x = ease.options.ease(ease.time, ease.start.x, ease.delta.x, ease.options.duration);
+                    this.element.y = ease.options.ease(ease.time, ease.start.y, ease.delta.y, ease.options.duration);
+                }
+
                 updateCoord(ease, entry, name, coord)
                 {
                     this.element[name][coord] = ease.options.ease(ease.time, ease.start, ease.delta, ease.options.duration);
                 }
 
-                updateTint(ease, entry, colors, interval)
+                updateTint(ease, entry, colors)
                 {
-                    const percent = ease.options.ease(ease.time, ease.start, ease.delta, ease.options.duration);
-                    const index = Math.floor(percent / interval);
+                    const index = Math.floor(ease.options.ease(ease.time, ease.start, ease.delta, ease.options.duration));
                     this.element.tint = colors[index];
                 }
 
-                updateBlend(ease, entry, colors, interval)
+                updateBlend(ease, entry, colors)
                 {
-                    const percent = ease.options.ease(ease.time, ease.start, ease.delta, ease.options.duration);
-                    let index = Math.floor(percent / interval);
-                    index = index === colors.length ? index - 1 : index;
+                    const calc = ease.options.ease(ease.time, ease.start, ease.delta, ease.options.duration);
+                    const index = Math.floor(calc);
                     let next = index + 1;
                     if (next === colors.length)
                     {
-                        next = ease.options.reverse ? index - 1 : 0;
+                        next = ease.options.reverse ? index - 1 : ease.options.repeat ? 0 : index;
                     }
-                    const percentBlend = (percent % interval) / interval;
+                    const percent = calc - index;
                     const color1 = colors[index];
                     const color2 = colors[next];
-                    if (percentBlend === 0)
+                    if (percent === 0)
                     {
                         return color1
                     }
-                    if (percentBlend === 1)
+                    if (percent === 1)
                     {
                         return color2
                     }
-                    var r1 = color1 >> 16;
-                    var g1 = color1 >> 8 & 0x0000ff;
-                    var b1 = color1 & 0x0000ff;
-                    var r2 = color2 >> 16;
-                    var g2 = color2 >> 8 & 0x0000ff;
-                    var b2 = color2 & 0x0000ff;
-                    var percent1 = 1 - percentBlend;
-                    var r = percent1 * r1 + percent * r2;
-                    var g = percent1 * g1 + percent * g2;
-                    var b = percent1 * b1 + percent * b2;
+                    const r1 = color1 >> 16;
+                    const g1 = color1 >> 8 & 0x0000ff;
+                    const b1 = color1 & 0x0000ff;
+                    const r2 = color2 >> 16;
+                    const g2 = color2 >> 8 & 0x0000ff;
+                    const b2 = color2 & 0x0000ff;
+                    const percent1 = 1 - percent;
+                    const r = percent1 * r1 + percent * r2;
+                    const g = percent1 * g1 + percent * g2;
+                    const b = percent1 * b1 + percent * b2;
                     this.element.tint = r << 16 | g << 8 | b;
                 }
 
@@ -71996,10 +72030,62 @@
 
                 reverse(ease)
                 {
-                    const swap = ease.to;
-                    ease.to = ease.start;
-                    ease.start = swap;
-                    ease.delta = -ease.delta;
+                    if (ease.entry === 'position')
+                    {
+                        const swapX = ease.to.x;
+                        const swapY = ease.to.y;
+                        ease.to.x = ease.start.x;
+                        ease.to.y = ease.start.y;
+                        ease.start.x = swapX;
+                        ease.start.y = swapY;
+                        ease.delta.x = -ease.delta.x;
+                        ease.delta.y = -ease.delta.y;
+                    }
+                    else
+                    {
+                        const swap = ease.to;
+                        ease.to = ease.start;
+                        ease.start = swap;
+                        ease.delta = -ease.delta;
+                    }
+                }
+
+                repeat(ease)
+                {
+                    switch (ease.entry)
+                    {
+                        case 'skewX':
+                            this.element.skew.x = ease.start;
+                            break
+
+                        case 'skewY':
+                            this.element.skew.y = ease.start;
+                            break
+
+                        case 'skew':
+                            this.element.skew.set(ease.start);
+                            break
+
+                        case 'scaleX':
+                            this.element.scale.x = ease.start;
+                            break
+
+                        case 'scaleY':
+                            this.element.scale.y = ease.start;
+                            break
+
+                        case 'scale':
+                            this.element.scale.set(ease.start);
+                            break
+
+                        case 'position':
+                            this.element.position.set(ease.start.x, ease.start.y);
+                            break
+
+                        default:
+                            this.element[ease.entry] = ease.start;
+                    }
+                    ease.time = 0;
                 }
 
                 update(elapsed)
@@ -72012,31 +72098,33 @@
                     const eases = this.eases;
                     for (let i = 0, _i = eases.length; i < _i; i++)
                     {
+                        let current = elapsed;
                         const ease = eases[i];
                         if (ease.wait !== 0)
                         {
                             ease.wait -= elapsed;
                             if (ease.wait <= 0)
                             {
+                                current += ease.wait;
                                 ease.wait = 0;
-                                this.emit('wait-end-' + ease.name, ease.element);
+                                this.emit(`wait-end-${ease.name}`, ease.element);
                             }
                             else
                             {
-                                this.emit('wait-' + ease.entry, { element: this.element, wait: ease.wait });
+                                this.emit(`wait-${ease.entry}`, { element: this.element, wait: ease.wait });
                                 continue
                             }
                         }
                         const duration = ease.options.duration;
                         let leftover = 0;
-                        if (ease.time + elapsed > duration)
+                        if (ease.time + current > duration)
                         {
-                            leftover = ease.time + elapsed - duration;
+                            leftover = ease.time + current - duration;
                             ease.time = duration;
                         }
                         else
                         {
-                            ease.time += elapsed;
+                            ease.time += current;
                         }
                         ease.update(ease);
                         if (ease.time >= ease.options.duration)
@@ -72044,9 +72132,13 @@
                             const options = ease.options;
                             if (options.reverse)
                             {
-                                this.emit('loop-' + ease.name, ease.element);
                                 this.reverse(ease);
                                 ease.time = leftover;
+                                if (leftover)
+                                {
+                                    ease.update(ease);
+                                }
+                                this.emit(`reverse-${ease.entry}`, ease.element);
                                 if (!options.repeat)
                                 {
                                     options.reverse = false;
@@ -72058,21 +72150,27 @@
                             }
                             else if (options.repeat)
                             {
+                                this.repeat(ease);
                                 ease.time = leftover;
+                                if (leftover)
+                                {
+                                    ease.update(ease);
+                                }
                                 if (options.repeat !== true)
                                 {
                                     options.repeat--;
                                 }
+                                this.emit(`repeat-${ease.entry}`, ease.element);
                             }
                             else
                             {
-                                this.emit('complete-' + ease.entry, this.element);
+                                this.emit(`complete-${ease.entry}`, this.element);
                                 eases.splice(i, 1);
                                 i--;
                                 _i--;
                             }
                         }
-                        this.emit('each-' + ease.entry, this.element);
+                        this.emit(`each-${ease.entry}`, { element: this.element, time: ease.time });
                     }
                     this.emit('each', this);
                     if (Object.keys(eases).length === 0)
@@ -72110,18 +72208,27 @@
              * fires on each loop where there are animations
              * where * is the name of the parameter being eased (e.g., each-rotation)
              * @event EaseElement#each-*
+             * @type {object}
+             * @property {EaseElement} element
+             * @property {number} time remaining
+             */
+
+            /**
+             * fires when an animation repeats
+             * where * is the name of the parameter being eased (e.g., repeat-skewX)
+             * @event EaseElement#repeat-*
+             * @type {EaseElement}
+             */
+
+             /**
+             * fires when an animation reverses
+             * where * is the name of the parameter being eased (e.g., reverse-skewX)
+             * @event EaseElement#reverse-*
              * @type {EaseElement}
              */
 
             /**
-             * fires when an animation repeats or reverses
-             * where * is the name of the parameter being eased (e.g., complete-skewX)
-             * @event EaseElement#loop-*
-             * @type {EaseElement}
-             */
-
-            /**
-             * fires on each loop while a wait is counting down
+             * fires on each frame while a wait is counting down
              * where * is the name fo the parameter being eased (e.g., wait-end-y)
              * @event EaseElement#wait-*
              * @type {object}
@@ -72163,7 +72270,7 @@
              * const secondEase = new Ease({ duration: 3000, ease: 'easeInBack' })
              * const test2 = app.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
              * test2.tint = 0x0000ff
-             * secondEase.add(test2, { tintBlend: [0xff0000, 0x00ff00], scale: 2 })
+             * secondEase.add(test2, { blend: [0xff0000, 0x00ff00], scale: 2 })
              */
             class Ease extends eventemitter3$1
             {
@@ -72216,7 +72323,7 @@
                  */
                 destroy()
                 {
-                    this.removeAll();
+                    this.removeAll(true);
                     if (this.options.useTicker === true)
                     {
                         this.ticker.remove(this.update, this);
@@ -72230,7 +72337,7 @@
                  * @param {object} params
                  * @param {number} [params.x]
                  * @param {number} [params.y]
-                 * @param {(PIXI.DisplayObject|PIXI.Point)} [params.target] changes both x and y
+                 * @param {(PIXI.DisplayObject|PIXI.Point)} [params.position] changes both x and y
                  * @param {number} [params.width]
                  * @param {number} [params.height]
                  * @param {number} [params.scale] changes both scale.x and scale.y
@@ -72238,12 +72345,12 @@
                  * @param {number} [params.scaleY]
                  * @param {number} [params.alpha]
                  * @param {number} [params.rotation]
-                 * @param {number} [params.rotationFace] rotate to face a DisplayObject using the closest angle
+                 * @param {(PIXI.DisplayObject|PIXI.Point)} [params.face] rotate the element to face a DisplayObject using the closest angle
                  * @param {number} [params.skew] changes both skew.x and skew.y
                  * @param {number} [params.skewX]
                  * @param {number} [params.skewY]
-                 * @param {(number|number[])} [params.tint] this includes the current tint (or 0xffffff) as the first color
-                 * @param {(number|number[])} [params.tintBlend] tint by blending between colors
+                 * @param {(number|number[])} [params.tint] cycle through colors - if number is provided then it cycles between current tint and number; if number[] is provided is cycles only between tints in the number[]
+                 * @param {(number|number[])} [params.blend] blend between colors - if number is provided then it blends current tint to number; if number[] is provided then it blends between the tints in the number[]
                  * @param {number} [params.shake] moves
                  * @param {number} [params.*] generic number parameter
                  *
@@ -72253,7 +72360,7 @@
                  * @param {(boolean|number)} [options.repeat]
                  * @param {boolean} [options.reverse]
                  * @param {number} [options.wait] wait this number of milliseconds before ease starts
-                 *
+                 * @param {boolean} [options.removeExisting] removes existing eases on the element of the same type (including x,y/position, skewX,skewY/skew, scaleX,scaleY/scale)
                  * @returns {EaseDisplayObject}
                  */
                 add(element, params, options)
@@ -72341,7 +72448,7 @@
                         {
                             if (Array.isArray(param))
                             {
-                                param.forEach((entry) => ease.remove(entry));
+                                param.forEach(entry => ease.remove(entry));
                             }
                             else
                             {
@@ -72353,10 +72460,11 @@
 
                 /**
                  * remove all animations for all DisplayObjects
+                 * @param {boolean} [force] remove all eases even if called within update loop (setting this to true may cause unexpected problems)
                  */
-                removeAll()
+                removeAll(force)
                 {
-                    if (this.inUpdate)
+                    if (!force && this.inUpdate)
                     {
                         this.waitRemoveAll = true;
                     }
@@ -72515,9 +72623,9 @@
                 ease.add(box('scaleY'), { scaleY: 2 }, { repeat: true, reverse: true });
                 ease.add(box('scale'), { scale: 0 }, { repeat: true, reverse: true });
                 ease.add(box('x/y'), { x: window.innerWidth / 2, y: window.innerHeight / 2 }, { repeat: true, reverse: true });
-                ease.add(box('target'), { target: { x: window.innerWidth / 2, y: 0 } }, { repeat: true, reverse: true });
+                ease.add(box('position'), { position: { x: window.innerWidth / 2, y: 0 } }, { repeat: true, reverse: true });
                 ease.add(box('tint').sprite, { tint: [0xff0000, 0x00ff00, 0x0000ff] }, { repeat: true, ease: 'linear' });
-                ease.add(box('tintBlend').sprite, { tintBlend: [0xff0000, 0x00ff00, 0x0000ff] }, { repeat: true, duration: 5000, ease: 'linear' });
+                ease.add(box('blend').sprite, { blend: [0xff0000, 0x00ff00, 0x0000ff] }, { repeat: true, duration: 5000, ease: 'linear' });
                 ease.add(box('shake'), { shake: 5 }, { repeat: true });
                 ease.add(box('alpha'), { alpha: 0 }, { repeat: true, reverse: true });
                 ease.add(box('width'), { width: SIZE * 2 }, { repeat: true, reverse: true });
@@ -72526,7 +72634,7 @@
                 ease.add(box('skew'), { skew: 2 * Math.PI }, { repeat: true, reverse: true });
                 ease.add(box('skewX'), { skewX: 2 * Math.PI }, { repeat: true, reverse: true });
                 ease.add(box('skewY'), { skewY: 2 * Math.PI }, { repeat: true, reverse: true });
-                ease.add(box('all'), { scale: 2, target: { x: window.innerWidth / 2, y: window.innerHeight / 2 }, alpha: 0.5, skew: 2 * Math.PI, rotation: 2 * Math.PI }, { repeat: true, reverse: true });
+                ease.add(box('all'), { scale: 2, position: { x: window.innerWidth / 2, y: window.innerHeight / 2 }, alpha: 0.5, skew: 2 * Math.PI, rotation: 2 * Math.PI }, { repeat: true, reverse: true });
             }
 
             function resetEases()
@@ -72577,20 +72685,21 @@
                 api.onclick = () => window.location.href = 'jsdoc/';
             }
 
-            function box(words)
+            function box(words, size)
             {
+                size = size || SIZE;
                 const container = app.stage.addChild(new Container());
-                container.position.set(SIZE, y);
+                container.position.set(size, y);
                 const sprite = container.sprite = container.addChild(new Sprite(Texture.WHITE));
-                sprite.width = sprite.height = SIZE;
+                sprite.width = sprite.height = size;
                 sprite.tint = yyRandom.color();
                 if (words)
                 {
                     const text = container.addChild(new Text(words, { fill: 'white', fontSize: '1.25em' }));
                     text.anchor.set(0.5);
-                    text.position.set(SIZE / 2, SIZE / 2);
+                    text.position.set(size / 2, size / 2);
                 }
-                y += SIZE;
+                y += size;
                 boxes.push(container);
                 return container
             }
