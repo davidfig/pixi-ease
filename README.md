@@ -70,7 +70,7 @@ or [grab the latest release](https://github.com/davidfig/pixi-ease/releases/) an
 ```
 
 ## API Documentation
-[https://davidfig.github.io/dom-ease/jsdoc/](https://davidfig.github.io/dom-ease/jsdoc)
+[https://davidfig.github.io/pixi-ease/jsdoc/](https://davidfig.github.io/pixi-ease/jsdoc)
 
 ## Simple Usage
 ```js
