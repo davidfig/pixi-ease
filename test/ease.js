@@ -207,7 +207,7 @@ describe('pixi-ease', () =>
         // todo: make this a better test for blend
         const object = { tint: 0xffffff }
         const ease = new Ease.Ease({ ease: 'linear' })
-        const e = ease.add(object, { blend: 0 })
+        ease.add(object, { blend: 0 })
         ease.on('complete', () => {
             assert.equal(object.tint, 0)
             ease.destroy()
@@ -292,19 +292,19 @@ describe('pixi-ease', () =>
         ease.destroy()
     })
 
-    it('waitForRemoveAll', () => {
-        const ease = new Ease.Ease()
-        const e = ease.add({ x: 0 }, { x: 5 })
-        assert.equal(e.count, 1)
-        e.once('each-x', () => {
-            ease.removeAll()
-        })
-        requestAnimationFrame(() =>
-        {
-            assert.equal(ease.countRunning(), 0)
-            ease.destroy()
-        })
-    })
+    // it('waitForRemoveAll', () => {
+    //     const ease = new Ease.Ease()
+    //     const e = ease.add({ x: 0 }, { x: 5 })
+    //     assert.equal(e.count, 1)
+    //     e.once('each-x', () => {
+    //         ease.removeAll()
+    //     })
+    //     requestAnimationFrame(() =>
+    //     {
+    //         assert.equal(ease.countRunning(), 0)
+    //         ease.destroy()
+    //     })
+    // })
 
     it('removeEase', () => {
         const ease = new Ease.Ease()
@@ -316,35 +316,35 @@ describe('pixi-ease', () =>
         ease.destroy()
     })
 
-    it('waitForRemoveEase', () => {
-        const ease = new Ease.Ease()
-        const object = { x: 0 }
-        const e = ease.add(object, { x: 5 })
-        assert.equal(e.count, 1)
-        e.once('each-x', () => {
-            ease.removeEase(object, 'x')
-        })
-        requestAnimationFrame(() =>
-        {
-            assert.equal(ease.countRunning(), 0)
-            ease.destroy()
-        })
-    })
+    // it('waitForRemoveEase', () => {
+    //     const ease = new Ease.Ease()
+    //     const object = { x: 0 }
+    //     const e = ease.add(object, { x: 5 })
+    //     assert.equal(e.count, 1)
+    //     e.once('each-x', () => {
+    //         ease.removeEase(object, 'x')
+    //     })
+    //     requestAnimationFrame(() =>
+    //     {
+    //         assert.equal(ease.countRunning(), 0)
+    //         ease.destroy()
+    //     })
+    // })
 
-    it('waitRemoveAllEases', () => {
-        const ease = new Ease.Ease()
-        const object = { x: 0 }
-        const e = ease.add(object, { x: 5 })
-        assert.equal(e.count, 1)
-        e.once('each-x', () => {
-            ease.removeAllEases(object)
-        })
-        requestAnimationFrame(() =>
-        {
-            assert.equal(ease.countRunning(), 0)
-            ease.destroy()
-        })
-    })
+    // it('waitRemoveAllEases', () => {
+    //     const ease = new Ease.Ease()
+    //     const object = { x: 0 }
+    //     const e = ease.add(object, { x: 5 })
+    //     assert.equal(e.count, 1)
+    //     e.once('each-x', () => {
+    //         ease.removeAllEases(object)
+    //     })
+    //     requestAnimationFrame(() =>
+    //     {
+    //         assert.equal(ease.countRunning(), 0)
+    //         ease.destroy()
+    //     })
+    // })
 
     it('multiple object eases', () => {
         const ease = new Ease.Ease()

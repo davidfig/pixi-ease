@@ -11,7 +11,7 @@ a simple and powerful pixi.js easing/tweening/animating library
 * tracks eases on DisplayObject and cleans up when DisplayObject is destroyed
 * includes a default easing list so you don't have to instantiate for simple cases
 * includes a shake parameter
-* full test coverage
+* strong test coverage
 
 ## Live Demo
 [https://davidfig.github.io/pixi-ease/](https://davidfig.github.io/pixi-ease/)
@@ -93,6 +93,35 @@ test2.tint = 0x0000ff
 secondEase.add(test2, { tintBlend: [0xff0000, 0x00ff00], scale: 2 })
 ```
 
-## License 
-MIT License  
-(c) 2019 [YOPEY YOPEY LLC](https://yopeyopey.com/) by [David Figatner](https://twitter.com/yopey_yopey/)
+## Build Examples
+I've included a bunch of build examples in the builds directory, including: [browserify](https://github.com/davidfig/pixi-ease/tree/master/builds/browserify), [rollup](https://github.com/davidfig/pixi-ease/tree/master/builds/rollup), [standalone (e.g., cdn)](https://github.com/davidfig/pixi-ease/tree/master/builds/standalone), [standalone (pixi.js v4)](https://github.com/davidfig/pixi-ease/tree/master/builds/standalone-v4), and [typescript](https://github.com/davidfig/pixi-ease/tree/master/builds/typescript).
+  
+## Tests
+
+1. Clone repository
+2. yarn install
+3. yarn test (for Mocha test code)
+4. yarn coverage (for Instanbul coverage)
+
+### To run demo locally:
+1. Clone repository
+2. yarn install
+3. yarn build && yarn dev
+4. open browser to http://localhost:10001
+
+### To run build examples:
+1. Clone repository
+2. yarn install
+3. yarn build
+4. yarn builds
+5 yarn test-builds
+6. open browser to http://localhost:5000
+
+## Other Libraries
+If you liked pixi-ease, please try my other open source libraries:
+* [pixi-viewport](https://github.com/davidfig/pixi-viewport) - A highly configurable viewport/2D camera designed to work with pixi.js.
+* [pixi-scrollbox](https://github.com/davidfig/pixi-scrollbox) - pixi.js scrollbox: a masked box that can scroll vertically or horizontally with scrollbars (uses pixi-ease)
+* [intersects](https://github.com/davidfig/intersects) - a simple collection of 2d collision/intersects functions. Supports points, circles, lines, axis-aligned boxes, and polygons## License 
+
+## License
+MIT License (c) 2019 [YOPEY YOPEY LLC](https://yopeyopey.com/) by [David Figatner](https://twitter.com/yopey_yopey/)

@@ -146,17 +146,17 @@ export class Ease extends Events
         options = options || {}
         options.duration = typeof options.duration !== 'undefined' ? options.duration : this.options.duration
         options.ease = options.ease || this.options.ease
-
         if (typeof options.ease === 'string')
         {
             options.ease = Penner[options.ease]
         }
+
         let ease = element[this.key]
         if (ease)
         {
             if (!ease.connected)
             {
-                this.list.push(element)
+                this.list.push(element[this.key])
             }
         }
         else
@@ -188,25 +188,25 @@ export class Ease extends Events
                 {
                     this.list.splice(index, 1)
                 }
-                delete object[this.key]
+                object[this.key].clear()
             }
         }
     }
 
     /**
      * removes one or more eases from a DisplayObject
-     * @param {PIXI.DisplayObject} object
+     * @param {PIXI.DisplayObject} element
      * @param {(string|string[])} param
      */
-    removeEase(object, param)
+    removeEase(element, param)
     {
         if (this.inUpdate)
         {
-            this.waitRemoveEase.push({ object, param })
+            this.waitRemoveEase.push({ object: element, param })
         }
         else
         {
-            const ease = object[this.key]
+            const ease = element[this.key]
             if (ease)
             {
                 if (Array.isArray(param))
@@ -238,7 +238,7 @@ export class Ease extends Events
                 const easeDisplayObject = this.list.pop()
                 if (easeDisplayObject.element[this.key])
                 {
-                    delete easeDisplayObject.element[this.key]
+                    easeDisplayObject.element[this.key].clear()
                 }
             }
         }
@@ -246,21 +246,20 @@ export class Ease extends Events
 
     /**
      * update frame; this is called automatically if options.useTicker !== false
-     * @param {number} elapsed time in ms
+     * @param {number} elapsed time in ms since last frame (capped at options.maxFrame)
      */
     update()
     {
         if (!this.empty)
         {
-            this.inUpdate = true
+            // this.inUpdate = true
             const elapsed = Math.max(this.ticker.elapsedMS, this.options.maxFrame)
-            for (let i = 0, _i = this.list.length; i < _i; i++)
+            for (let i = 0; i < this.list.length; i++)
             {
                 if (this.list[i].update(elapsed))
                 {
                     this.list.splice(i, 1)
                     i--
-                    _i--
                 }
             }
             this.emit('each', this)
@@ -269,21 +268,21 @@ export class Ease extends Events
                 this.empty = true
                 this.emit('complete', this)
             }
-            this.inUpdate = false
-            while (this.waitRemoveEase.length)
-            {
-                const remove = this.waitRemoveEase.pop()
-                this.removeEase(remove.object, remove.param)
-            }
-            while (this.waitRemoveAllEases.length)
-            {
-                this.removeAllEases(this.waitRemoveAllEases.pop())
-            }
-            if (this.waitRemoveAll)
-            {
-                this.removeAll()
-                this.waitRemoveAll = false
-            }
+            // this.inUpdate = false
+            // while (this.waitRemoveEase.length)
+            // {
+            //     const remove = this.waitRemoveEase.pop()
+            //     this.removeEase(remove.object, remove.param)
+            // }
+            // while (this.waitRemoveAllEases.length)
+            // {
+            //     this.removeAllEases(this.waitRemoveAllEases.pop())
+            // }
+            // if (this.waitRemoveAll)
+            // {
+            //     this.removeAll()
+            //     this.waitRemoveAll = false
+            // }
         }
     }
 

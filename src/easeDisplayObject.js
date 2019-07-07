@@ -27,6 +27,14 @@ export class EaseDisplayObject extends Events
         this.connected = true
     }
 
+    /**
+     * clears all eases and disconnects object from list
+     */
+    clear()
+    {
+        this.eases = []
+    }
+
     addParam(entry, param, options)
     {
         let start, to, delta, update, name = entry
@@ -293,92 +301,97 @@ export class EaseDisplayObject extends Events
         if (this.element._destroyed)
         {
             delete this.element[this.key]
-            return true
-        }
-        const eases = this.eases
-        for (let i = 0, _i = eases.length; i < _i; i++)
-        {
-            let current = elapsed
-            const ease = eases[i]
-            if (ease.wait)
-            {
-                ease.wait -= elapsed
-                if (ease.wait <= 0)
-                {
-                    current += ease.wait
-                    ease.wait = 0
-                    this.emit(`wait-end-${ease.entry}`, ease.element)
-                }
-                else
-                {
-                    this.emit(`wait-${ease.entry}`, { element: this.element, wait: ease.wait })
-                    continue
-                }
-            }
-            const duration = ease.options.duration
-            let leftover = 0
-            if (ease.time + current > duration)
-            {
-                leftover = ease.time + current - duration
-                ease.time = duration
-            }
-            else
-            {
-                ease.time += current
-            }
-            ease.update(ease)
-            if (ease.time >= ease.options.duration)
-            {
-                const options = ease.options
-                if (options.reverse)
-                {
-                    this.reverse(ease)
-                    ease.time = leftover
-                    if (leftover)
-                    {
-                        ease.update(ease)
-                    }
-                    this.emit(`reverse-${ease.entry}`, ease.element)
-                    if (!options.repeat)
-                    {
-                        options.reverse = false
-                    }
-                    else if (options.repeat !== true)
-                    {
-                        options.repeat--
-                    }
-                }
-                else if (options.repeat)
-                {
-                    this.repeat(ease)
-                    ease.time = leftover
-                    if (leftover)
-                    {
-                        ease.update(ease)
-                    }
-                    if (options.repeat !== true)
-                    {
-                        options.repeat--
-                    }
-                    this.emit(`repeat-${ease.entry}`, ease.element)
-                }
-                else
-                {
-                    this.complete(ease)
-                    this.emit(`complete-${ease.entry}`, this.element)
-                    eases.splice(i, 1)
-                    i--
-                    _i--
-                }
-            }
-            this.emit(`each-${ease.entry}`, { element: this.element, time: ease.time })
-        }
-        this.emit('each', this)
-        if (Object.keys(eases).length === 0)
-        {
-            this.emit('complete', this)
             this.connected = false
             return true
+        }
+        if (this.eases.length)
+        {
+            for (let i = 0; i < this.eases.length; i++)
+            {
+                let current = elapsed
+                const ease = this.eases[i]
+                if (ease.wait)
+                {
+                    ease.wait -= elapsed
+                    if (ease.wait <= 0)
+                    {
+                        current += ease.wait
+                        ease.wait = 0
+                        this.emit(`wait-end-${ease.entry}`, ease.element)
+                    }
+                    else
+                    {
+                        this.emit(`wait-${ease.entry}`, { element: this.element, wait: ease.wait })
+                        continue
+                    }
+                }
+                const duration = ease.options.duration
+                let leftover = 0
+                if (ease.time + current > duration)
+                {
+                    leftover = ease.time + current - duration
+                    ease.time = duration
+                }
+                else
+                {
+                    ease.time += current
+                }
+                ease.update(ease)
+                if (ease.time >= ease.options.duration)
+                {
+                    const options = ease.options
+                    if (options.reverse)
+                    {
+                        this.reverse(ease)
+                        ease.time = leftover
+                        if (leftover)
+                        {
+                            ease.update(ease)
+                        }
+                        this.emit(`reverse-${ease.entry}`, ease.element)
+                        if (!options.repeat)
+                        {
+                            options.reverse = false
+                        }
+                        else if (options.repeat !== true)
+                        {
+                            options.repeat--
+                        }
+                    }
+                    else if (options.repeat)
+                    {
+                        this.repeat(ease)
+                        ease.time = leftover
+                        if (leftover)
+                        {
+                            ease.update(ease)
+                        }
+                        if (options.repeat !== true)
+                        {
+                            options.repeat--
+                        }
+                        this.emit(`repeat-${ease.entry}`, ease.element)
+                    }
+                    else
+                    {
+                        this.complete(ease)
+                        this.eases.splice(i, 1)
+                        i--
+                        this.emit(`complete-${ease.entry}`, this.element)
+                    }
+                }
+                this.emit(`each-${ease.entry}`, { element: this.element, time: ease.time })
+            }
+            this.emit('each', this)
+            if (this.eases.length === 0)
+            {
+                this.emit('complete', this)
+                if (this.eases.length === 0)
+                {
+                    this.connected = false
+                    return true
+                }
+            }
         }
     }
 
