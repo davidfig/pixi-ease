@@ -90,7 +90,7 @@ export class EaseDisplayObject extends Events
 
             case 'face':
                 start = this.element.rotation
-                to = Math.atan2(param.y - this.element.y, param.x - this.element.x)
+                to = EaseDisplayObject.shortestAngle(start, Math.atan2(param.y - this.element.y, param.x - this.element.x))
                 delta = to - start
                 update = ease => this.updateOne(ease, 'rotation')
                 break
@@ -102,6 +102,28 @@ export class EaseDisplayObject extends Events
                 update = ease => this.updateOne(ease, entry)
         }
         this.eases.push({ entry, options, update, start, to, delta, time: 0, wait: options.wait })
+    }
+
+    /**
+     * helper function to find closest angle to change between angle start and angle finish (used by face)
+     * @param {number} start angle
+     * @param {number} finish angle
+     */
+    static shortestAngle(start, finish)
+    {
+        function mod(a, n)
+        {
+            return (a % n + n) % n
+        }
+
+        const PI_2 = Math.PI * 2
+        let diff = Math.abs(start - finish) % PI_2
+        diff = diff > Math.PI ? (PI_2 - diff) : diff
+
+        const simple = finish - start
+        const sign = mod((simple + Math.PI), PI_2) - Math.PI > 0 ? 1 : -1
+
+        return diff * sign
     }
 
     /**

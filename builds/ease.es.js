@@ -681,7 +681,7 @@ class EaseDisplayObject extends eventemitter3
 
             case 'face':
                 start = this.element.rotation;
-                to = Math.atan2(param.y - this.element.y, param.x - this.element.x);
+                to = EaseDisplayObject.shortestAngle(start, Math.atan2(param.y - this.element.y, param.x - this.element.x));
                 delta = to - start;
                 update = ease => this.updateOne(ease, 'rotation');
                 break
@@ -693,6 +693,28 @@ class EaseDisplayObject extends eventemitter3
                 update = ease => this.updateOne(ease, entry);
         }
         this.eases.push({ entry, options, update, start, to, delta, time: 0, wait: options.wait });
+    }
+
+    /**
+     * helper function to find closest angle to change between angle start and angle finish (used by face)
+     * @param {number} start angle
+     * @param {number} finish angle
+     */
+    static shortestAngle(start, finish)
+    {
+        function mod(a, n)
+        {
+            return (a % n + n) % n
+        }
+
+        const PI_2 = Math.PI * 2;
+        let diff = Math.abs(start - finish) % PI_2;
+        diff = diff > Math.PI ? (PI_2 - diff) : diff;
+
+        const simple = finish - start;
+        const sign = mod((simple + Math.PI), PI_2) - Math.PI > 0 ? 1 : -1;
+
+        return diff * sign
     }
 
     /**
@@ -1099,13 +1121,13 @@ class Ease extends eventemitter3
         this.empty = true;
         if (this.options.useTicker === true)
         {
-            // weird code to ensure pixi.js v4 support (which changed from PIXI.ticker.shared to PIXI.Ticker.shared)
             if (this.options.ticker)
             {
                 this.ticker = this.options.ticker;
             }
             else
             {
+                // weird code to ensure pixi.js v4 support (which changed from PIXI.ticker.shared to PIXI.Ticker.shared)
                 // to avoid Rollup transforming our import, save pixi namespace in a variable
                 // from here: https://github.com/pixijs/pixi.js/issues/5757
                 const pixiNS = PIXI;
@@ -1156,7 +1178,7 @@ class Ease extends eventemitter3
      * @param {number} [params.skewY]
      * @param {(number|number[])} [params.tint] cycle through colors - if number is provided then it cycles between current tint and number; if number[] is provided is cycles only between tints in the number[]
      * @param {(number|number[])} [params.blend] blend between colors - if number is provided then it blends current tint to number; if number[] is provided then it blends between the tints in the number[]
-     * @param {number} [params.shake] moves
+     * @param {number} [params.shake] shakes the object by this number (randomly placing the element +/-shake pixels away from starting point)
      * @param {number} [params.*] generic number parameter
      *
      * @param {object} [options]
@@ -1214,26 +1236,64 @@ class Ease extends eventemitter3
     }
 
     /**
+     * helper function to create an ease that changes x and y to move the element to the desired target at the speed
+     * NOTE: under the hood this calls add(element {x, y }, { duration: <calculated speed based on distance and speed> })
+     * @param {PIXI.DisplayObject} element
+     * @param {(PIXI.DisplayObject|PIXI.Point)} target
+     * @param {number} speed in pixels / ms
+     *
+     * @param {object} [options]
+     * @param {(string|function)} [options.ease]
+     * @param {(boolean|number)} [options.repeat]
+     * @param {boolean} [options.reverse]
+     * @param {number} [options.wait] wait this number of milliseconds before ease starts
+     * @param {boolean} [options.removeExisting] removes existing eases on the element of the same type (including x,y/position, skewX,skewY/skew, scaleX,scaleY/scale)
+     *
+     * @returns {EaseDisplayObject}
+     */
+    target(element, target, speed, options)
+    {
+        const duration = Math.sqrt(Math.pow(element.x - target.x, 2) + Math.pow(element.y - target.y, 2)) / speed;
+        options = options || {};
+        options.duration = duration;
+        return this.add(element, { x: target.x, y: target.y }, options)
+    }
+
+    /**
+     * helper function to add an ease that changes rotation to face the element at the desired target using the speed
+     * NOTE: under the hood this calls add(element {x, y }, { duration: <calculated speed based on shortest rotation and speed> })
+     * @param {PIXI.DisplayObject} element
+     * @param {(PIXI.DisplayObject|PIXI.Point)} target
+     * @param {number} speed in radians / ms
+     *
+     * @param {object} [options]
+     * @param {(string|function)} [options.ease]
+     * @param {(boolean|number)} [options.repeat]
+     * @param {boolean} [options.reverse]
+     * @param {number} [options.wait] wait this number of milliseconds before ease starts
+     * @param {boolean} [options.removeExisting] removes existing eases on the element of the same type (including x,y/position, skewX,skewY/skew, scaleX,scaleY/scale)
+     *
+     * @returns {EaseDisplayObject}
+     */
+    face(element, target, speed, options)
+    {
+        const shortestAngle = EaseDisplayObject.shortestAngle(element.rotation, Math.atan2(target.y - element.y, target.x - element.x));
+        const duration = Math.abs(shortestAngle - element.rotation) / speed;
+        options = options || {};
+        options.duration = duration;
+        return this.add(element, { rotation: shortestAngle }, options)
+    }
+
+    /**
      * remove all eases from a DisplayObject
      * @param {PIXI.DisplayObject} object
      */
     removeAllEases(object)
     {
-        if (this.inUpdate)
+        if (object[this.key])
         {
-            this.waitRemoveAllEases.push(object);
-        }
-        else
-        {
-            if (object[this.key])
-            {
-                const index = this.list.indexOf(object[this.key]);
-                if (index !== -1)
-                {
-                    this.list.splice(index, 1);
-                }
-                object[this.key].clear();
-            }
+            this.list.splice(this.list.indexOf(object[this.key]), 1);
+            object[this.key].clear();
         }
     }
 
@@ -1244,46 +1304,31 @@ class Ease extends eventemitter3
      */
     removeEase(element, param)
     {
-        if (this.inUpdate)
+        const ease = element[this.key];
+        if (ease)
         {
-            this.waitRemoveEase.push({ object: element, param });
-        }
-        else
-        {
-            const ease = element[this.key];
-            if (ease)
+            if (Array.isArray(param))
             {
-                if (Array.isArray(param))
-                {
-                    param.forEach(entry => ease.remove(entry));
-                }
-                else
-                {
-                    ease.remove(param);
-                }
+                param.forEach(entry => ease.remove(entry));
+            }
+            else
+            {
+                ease.remove(param);
             }
         }
     }
 
     /**
      * remove all animations for all DisplayObjects
-     * @param {boolean} [force] remove all eases even if called within update loop (setting this to true may cause unexpected problems)
      */
-    removeAll(force)
+    removeAll()
     {
-        if (!force && this.inUpdate)
+        while (this.list.length)
         {
-            this.waitRemoveAll = true;
-        }
-        else
-        {
-            while (this.list.length)
+            const easeDisplayObject = this.list.pop();
+            if (easeDisplayObject.element[this.key])
             {
-                const easeDisplayObject = this.list.pop();
-                if (easeDisplayObject.element[this.key])
-                {
-                    easeDisplayObject.element[this.key].clear();
-                }
+                easeDisplayObject.element[this.key].clear();
             }
         }
     }
@@ -1296,7 +1341,6 @@ class Ease extends eventemitter3
     {
         if (!this.empty)
         {
-            // this.inUpdate = true
             const elapsed = Math.max(this.ticker.elapsedMS, this.options.maxFrame);
             for (let i = 0; i < this.list.length; i++)
             {
@@ -1312,21 +1356,6 @@ class Ease extends eventemitter3
                 this.empty = true;
                 this.emit('complete', this);
             }
-            // this.inUpdate = false
-            // while (this.waitRemoveEase.length)
-            // {
-            //     const remove = this.waitRemoveEase.pop()
-            //     this.removeEase(remove.object, remove.param)
-            // }
-            // while (this.waitRemoveAllEases.length)
-            // {
-            //     this.removeAllEases(this.waitRemoveAllEases.pop())
-            // }
-            // if (this.waitRemoveAll)
-            // {
-            //     this.removeAll()
-            //     this.waitRemoveAll = false
-            // }
         }
     }
 

@@ -292,20 +292,6 @@ describe('pixi-ease', () =>
         ease.destroy()
     })
 
-    // it('waitForRemoveAll', () => {
-    //     const ease = new Ease.Ease()
-    //     const e = ease.add({ x: 0 }, { x: 5 })
-    //     assert.equal(e.count, 1)
-    //     e.once('each-x', () => {
-    //         ease.removeAll()
-    //     })
-    //     requestAnimationFrame(() =>
-    //     {
-    //         assert.equal(ease.countRunning(), 0)
-    //         ease.destroy()
-    //     })
-    // })
-
     it('removeEase', () => {
         const ease = new Ease.Ease()
         const object = { x: 0, rotation: 0 }
@@ -315,36 +301,6 @@ describe('pixi-ease', () =>
         assert.equal(e.count, 0)
         ease.destroy()
     })
-
-    // it('waitForRemoveEase', () => {
-    //     const ease = new Ease.Ease()
-    //     const object = { x: 0 }
-    //     const e = ease.add(object, { x: 5 })
-    //     assert.equal(e.count, 1)
-    //     e.once('each-x', () => {
-    //         ease.removeEase(object, 'x')
-    //     })
-    //     requestAnimationFrame(() =>
-    //     {
-    //         assert.equal(ease.countRunning(), 0)
-    //         ease.destroy()
-    //     })
-    // })
-
-    // it('waitRemoveAllEases', () => {
-    //     const ease = new Ease.Ease()
-    //     const object = { x: 0 }
-    //     const e = ease.add(object, { x: 5 })
-    //     assert.equal(e.count, 1)
-    //     e.once('each-x', () => {
-    //         ease.removeAllEases(object)
-    //     })
-    //     requestAnimationFrame(() =>
-    //     {
-    //         assert.equal(ease.countRunning(), 0)
-    //         ease.destroy()
-    //     })
-    // })
 
     it('multiple object eases', () => {
         const ease = new Ease.Ease()
@@ -423,5 +379,40 @@ describe('pixi-ease', () =>
                 ease.destroy()
             })
         })
+    })
+
+    it('target', () => {
+        const ease = new Ease.Ease({ ease: 'linear' })
+        const object = { x: 0, y: 0 }
+        const target = { x: 100, y: 100 }
+        ease.target(object, target, 1)
+        ease.once('each', () => {
+            assert.closeTo(object.x, 12, 2)
+            assert.closeTo(object.y, 12, 2)
+            ease.destroy()
+        })
+    })
+
+    it('face', () => {
+        const ease = new Ease.Ease({ ease: 'linear' })
+        const object = { x: 0, y: 0, rotation: 0 }
+        const target = { x: 100, y: 100 }
+        ease.face(object, target, 0.01)
+        ease.once('each', () => {
+            assert.closeTo(object.rotation, 0.16, 0.1)
+            ease.destroy()
+        })
+    })
+
+    it('removeAllEases', () => {
+        const ease = new Ease.Ease()
+        const object1 = { x: 0, y: 0 }
+        ease.add(object1, { x: 5 })
+        ease.add(object1, { y: 5 })
+        const object2 = { x: 0, y: 0 }
+        ease.add(object2, { y: 5 })
+        ease.removeAllEases(object1)
+        assert.equal(ease.countRunning(), 1)
+        ease.destroy()
     })
 })

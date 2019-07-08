@@ -112,6 +112,8 @@
             
                 <li class="  " data-name="Ease#eventNames~"><a href="Ease.html#eventNames">eventNames</a></li>
             
+                <li class="parent  " data-name="Ease#face"><a href="Ease.html#face">face</a></li>
+            
                 <li class="  " data-name="Ease#listenerCount~"><a href="Ease.html#listenerCount">listenerCount</a></li>
             
                 <li class="  " data-name="Ease#listeners~"><a href="Ease.html#listeners">listeners</a></li>
@@ -129,6 +131,8 @@
                 <li class="parent  " data-name="Ease#removeEase"><a href="Ease.html#removeEase">removeEase</a></li>
             
                 <li class="  " data-name="Ease#removeListener~"><a href="Ease.html#removeListener">removeListener</a></li>
+            
+                <li class="parent  " data-name="Ease#target"><a href="Ease.html#target">target</a></li>
             
                 <li class="parent  " data-name="Ease#update"><a href="Ease.html#update">update</a></li>
             
@@ -1346,7 +1350,7 @@
                         
                     
                 
-                moves</td>
+                shakes the object by this number (randomly placing the element +/-shake pixels away from starting point)</td>
         </tr>
 	
 	
@@ -1715,7 +1719,7 @@
 
         
         <div class="tag-source">
-            <a href="src_ease.js.html#line293">ease.js:293</a>
+            <a href="src_ease.js.html#line300">ease.js:300</a>
         </div>
         
     </div>
@@ -1820,7 +1824,7 @@
 
         
         <div class="tag-source">
-            <a href="src_ease.js.html#line302">ease.js:302</a>
+            <a href="src_ease.js.html#line309">ease.js:309</a>
         </div>
         
     </div>
@@ -2236,6 +2240,428 @@ listeners.
             <td class="type">
             
                         Array
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="face">
+            <a class="share-icon" href="#face"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                face
+            </span>
+            <span class="signature">(element, target, speed, <span class="optional">options</span>)</span><span class="type-signature"><a href="EaseDisplayObject.html">EaseDisplayObject</a></span>
+            
+            
+            
+            
+        </h4>
+
+        
+        <div class="tag-source">
+            <a href="src_ease.js.html#line212">ease.js:212</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        helper function to add an ease that changes rotation to face the element at the desired target using the speedNOTE: under the hood this calls add(element {x, y }, { duration: <calculated speed based on shortest rotation and speed> })
+    </div>
+    
+
+    
+
+    
+
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>element</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">PIXI.DisplayObject</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>target</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">PIXI.DisplayObject</span>
+|
+
+<span class="param-type">PIXI.Point</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>speed</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                in radians / ms</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                
+                
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>ease</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>repeat</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+|
+
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>reverse</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>wait</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                wait this number of milliseconds before ease starts</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>removeExisting</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                removes existing eases on the element of the same type (including x,y/position, skewX,skewY/skew, scaleX,scaleY/scale)</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="EaseDisplayObject.html">EaseDisplayObject</a>
                         
                     
             </td>
@@ -3045,7 +3471,7 @@ listeners.
             <span class="">
                 removeAll
             </span>
-            <span class="signature">(<span class="optional">force</span>)</span>
+            <span class="signature">()</span>
             
             
             
@@ -3054,7 +3480,7 @@ listeners.
 
         
         <div class="tag-source">
-            <a href="src_ease.js.html#line228">ease.js:228</a>
+            <a href="src_ease.js.html#line258">ease.js:258</a>
         </div>
         
     </div>
@@ -3073,58 +3499,6 @@ listeners.
 
     
 
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>force</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                remove all eases even if called within update loop (setting this to true may cause unexpected problems)</td>
-        </tr>
-	
-	
-	</tbody>
-</table>
     
 
     
@@ -3182,7 +3556,7 @@ listeners.
 
         
         <div class="tag-source">
-            <a href="src_ease.js.html#line176">ease.js:176</a>
+            <a href="src_ease.js.html#line225">ease.js:225</a>
         </div>
         
     </div>
@@ -3467,7 +3841,7 @@ listeners.
 
         
         <div class="tag-source">
-            <a href="src_ease.js.html#line201">ease.js:201</a>
+            <a href="src_ease.js.html#line239">ease.js:239</a>
         </div>
         
     </div>
@@ -3826,6 +4200,428 @@ listeners.
             
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="target">
+            <a class="share-icon" href="#target"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                target
+            </span>
+            <span class="signature">(element, target, speed, <span class="optional">options</span>)</span><span class="type-signature"><a href="EaseDisplayObject.html">EaseDisplayObject</a></span>
+            
+            
+            
+            
+        </h4>
+
+        
+        <div class="tag-source">
+            <a href="src_ease.js.html#line188">ease.js:188</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        helper function to create an ease that changes x and y to move the element to the desired target at the speedNOTE: under the hood this calls add(element {x, y }, { duration: <calculated speed based on distance and speed> })
+    </div>
+    
+
+    
+
+    
+
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>element</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">PIXI.DisplayObject</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>target</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">PIXI.DisplayObject</span>
+|
+
+<span class="param-type">PIXI.Point</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>speed</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                in pixels / ms</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                
+                
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>ease</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>repeat</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+|
+
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>reverse</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>wait</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                wait this number of milliseconds before ease starts</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>removeExisting</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                removes existing eases on the element of the same type (including x,y/position, skewX,skewY/skew, scaleX,scaleY/scale)</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="EaseDisplayObject.html">EaseDisplayObject</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="update">
             <a class="share-icon" href="#update"><span class="glyphicon glyphicon-link"></span></a>
             <span class="">
@@ -3840,7 +4636,7 @@ listeners.
 
         
         <div class="tag-source">
-            <a href="src_ease.js.html#line251">ease.js:251</a>
+            <a href="src_ease.js.html#line274">ease.js:274</a>
         </div>
         
     </div>
@@ -3971,7 +4767,7 @@ listeners.
 
         
         <div class="tag-source">
-            <a href="src_ease.js.html#line358">ease.js:358</a>
+            <a href="src_ease.js.html#line365">ease.js:365</a>
         </div>
         
     </div>
@@ -4057,7 +4853,7 @@ listeners.
 
         
         <div class="tag-source">
-            <a href="src_ease.js.html#line364">ease.js:364</a>
+            <a href="src_ease.js.html#line371">ease.js:371</a>
         </div>
         
     </div>
@@ -4139,7 +4935,7 @@ listeners.
 
         <footer class="content-size">
             <div class="footer">
-                Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.2</a> on Sun Jul 07 2019 10:33:21 GMT-0400 (Eastern Daylight Time)
+                Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.2</a> on Mon Jul 08 2019 11:31:01 GMT-0400 (Eastern Daylight Time)
             </div>
         </footer>
     </div>

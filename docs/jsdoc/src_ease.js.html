@@ -112,6 +112,8 @@
             
                 <li class="  " data-name="Ease#eventNames~"><a href="Ease.html#eventNames">eventNames</a></li>
             
+                <li class="parent  " data-name="Ease#face"><a href="Ease.html#face">face</a></li>
+            
                 <li class="  " data-name="Ease#listenerCount~"><a href="Ease.html#listenerCount">listenerCount</a></li>
             
                 <li class="  " data-name="Ease#listeners~"><a href="Ease.html#listeners">listeners</a></li>
@@ -129,6 +131,8 @@
                 <li class="parent  " data-name="Ease#removeEase"><a href="Ease.html#removeEase">removeEase</a></li>
             
                 <li class="  " data-name="Ease#removeListener~"><a href="Ease.html#removeListener">removeListener</a></li>
+            
+                <li class="parent  " data-name="Ease#target"><a href="Ease.html#target">target</a></li>
             
                 <li class="parent  " data-name="Ease#update"><a href="Ease.html#update">update</a></li>
             
@@ -261,13 +265,13 @@ export class Ease extends Events
         this.empty = true
         if (this.options.useTicker === true)
         {
-            // weird code to ensure pixi.js v4 support (which changed from PIXI.ticker.shared to PIXI.Ticker.shared)
             if (this.options.ticker)
             {
                 this.ticker = this.options.ticker
             }
             else
             {
+                // weird code to ensure pixi.js v4 support (which changed from PIXI.ticker.shared to PIXI.Ticker.shared)
                 // to avoid Rollup transforming our import, save pixi namespace in a variable
                 // from here: https://github.com/pixijs/pixi.js/issues/5757
                 const pixiNS = PIXI
@@ -318,7 +322,7 @@ export class Ease extends Events
      * @param {number} [params.skewY]
      * @param {(number|number[])} [params.tint] cycle through colors - if number is provided then it cycles between current tint and number; if number[] is provided is cycles only between tints in the number[]
      * @param {(number|number[])} [params.blend] blend between colors - if number is provided then it blends current tint to number; if number[] is provided then it blends between the tints in the number[]
-     * @param {number} [params.shake] moves
+     * @param {number} [params.shake] shakes the object by this number (randomly placing the element +/-shake pixels away from starting point)
      * @param {number} [params.*] generic number parameter
      *
      * @param {object} [options]
@@ -376,26 +380,64 @@ export class Ease extends Events
     }
 
     /**
+     * helper function to create an ease that changes x and y to move the element to the desired target at the speed
+     * NOTE: under the hood this calls add(element {x, y }, { duration: &lt;calculated speed based on distance and speed> })
+     * @param {PIXI.DisplayObject} element
+     * @param {(PIXI.DisplayObject|PIXI.Point)} target
+     * @param {number} speed in pixels / ms
+     *
+     * @param {object} [options]
+     * @param {(string|function)} [options.ease]
+     * @param {(boolean|number)} [options.repeat]
+     * @param {boolean} [options.reverse]
+     * @param {number} [options.wait] wait this number of milliseconds before ease starts
+     * @param {boolean} [options.removeExisting] removes existing eases on the element of the same type (including x,y/position, skewX,skewY/skew, scaleX,scaleY/scale)
+     *
+     * @returns {EaseDisplayObject}
+     */
+    target(element, target, speed, options)
+    {
+        const duration = Math.sqrt(Math.pow(element.x - target.x, 2) + Math.pow(element.y - target.y, 2)) / speed
+        options = options || {}
+        options.duration = duration
+        return this.add(element, { x: target.x, y: target.y }, options)
+    }
+
+    /**
+     * helper function to add an ease that changes rotation to face the element at the desired target using the speed
+     * NOTE: under the hood this calls add(element {x, y }, { duration: &lt;calculated speed based on shortest rotation and speed> })
+     * @param {PIXI.DisplayObject} element
+     * @param {(PIXI.DisplayObject|PIXI.Point)} target
+     * @param {number} speed in radians / ms
+     *
+     * @param {object} [options]
+     * @param {(string|function)} [options.ease]
+     * @param {(boolean|number)} [options.repeat]
+     * @param {boolean} [options.reverse]
+     * @param {number} [options.wait] wait this number of milliseconds before ease starts
+     * @param {boolean} [options.removeExisting] removes existing eases on the element of the same type (including x,y/position, skewX,skewY/skew, scaleX,scaleY/scale)
+     *
+     * @returns {EaseDisplayObject}
+     */
+    face(element, target, speed, options)
+    {
+        const shortestAngle = EaseDisplayObject.shortestAngle(element.rotation, Math.atan2(target.y - element.y, target.x - element.x))
+        const duration = Math.abs(shortestAngle - element.rotation) / speed
+        options = options || {}
+        options.duration = duration
+        return this.add(element, { rotation: shortestAngle }, options)
+    }
+
+    /**
      * remove all eases from a DisplayObject
      * @param {PIXI.DisplayObject} object
      */
     removeAllEases(object)
     {
-        if (this.inUpdate)
+        if (object[this.key])
         {
-            this.waitRemoveAllEases.push(object)
-        }
-        else
-        {
-            if (object[this.key])
-            {
-                const index = this.list.indexOf(object[this.key])
-                if (index !== -1)
-                {
-                    this.list.splice(index, 1)
-                }
-                object[this.key].clear()
-            }
+            this.list.splice(this.list.indexOf(object[this.key]), 1)
+            object[this.key].clear()
         }
     }
 
@@ -406,46 +448,31 @@ export class Ease extends Events
      */
     removeEase(element, param)
     {
-        if (this.inUpdate)
+        const ease = element[this.key]
+        if (ease)
         {
-            this.waitRemoveEase.push({ object: element, param })
-        }
-        else
-        {
-            const ease = element[this.key]
-            if (ease)
+            if (Array.isArray(param))
             {
-                if (Array.isArray(param))
-                {
-                    param.forEach(entry => ease.remove(entry))
-                }
-                else
-                {
-                    ease.remove(param)
-                }
+                param.forEach(entry => ease.remove(entry))
+            }
+            else
+            {
+                ease.remove(param)
             }
         }
     }
 
     /**
      * remove all animations for all DisplayObjects
-     * @param {boolean} [force] remove all eases even if called within update loop (setting this to true may cause unexpected problems)
      */
-    removeAll(force)
+    removeAll()
     {
-        if (!force &amp;&amp; this.inUpdate)
+        while (this.list.length)
         {
-            this.waitRemoveAll = true
-        }
-        else
-        {
-            while (this.list.length)
+            const easeDisplayObject = this.list.pop()
+            if (easeDisplayObject.element[this.key])
             {
-                const easeDisplayObject = this.list.pop()
-                if (easeDisplayObject.element[this.key])
-                {
-                    easeDisplayObject.element[this.key].clear()
-                }
+                easeDisplayObject.element[this.key].clear()
             }
         }
     }
@@ -458,7 +485,6 @@ export class Ease extends Events
     {
         if (!this.empty)
         {
-            // this.inUpdate = true
             const elapsed = Math.max(this.ticker.elapsedMS, this.options.maxFrame)
             for (let i = 0; i &lt; this.list.length; i++)
             {
@@ -474,21 +500,6 @@ export class Ease extends Events
                 this.empty = true
                 this.emit('complete', this)
             }
-            // this.inUpdate = false
-            // while (this.waitRemoveEase.length)
-            // {
-            //     const remove = this.waitRemoveEase.pop()
-            //     this.removeEase(remove.object, remove.param)
-            // }
-            // while (this.waitRemoveAllEases.length)
-            // {
-            //     this.removeAllEases(this.waitRemoveAllEases.pop())
-            // }
-            // if (this.waitRemoveAll)
-            // {
-            //     this.removeAll()
-            //     this.waitRemoveAll = false
-            // }
         }
     }
 
@@ -585,7 +596,7 @@ export class List
 
         <footer class="content-size">
             <div class="footer">
-                Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.2</a> on Sun Jul 07 2019 10:33:21 GMT-0400 (Eastern Daylight Time)
+                Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.2</a> on Mon Jul 08 2019 11:31:01 GMT-0400 (Eastern Daylight Time)
             </div>
         </footer>
     </div>
