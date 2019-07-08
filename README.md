@@ -11,7 +11,7 @@ a simple and powerful pixi.js easing/tweening/animating library
 * tracks eases on DisplayObject and cleans up when DisplayObject is destroyed
 * includes a default easing list so you don't have to instantiate for simple cases
 * includes a shake parameter
-* strong test coverage
+* good test coverage
 
 ## Live Demo
 [https://davidfig.github.io/pixi-ease/](https://davidfig.github.io/pixi-ease/)
@@ -79,15 +79,17 @@ import { Ease, ease } from 'pixi-ease'
 
 const app = new PIXI.Application()
 const test = app.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
+test.tint = 0x00ff00
 
-const move = ease.add(test, { x: 20, y: 15, alpha: 0.25 }, { reverse: true })
-move.once('complete', () => console.log('move ease complete.'))
+const example = ease.add(test, { x: 20, y: 15, alpha: 0.25, rotation: 20, scale: 5, skewX: 0.25, blend: 0xff0000 } }, { reverse: true, duration: 2500, ease: 'easeInOutQuad' })
+example.on('each', () => console.log('ease updated object during frame using PIXI.Ticker.'))
+example.once('complete', () => console.log('move ease complete.'))
 
 test.generic = 25
 const generic = ease.add(test, { generic: 0 }, { duration: 1500, ease: 'easeOutQuad' })
 generic.on('each', () => console.log(test.generic))
 
-const secondEase = new Ease({ duration: 3000, ease: 'easeInBack' })
+const secondEase = new Ease({ duration: 3000, wait: 1500, ease: 'easeInBack', repeat: 3 })
 const test2 = app.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
 test2.tint = 0x0000ff
 secondEase.add(test2, { tintBlend: [0xff0000, 0x00ff00], scale: 2 })
@@ -121,7 +123,7 @@ I've included a bunch of build examples in the builds directory, including: [bro
 If you liked pixi-ease, please try my other open source libraries:
 * [pixi-viewport](https://github.com/davidfig/pixi-viewport) - A highly configurable viewport/2D camera designed to work with pixi.js.
 * [pixi-scrollbox](https://github.com/davidfig/pixi-scrollbox) - pixi.js scrollbox: a masked box that can scroll vertically or horizontally with scrollbars (uses pixi-ease)
-* [intersects](https://github.com/davidfig/intersects) - a simple collection of 2d collision/intersects functions. Supports points, circles, lines, axis-aligned boxes, and polygons## License 
+* [intersects](https://github.com/davidfig/intersects) - a simple collection of 2d collision/intersects functions. Supports points, circles, lines, axis-aligned boxes, and polygons 
 
 ## License
 MIT License (c) 2019 [YOPEY YOPEY LLC](https://yopeyopey.com/) by [David Figatner](https://twitter.com/yopey_yopey/)
