@@ -21,10 +21,10 @@ a simple and powerful pixi.js easing/tweening/animating library
 ```js
 // v1 code
 // -------
-const Ease = require('pixi-ease')
-const ease = new Ease.list()
-const moveSquare = ease.to(square, { x: 20, y: 55 }, 2000, { reverse: true })
-moveSquare.on('done', () => console.log('ease complete.'))
+// const Ease = require('pixi-ease')
+// const ease = new Ease.list()
+// const moveSquare = ease.to(square, { x: 20, y: 55 }, 2000, { reverse: true })
+// moveSquare.on('done', () => console.log('ease complete.'))
 
 // v2 code
 //--------
@@ -45,7 +45,7 @@ easeList.add('square', { tintBlend: [0xff0000, 0x00ff00] })
 // -------------------------------
 // v1 code
 // -------
-ease.to(square, { x: 20 }, 200, { ease: 'easeInOutSine' })
+// ease.to(square, { x: 20 }, 200, { ease: 'easeInOutSine' })
 
 // v2 code
 // -------
@@ -60,7 +60,7 @@ or [grab the latest release](https://github.com/davidfig/pixi-ease/releases/) an
 
 ```html
 <script src="/directory-to-file/pixi.js"></script>
-<script src="/directory-to-file/pixi-ease.js"></script>
+<scupdatript src="/directory-to-file/pixi-ease.js"></script>
 <!-- or <script type="module" src="/directory-to-file/pixi-ease.es.js"></script> -->
 <script>
     const ease = new Ease.Ease(options)
