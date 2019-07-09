@@ -91,8 +91,7 @@ generic.on('each', () => console.log(test.generic))
 
 const secondEase = new Ease({ duration: 3000, wait: 1500, ease: 'easeInBack', repeat: 3 })
 const test2 = app.stage.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
-test2.tint = 0x0000ff
-secondEase.add(test2, { tintBlend: [0xff0000, 0x00ff00], scale: 2 })
+secondEase.add(test2, { tint: [0xff0000, 0x00ff00, 0x000ff], scaleX: 2 })
 ```
 
 ## Build Examples
