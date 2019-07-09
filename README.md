@@ -60,7 +60,7 @@ or [grab the latest release](https://github.com/davidfig/pixi-ease/releases/) an
 
 ```html
 <script src="/directory-to-file/pixi.js"></script>
-<scupdatript src="/directory-to-file/pixi-ease.js"></script>
+<script src="/directory-to-file/pixi-ease.js"></script>
 <!-- or <script type="module" src="/directory-to-file/pixi-ease.es.js"></script> -->
 <script>
     const ease = new Ease.Ease(options)
