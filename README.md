@@ -107,15 +107,16 @@ I've included a bunch of build examples in the builds directory, including: [bro
 ### To run demo locally:
 1. Clone repository
 2. yarn install
-3. yarn build && yarn dev
-4. open browser to http://localhost:10001
+3. yarn build 
+4. yarn dev
+5. open browser to http://localhost:10001
 
 ### To run build examples:
 1. Clone repository
 2. yarn install
 3. yarn build
 4. yarn builds
-5 yarn test-builds
+5. yarn test-builds
 6. open browser to http://localhost:5000
 
 ## Other Libraries
