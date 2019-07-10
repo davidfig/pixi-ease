@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js'
 import Penner from 'penner'
 import Events from 'eventemitter3'
 
-import { EaseDisplayObject } from './easeDisplayObject'
+import { Easing } from './easing'
 
 const easeOptions = {
     duration: 1000,
@@ -49,7 +49,7 @@ export class Ease extends Events
     {
         super()
         this.options = Object.assign({}, easeOptions, options)
-        this.list = []
+        this.easings = []
         this.empty = true
         if (this.options.useTicker === true)
         {
@@ -74,7 +74,6 @@ export class Ease extends Events
             }
             this.ticker.add(this.update, this)
         }
-        this.key = `__ease_${Ease.id++}`
     }
 
     /**
@@ -82,7 +81,7 @@ export class Ease extends Events
      */
     destroy()
     {
-        this.removeAll(true)
+        this.removeAll()
         if (this.options.useTicker === true)
         {
             this.ticker.remove(this.update, this)
@@ -90,22 +89,7 @@ export class Ease extends Events
     }
 
     /**
-     * adds a EaseDisplayObject to a DisplayObject - useful for creating events on an element's eases that don't yet exist
-     * @param {PIXI.DisplayObject}
-     * @return EaseDisplayObject
-     */
-    create(element)
-    {
-        if (!element[this.key])
-        {
-            element[this.key] = new EaseDisplayObject(element, this)
-            element[this.key].connected = false
-        }
-        return element[this.key]
-    }
-
-    /**
-     * add animation(s) to a PIXI.DisplayObject element
+     * add ease(s) to a PIXI.DisplayObject element
      * @param {(PIXI.DisplayObject|PIXI.DisplayObject[])} element
      *
      * @param {object} params
@@ -134,28 +118,11 @@ export class Ease extends Events
      * @param {(boolean|number)} [options.repeat]
      * @param {boolean} [options.reverse]
      * @param {number} [options.wait] wait this number of milliseconds before ease starts
-     * @param {boolean} [options.removeExisting] removes existing eases on the element of the same type (including x,y/position, skewX,skewY/skew, scaleX,scaleY/scale)
-     * @returns {(EaseDisplayObject|EaseDisplayObject[])}
+     *
+     * @returns {Easing}
      */
     add(element, params, options)
     {
-        if (Array.isArray(element))
-        {
-            const easeDisplayObjects = []
-            for (let i = 0; i < element.length; i++)
-            {
-                if (i === element.length - 1)
-                {
-                    easeDisplayObjects.push(this.add(element[i], params, options))
-                }
-                else
-                {
-                    easeDisplayObjects.push(this.add(element[i], params, options))
-                }
-            }
-            return easeDisplayObjects
-        }
-
         options = options || {}
         options.duration = typeof options.duration !== 'undefined' ? options.duration : this.options.duration
         options.ease = options.ease || this.options.ease
@@ -163,28 +130,15 @@ export class Ease extends Events
         {
             options.ease = Penner[options.ease]
         }
-
-        let ease = element[this.key]
-        if (ease)
-        {
-            if (!ease.connected)
-            {
-                this.list.push(element[this.key])
-            }
-        }
-        else
-        {
-            ease = element[this.key] = new EaseDisplayObject(element, this)
-            this.list.push(ease)
-        }
-        ease.add(params, options)
+        const easing = new Easing(element, params, options)
+        this.easings.push(easing)
         this.empty = false
-        return ease
+        return easing
     }
 
     /**
-     * helper function to create an ease that changes x and y to move the element to the desired target at the speed
-     * NOTE: under the hood this calls add(element {x, y }, { duration: <calculated speed based on distance and speed> })
+     * create an ease that changes position (x, y) of the element by moving to the target at the speed
+     * NOTE: under the hood this calls add(element, { x, y }, { duration: <calculated speed based on distance and speed> })
      * @param {PIXI.DisplayObject} element
      * @param {(PIXI.DisplayObject|PIXI.Point)} target
      * @param {number} speed in pixels / ms
@@ -196,7 +150,7 @@ export class Ease extends Events
      * @param {number} [options.wait] wait this number of milliseconds before ease starts
      * @param {boolean} [options.removeExisting] removes existing eases on the element of the same type (including x,y/position, skewX,skewY/skew, scaleX,scaleY/scale)
      *
-     * @returns {EaseDisplayObject}
+     * @returns {Easing}
      */
     target(element, target, speed, options)
     {
@@ -218,13 +172,12 @@ export class Ease extends Events
      * @param {(boolean|number)} [options.repeat]
      * @param {boolean} [options.reverse]
      * @param {number} [options.wait] wait this number of milliseconds before ease starts
-     * @param {boolean} [options.removeExisting] removes existing eases on the element of the same type (including x,y/position, skewX,skewY/skew, scaleX,scaleY/scale)
      *
-     * @returns {EaseDisplayObject}
+     * @returns {Easing}
      */
     face(element, target, speed, options)
     {
-        const shortestAngle = EaseDisplayObject.shortestAngle(element.rotation, Math.atan2(target.y - element.y, target.x - element.x))
+        const shortestAngle = Easing.shortestAngle(element.rotation, Math.atan2(target.y - element.y, target.x - element.x))
         const duration = Math.abs(shortestAngle - element.rotation) / speed
         options = options || {}
         options.duration = duration
@@ -233,51 +186,55 @@ export class Ease extends Events
 
     /**
      * remove all eases from a DisplayObject
+     * WARNING: 'complete' events will not fire for these removals
      * @param {PIXI.DisplayObject} object
      */
-    removeAllEases(object)
+    removeAllEases(element)
     {
-        if (object[this.key])
+        for (let i = 0; i < this.easings.length; i++)
         {
-            this.list.splice(this.list.indexOf(object[this.key]), 1)
-            object[this.key].clear()
+            if (this.easings[i].remove(element))
+            {
+                this.easings.splice(i, 1)
+                i--
+            }
+        }
+        if (this.easings.length === 0)
+        {
+            this.empty = true
         }
     }
 
     /**
      * removes one or more eases from a DisplayObject
+     * WARNING: 'complete' events will not fire for these removals
      * @param {PIXI.DisplayObject} element
      * @param {(string|string[])} param
      */
     removeEase(element, param)
     {
-        const ease = element[this.key]
-        if (ease)
+        for (let i = 0; i < this.easings.length; i++)
         {
-            if (Array.isArray(param))
+            if (this.easings[i].remove(element, param))
             {
-                param.forEach(entry => ease.remove(entry))
+                this.easings.splice(i, 1)
+                i--
             }
-            else
-            {
-                ease.remove(param)
-            }
+        }
+        if (this.easings.length === 0)
+        {
+            this.empty = true
         }
     }
 
     /**
-     * remove all animations for all DisplayObjects
+     * remove all easings
+     * WARNING: 'complete' events will not fire for these removals
      */
     removeAll()
     {
-        while (this.list.length)
-        {
-            const easeDisplayObject = this.list.pop()
-            if (easeDisplayObject.element[this.key])
-            {
-                easeDisplayObject.element[this.key].clear()
-            }
-        }
+        this.easings = []
+        this.empty = true
     }
 
     /**
@@ -289,16 +246,16 @@ export class Ease extends Events
         if (!this.empty)
         {
             const elapsed = Math.max(this.ticker.elapsedMS, this.options.maxFrame)
-            for (let i = 0; i < this.list.length; i++)
+            for (let i = 0; i < this.easings.length; i++)
             {
-                if (this.list[i].update(elapsed))
+                if (this.easings[i].update(elapsed))
                 {
-                    this.list.splice(i, 1)
+                    this.easings.splice(i, 1)
                     i--
                 }
             }
             this.emit('each', this)
-            if (this.list.length === 0)
+            if (this.easings.length === 0)
             {
                 this.empty = true
                 this.emit('complete', this)
@@ -307,22 +264,22 @@ export class Ease extends Events
     }
 
     /**
-     * number of elements being eased
-     * @returns {number}
+     * number of easings
+     * @type {number}
      */
-    countElements()
+    get count()
     {
-        return this.list.length
+        return this.easings.length
     }
 
     /**
-     * number of active animations across all elements
+     * number of active easings across all elements
      * @returns {number}
      */
     countRunning()
     {
         let count = 0
-        for (let entry of this.list)
+        for (let entry of this.easings)
         {
             count += entry.count
         }
