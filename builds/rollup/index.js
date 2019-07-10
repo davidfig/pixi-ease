@@ -46020,42 +46020,45 @@
             }
             });
 
-            class EaseDisplayObject extends eventemitter3$1
+            class Easing extends eventemitter3$1
             {
                 /**
-                 * each DisplayObject has its own EaseElement object returned by add() or accessed through DisplayObject.__ease_{$id}
+                 * an easing that acts on an element or an array of elements
+                 * @param {(PIXI.DisplayObject|PIXI.DisplayObject[])} element
+                 * @param {object} params
+                 * @param {object} options
                  * @extends EventEmitter
                  * @fires EaseElement#complete
-                 * @fires EaseElement#each-*
-                 * @fires EaseElement#complete-*
-                 * @fires EaseElement#reverse-*
-                 * @fires EaseElement#repeat-*
-                 * @fires EaseElement#wait-*
-                 * @fires EaseElement#wait-end-*
+                 * @fires EaseElement#each
+                 * @fires EaseElement#complete
+                 * @fires EaseElement#reverse
+                 * @fires EaseElement#repeat
+                 * @fires EaseElement#wait
+                 * @fires EaseElement#wait-end
                  */
-                constructor(element, ease)
+                constructor(element, params, options)
                 {
                     super();
 
                     /**
-                     * element being animated
-                     * @member {PIXI.DisplayObject}
+                     * element(s) being eased
+                     * @member {(PIXI.DisplayObject|PIXI.DisplayObject[])}
                      */
-                    this.element = element;
-                    this.ease = ease;
+                    this.elements = Array.isArray(element) ? element : [element];
                     this.eases = [];
-                    this.connected = true;
+                    this.options = options || {};
+                    this.wait = options.wait || 0;
+                    this.time = 0;
+                    for (let param in params)
+                    {
+                        for (let element of this.elements)
+                        {
+                            this.addParam(element, param, params[param]);
+                        }
+                    }
                 }
 
-                /**
-                 * clears all eases and disconnects object from list
-                 */
-                clear()
-                {
-                    this.eases = [];
-                }
-
-                addParam(entry, param, options)
+                addParam(element, entry, param)
                 {
                     let start, to, delta, update, name = entry;
                     switch (entry)
@@ -46063,38 +46066,38 @@
                         case 'scaleX':
                         case 'skewX':
                             name = entry.substr(0, entry.length - 1);
-                            start = this.element[name].x;
+                            start = element[name].x;
                             to = param;
                             delta = param - start;
-                            update = ease => this.updateCoord(ease, entry, name, 'x');
+                            update = ease => this.updateCoord(ease, name, 'x');
                             break
 
                         case 'scaleY':
                         case 'skewY':
                             name = entry.substr(0, entry.length - 1);
-                            start = this.element[name].y;
+                            start = element[name].y;
                             to = param;
                             delta = param - start;
-                            update = ease => this.updateCoord(ease, entry, name, 'y');
+                            update = ease => this.updateCoord(ease, name, 'y');
                             break
 
                         case 'tint':
                         case 'blend':
-                            const colors = Array.isArray(param) ? param : [this.element.tint, param];
+                            const colors = Array.isArray(param) ? param : [element.tint, param];
                             start = 0;
                             to = colors.length;
                             delta = to;
-                            update = (entry === 'tint') ? ease => this.updateTint(ease, entry, colors) : ease => this.updateBlend(ease, entry, colors);
+                            update = (entry === 'tint') ? ease => this.updateTint(ease, colors) : ease => this.updateBlend(ease, colors);
                             break
 
                         case 'shake':
-                            start = { x: this.element.x, y: this.element.y };
+                            start = { x: element.x, y: element.y };
                             to = param;
                             update = ease => this.updateShake(ease);
                             break
 
                         case 'position':
-                            start = { x: this.element.x, y: this.element.y };
+                            start = { x: element.x, y: element.y };
                             to = { x: param.x, y: param.y };
                             delta = { x: to.x - start.x, y: to.y - start.y };
                             update = ease => this.updatePosition(ease);
@@ -46102,26 +46105,26 @@
 
                         case 'skew':
                         case 'scale':
-                            start = this.element[entry].x;
+                            start = element[entry].x;
                             to = param;
                             delta = param - start;
                             update = ease => this.updatePoint(ease, entry);
                             break
 
                         case 'face':
-                            start = this.element.rotation;
-                            to = EaseDisplayObject.shortestAngle(start, Math.atan2(param.y - this.element.y, param.x - this.element.x));
+                            start = element.rotation;
+                            to = Easing.shortestAngle(start, Math.atan2(param.y - element.y, param.x - element.x));
                             delta = to - start;
                             update = ease => this.updateOne(ease, 'rotation');
                             break
 
                         default:
-                            start = this.element[entry];
+                            start = element[entry];
                             to = param;
                             delta = param - start;
                             update = ease => this.updateOne(ease, entry);
                     }
-                    this.eases.push({ entry, options, update, start, to, delta, time: 0, wait: options.wait });
+                    this.eases.push({ element, entry, update, start, to, delta });
                 }
 
                 /**
@@ -46147,99 +46150,63 @@
                 }
 
                 /**
-                 * remove all matching parameters from element
-                 * @param {(string|string[])} params
+                 * remove all easings with matching element and params
+                 * @param {PIXI.DisplayObject} element
+                 * @param {(string|string[])} [params] if not set, removes all params for the element
                  */
-                remove(params)
+                remove(element, params)
                 {
-                    params = typeof params === 'string' ? [params] : params;
+                    params = typeof params === 'undefined' ? false : typeof params === 'string' ? [params] : params;
                     for (let i = 0; i < this.eases.length; i++)
                     {
-                        if (params.indexOf(this.eases[i].entry) !== -1)
+                        const ease = this.eases[i];
+                        if (ease.element === element && (params === false || params.indexOf(ease.entry) !== -1))
                         {
                             this.eases.splice(i, 1);
                             i--;
                         }
                     }
-                }
-
-                add(params, options)
-                {
-                    if (options.removeExisting)
+                    if (this.eases.length === 0)
                     {
-                        const skew = ['skewX', 'skewY', 'skew'];
-                        const scale = ['scaleX', 'scaleY', 'scale'];
-                        const position = ['position', 'x', 'y'];
-                        for (let entry in params)
-                        {
-                            if (skew.indexOf(entry) !== -1)
-                            {
-                                this.remove(skew);
-                            }
-                            else if (scale.indexOf(entry) !== -1)
-                            {
-                                this.remove(scale);
-                            }
-                            else if (entry === 'position')
-                            {
-                                this.remove(position);
-                            }
-                            else if (entry === 'x')
-                            {
-                                this.remove(['x', 'position']);
-                            }
-                            else if (entry === 'y')
-                            {
-                                this.remove(['y', 'position']);
-                            }
-                            else
-                            {
-                                this.remove(entry);
-                            }
-                        }
-                    }
-                    for (let entry in params)
-                    {
-                        const opts = { ease: options.ease, duration: options.duration, repeat: options.repeat, reverse: options.reverse, wait: options.wait };
-                        this.addParam(entry, params[entry], opts);
+                        return true
                     }
                 }
 
                 updateOne(ease, entry)
                 {
-                    this.element[entry] = ease.options.ease(ease.time, ease.start, ease.delta, ease.options.duration);
+                    ease.element[entry] = this.options.ease(this.time, ease.start, ease.delta, this.options.duration);
                 }
 
                 updatePoint(ease, entry)
                 {
-                    this.element[entry].x = this.element[entry].y = ease.options.ease(ease.time, ease.start, ease.delta, ease.options.duration);
+                    ease.element[entry].x = ease.element[entry].y = this.options.ease(this.time, ease.start, ease.delta, this.options.duration);
                 }
 
                 updatePosition(ease)
                 {
-                    this.element.x = ease.options.ease(ease.time, ease.start.x, ease.delta.x, ease.options.duration);
-                    this.element.y = ease.options.ease(ease.time, ease.start.y, ease.delta.y, ease.options.duration);
+                    ease.element.x = this.options.ease(this.time, ease.start.x, ease.delta.x, this.options.duration);
+                    ease.element.y = this.options.ease(this.time, ease.start.y, ease.delta.y, this.options.duration);
                 }
 
-                updateCoord(ease, entry, name, coord)
+                updateCoord(ease, name, coord)
                 {
-                    this.element[name][coord] = ease.options.ease(ease.time, ease.start, ease.delta, ease.options.duration);
+                    ease.element[name][coord] = this.options.ease(this.time, ease.start, ease.delta, this.options.duration);
                 }
 
-                updateTint(ease, entry, colors)
+                updateTint(ease, colors)
                 {
-                    const index = Math.floor(ease.options.ease(ease.time, ease.start, ease.delta, ease.options.duration));
-                    this.element.tint = colors[index];
+                    const index = Math.floor(this.options.ease(this.time, ease.start, ease.delta, this.options.duration));
+                    ease.element.tint = colors[index];
                 }
 
-                updateBlend(ease, entry, colors)
+                updateBlend(ease, colors)
                 {
-                    const calc = ease.options.ease(ease.time, ease.start, ease.delta, ease.options.duration);
+                    const calc = this.options.ease(this.time, ease.start, ease.delta, this.options.duration);
                     const index = Math.floor(calc);
                     let next = index + 1;
                     if (next === colors.length)
                     {
-                        next = ease.options.reverse ? index - 1 : ease.options.repeat ? 0 : index;
+                        next = this.options.reverse ? index - 1 : this.options.repeat ? 0 : index;
                     }
                     const percent = calc - index;
                     const color1 = colors[index];
@@ -46254,7 +46221,7 @@
                     const r = percent1 * r1 + percent * r2;
                     const g = percent1 * g1 + percent * g2;
                     const b = percent1 * b1 + percent * b2;
-                    this.element.tint = r << 16 | g << 8 | b;
+                    ease.element.tint = r << 16 | g << 8 | b;
                 }
 
                 updateShake(ease)
@@ -46263,16 +46230,16 @@
                     {
                         return Math.floor(Math.random() * n) - Math.floor(n / 2)
                     }
-                    this.element.x = ease.start.x + random(ease.to);
-                    this.element.y = ease.start.y + random(ease.to);
+                    ease.element.x = ease.start.x + random(ease.to);
+                    ease.element.y = ease.start.y + random(ease.to);
                 }
 
                 complete(ease)
                 {
                     if (ease.entry === 'shake')
                     {
-                        this.element.x = ease.start.x;
-                        this.element.y = ease.start.y;
+                        ease.element.x = ease.start.x;
+                        ease.element.y = ease.start.y;
                     }
                 }
 
@@ -46303,136 +46270,118 @@
                     switch (ease.entry)
                     {
                         case 'skewX':
-                            this.element.skew.x = ease.start;
+                            ease.element.skew.x = ease.start;
                             break
 
                         case 'skewY':
-                            this.element.skew.y = ease.start;
+                            ease.element.skew.y = ease.start;
                             break
 
                         case 'skew':
-                            this.element.skew.x = ease.start;
-                            this.element.skew.y = ease.start;
+                            ease.element.skew.x = ease.start;
+                            ease.element.skew.y = ease.start;
                             break
 
                         case 'scaleX':
-                            this.element.scale.x = ease.start;
+                            ease.element.scale.x = ease.start;
                             break
 
                         case 'scaleY':
-                            this.element.scale.y = ease.start;
+                            ease.element.scale.y = ease.start;
                             break
 
                         case 'scale':
-                            this.element.scale.x = ease.start;
-                            this.element.scale.y = ease.start;
+                            ease.element.scale.x = ease.start;
+                            ease.element.scale.y = ease.start;
                             break
 
                         case 'position':
-                            this.element.x = ease.start.x;
-                            this.element.y = ease.start.y;
+                            ease.element.x = ease.start.x;
+                            ease.element.y = ease.start.y;
                             break
 
                         default:
-                            this.element[ease.entry] = ease.start;
+                            ease.element[ease.entry] = ease.start;
                     }
                 }
 
                 update(elapsed)
                 {
-                    if (this.element._destroyed)
+                    if (this.wait)
                     {
-                        delete this.element[this.key];
-                        this.connected = false;
-                        return true
-                    }
-                    if (this.eases.length)
-                    {
-                        for (let i = 0; i < this.eases.length; i++)
+                        this.wait -= elapsed;
+                        if (this.wait >= 0)
                         {
-                            let current = elapsed;
-                            const ease = this.eases[i];
-                            if (ease.wait)
-                            {
-                                ease.wait -= elapsed;
-                                if (ease.wait <= 0)
-                                {
-                                    current += ease.wait;
-                                    ease.wait = 0;
-                                    this.emit(`wait-end-${ease.entry}`, ease.element);
-                                }
-                                else
-                                {
-                                    this.emit(`wait-${ease.entry}`, { element: this.element, wait: ease.wait });
-                                    continue
-                                }
-                            }
-                            const duration = ease.options.duration;
-                            let leftover = 0;
-                            if (ease.time + current > duration)
-                            {
-                                leftover = ease.time + current - duration;
-                                ease.time = duration;
-                            }
-                            else
-                            {
-                                ease.time += current;
-                            }
-                            ease.update(ease);
-                            if (ease.time >= ease.options.duration)
-                            {
-                                const options = ease.options;
-                                if (options.reverse)
-                                {
-                                    this.reverse(ease);
-                                    ease.time = leftover;
-                                    if (leftover)
-                                    {
-                                        ease.update(ease);
-                                    }
-                                    this.emit(`reverse-${ease.entry}`, ease.element);
-                                    if (!options.repeat)
-                                    {
-                                        options.reverse = false;
-                                    }
-                                    else if (options.repeat !== true)
-                                    {
-                                        options.repeat--;
-                                    }
-                                }
-                                else if (options.repeat)
-                                {
-                                    this.repeat(ease);
-                                    ease.time = leftover;
-                                    if (leftover)
-                                    {
-                                        ease.update(ease);
-                                    }
-                                    if (options.repeat !== true)
-                                    {
-                                        options.repeat--;
-                                    }
-                                    this.emit(`repeat-${ease.entry}`, ease.element);
-                                }
-                                else
-                                {
-                                    this.complete(ease);
-                                    this.eases.splice(i, 1);
-                                    i--;
-                                    this.emit(`complete-${ease.entry}`, this.element);
-                                }
-                            }
-                            this.emit(`each-${ease.entry}`, { element: this.element, time: ease.time });
+                            this.emit('wait', this);
+                            return
                         }
-                        this.emit('each', this);
-                        if (this.eases.length === 0)
+                        if (this.wait <= 0)
                         {
-                            this.emit('complete', this);
-                            if (this.eases.length === 0)
+                            elapsed = -this.wait;
+                            this.wait = 0;
+                            this.emit('wait-end', this);
+                        }
+                    }
+                    this.time += elapsed;
+                    let leftover = 0;
+                    if (this.time >= this.options.duration)
+                    {
+                        leftover = this.time - this.options.duration;
+                        this.time = this.options.duration;
+                    }
+                    for (let i = 0; i < this.eases.length; i++)
+                    {
+                        const ease = this.eases[i];
+                        if (ease.element._destroyed)
+                        {
+                            this.eases.splice(i, 1);
+                            i--;
+                        }
+                        else
+                        {
+                            ease.update(ease);
+                        }
+                    }
+                    this.emit('each', this);
+                    if (this.time >= this.options.duration)
+                    {
+                        if (this.options.reverse)
+                        {
+                            this.eases.forEach(ease => this.reverse(ease));
+                            this.time = leftover;
+                            if (leftover)
                             {
-                                this.connected = false;
-                                return true
+                                this.eases.forEach(ease => ease.update(ease));
                             }
+                            this.emit('reverse', this);
+                            if (!this.options.repeat)
+                            {
+                                this.options.reverse = false;
+                            }
+                            else if (this.options.repeat !== true)
+                            {
+                                this.options.repeat--;
+                            }
+                        }
+                        else if (this.options.repeat)
+                        {
+                            this.eases.forEach(ease => this.repeat(ease));
+                            this.time = leftover;
+                            if (leftover)
+                            {
+                                this.eases.forEach(ease => ease.update(ease));
+                            }
+                            if (this.options.repeat !== true)
+                            {
+                                this.options.repeat--;
+                            }
+                            this.emit('repeat', this);
+                        }
+                        else
+                        {
+                            this.eases.forEach(ease => this.complete(ease));
+                            this.emit('complete', this);
+                            return true
                         }
                     }
                 }
@@ -46448,54 +46397,40 @@
             }
 
             /**
-             * fires when there are no more animations for this DisplayObject
+             * fires when easings are finished
              * @event EaseElement#complete
              * @type {EaseElement}
              */
 
             /**
-             * fires when the parameter completes the ease
-             * where name is the name of the parameter being eased (e.g., complete-x)
-             * @event EaseElement#complete-*
+             * fires on each loop where there are easings
+             * @event EaseElement#each
              * @type {EaseElement}
              */
 
             /**
-             * fires on each loop where there are animations
-             * where * is the name of the parameter being eased (e.g., each-rotation)
-             * @event EaseElement#each-*
-             * @type {object}
-             * @property {EaseElement} element
-             * @property {number} time remaining
-             */
-
-            /**
-             * fires when an animation repeats
-             * where * is the name of the parameter being eased (e.g., repeat-skewX)
-             * @event EaseElement#repeat-*
+             * fires when easings repeats
+             * @event EaseElement#repeat
              * @type {EaseElement}
              */
 
              /**
-             * fires when an animation reverses
-             * where * is the name of the parameter being eased (e.g., reverse-skewX)
-             * @event EaseElement#reverse-*
+             * fires when easings reverse
+             * @event EaseElement#reverse
              * @type {EaseElement}
              */
 
             /**
              * fires on each frame while a wait is counting down
-             * where * is the name fo the parameter being eased (e.g., wait-end-y)
-             * @event EaseElement#wait-*
+             * @event EaseElement#wait
              * @type {object}
              * @property {EaseElement} element
              * @property {number} wait
              */
 
             /**
-             * fires after a wait expires for a parameter
-             * where * is the name fo the parameter being eased (e.g., wait-end-y)
-             * @event EaseElement#wait-end-*
+             * fires after a wait expires
+             * @event EaseElement#wait-end
              * @type { EaseElement }
              */
 
@@ -46544,9 +46479,7 @@
                 {
                     super();
                     this.options = Object.assign({}, easeOptions, options);
-                    this.list = [];
-                    this.waitRemoveEase = [];
-                    this.waitRemoveAllEases = [];
+                    this.easings = [];
                     this.empty = true;
                     if (this.options.useTicker === true)
                     {
@@ -46571,7 +46504,6 @@
                         }
                         this.ticker.add(this.update, this);
                     }
-                    this.key = `__ease_${Ease.id++}`;
                 }
 
                 /**
@@ -46579,7 +46511,7 @@
                  */
                 destroy()
                 {
-                    this.removeAll(true);
+                    this.removeAll();
                     if (this.options.useTicker === true)
                     {
                         this.ticker.remove(this.update, this);
@@ -46587,7 +46519,7 @@
                 }
 
                 /**
-                 * add animation(s) to a PIXI.DisplayObject element
+                 * add ease(s) to a PIXI.DisplayObject element
                  * @param {(PIXI.DisplayObject|PIXI.DisplayObject[])} element
                  *
                  * @param {object} params
@@ -46616,28 +46548,11 @@
                  * @param {(boolean|number)} [options.repeat]
                  * @param {boolean} [options.reverse]
                  * @param {number} [options.wait] wait this number of milliseconds before ease starts
-                 * @param {boolean} [options.removeExisting] removes existing eases on the element of the same type (including x,y/position, skewX,skewY/skew, scaleX,scaleY/scale)
-                 * @returns {(EaseDisplayObject|EaseDisplayObject[])}
+                 *
+                 * @returns {Easing}
                  */
                 add(element, params, options)
                 {
-                    if (Array.isArray(element))
-                    {
-                        const easeDisplayObjects = [];
-                        for (let i = 0; i < element.length; i++)
-                        {
-                            if (i === element.length - 1)
-                            {
-                                easeDisplayObjects.push(this.add(element[i], params, options));
-                            }
-                            else
-                            {
-                                easeDisplayObjects.push(this.add(element[i], params, options));
-                            }
-                        }
-                        return easeDisplayObjects
-                    }
-
                     options = options || {};
                     options.duration = typeof options.duration !== 'undefined' ? options.duration : this.options.duration;
                     options.ease = options.ease || this.options.ease;
@@ -46645,28 +46560,15 @@
                     {
                         options.ease = penner[options.ease];
                     }
-
-                    let ease = element[this.key];
-                    if (ease)
-                    {
-                        if (!ease.connected)
-                        {
-                            this.list.push(element[this.key]);
-                        }
-                    }
-                    else
-                    {
-                        ease = element[this.key] = new EaseDisplayObject(element, this);
-                        this.list.push(ease);
-                    }
-                    ease.add(params, options);
+                    const easing = new Easing(element, params, options);
+                    this.easings.push(easing);
                     this.empty = false;
-                    return ease
+                    return easing
                 }
 
                 /**
-                 * helper function to create an ease that changes x and y to move the element to the desired target at the speed
-                 * NOTE: under the hood this calls add(element {x, y }, { duration: <calculated speed based on distance and speed> })
+                 * create an ease that changes position (x, y) of the element by moving to the target at the speed
+                 * NOTE: under the hood this calls add(element, { x, y }, { duration: <calculated speed based on distance and speed> })
                  * @param {PIXI.DisplayObject} element
                  * @param {(PIXI.DisplayObject|PIXI.Point)} target
                  * @param {number} speed in pixels / ms
@@ -46678,7 +46580,7 @@
                  * @param {number} [options.wait] wait this number of milliseconds before ease starts
                  * @param {boolean} [options.removeExisting] removes existing eases on the element of the same type (including x,y/position, skewX,skewY/skew, scaleX,scaleY/scale)
                  *
-                 * @returns {EaseDisplayObject}
+                 * @returns {Easing}
                  */
                 target(element, target, speed, options)
                 {
@@ -46700,13 +46602,12 @@
                  * @param {(boolean|number)} [options.repeat]
                  * @param {boolean} [options.reverse]
                  * @param {number} [options.wait] wait this number of milliseconds before ease starts
-                 * @param {boolean} [options.removeExisting] removes existing eases on the element of the same type (including x,y/position, skewX,skewY/skew, scaleX,scaleY/scale)
                  *
-                 * @returns {EaseDisplayObject}
+                 * @returns {Easing}
                  */
                 face(element, target, speed, options)
                 {
-                    const shortestAngle = EaseDisplayObject.shortestAngle(element.rotation, Math.atan2(target.y - element.y, target.x - element.x));
+                    const shortestAngle = Easing.shortestAngle(element.rotation, Math.atan2(target.y - element.y, target.x - element.x));
                     const duration = Math.abs(shortestAngle - element.rotation) / speed;
                     options = options || {};
                     options.duration = duration;
@@ -46715,51 +46616,55 @@
 
                 /**
                  * remove all eases from a DisplayObject
+                 * WARNING: 'complete' events will not fire for these removals
                  * @param {PIXI.DisplayObject} object
                  */
-                removeAllEases(object)
+                removeAllEases(element)
                 {
-                    if (object[this.key])
+                    for (let i = 0; i < this.easings.length; i++)
                     {
-                        this.list.splice(this.list.indexOf(object[this.key]), 1);
-                        object[this.key].clear();
+                        if (this.easings[i].remove(element))
+                        {
+                            this.easings.splice(i, 1);
+                            i--;
+                        }
+                    }
+                    if (this.easings.length === 0)
+                    {
+                        this.empty = true;
                     }
                 }
 
                 /**
                  * removes one or more eases from a DisplayObject
+                 * WARNING: 'complete' events will not fire for these removals
                  * @param {PIXI.DisplayObject} element
                  * @param {(string|string[])} param
                  */
                 removeEase(element, param)
                 {
-                    const ease = element[this.key];
-                    if (ease)
+                    for (let i = 0; i < this.easings.length; i++)
                     {
-                        if (Array.isArray(param))
+                        if (this.easings[i].remove(element, param))
                         {
-                            param.forEach(entry => ease.remove(entry));
+                            this.easings.splice(i, 1);
+                            i--;
                         }
-                        else
-                        {
-                            ease.remove(param);
-                        }
+                    }
+                    if (this.easings.length === 0)
+                    {
+                        this.empty = true;
                     }
                 }
 
                 /**
-                 * remove all animations for all DisplayObjects
+                 * remove all easings
+                 * WARNING: 'complete' events will not fire for these removals
                  */
                 removeAll()
                 {
-                    while (this.list.length)
-                    {
-                        const easeDisplayObject = this.list.pop();
-                        if (easeDisplayObject.element[this.key])
-                        {
-                            easeDisplayObject.element[this.key].clear();
-                        }
-                    }
+                    this.easings = [];
+                    this.empty = true;
                 }
 
                 /**
@@ -46771,16 +46676,16 @@
                     if (!this.empty)
                     {
                         const elapsed = Math.max(this.ticker.elapsedMS, this.options.maxFrame);
-                        for (let i = 0; i < this.list.length; i++)
+                        for (let i = 0; i < this.easings.length; i++)
                         {
-                            if (this.list[i].update(elapsed))
+                            if (this.easings[i].update(elapsed))
                             {
-                                this.list.splice(i, 1);
+                                this.easings.splice(i, 1);
                                 i--;
                             }
                         }
                         this.emit('each', this);
-                        if (this.list.length === 0)
+                        if (this.easings.length === 0)
                         {
                             this.empty = true;
                             this.emit('complete', this);
@@ -46789,22 +46694,22 @@
                 }
 
                 /**
-                 * number of elements being eased
-                 * @returns {number}
+                 * number of easings
+                 * @type {number}
                  */
-                countElements()
+                get count()
                 {
-                    return this.list.length
+                    return this.easings.length
                 }
 
                 /**
-                 * number of active animations across all elements
+                 * number of active easings across all elements
                  * @returns {number}
                  */
                 countRunning()
                 {
                     let count = 0;
-                    for (let entry of this.list)
+                    for (let entry of this.easings)
                     {
                         count += entry.count;
                     }

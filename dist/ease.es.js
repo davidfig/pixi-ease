@@ -658,7 +658,7 @@ class Easing extends eventemitter3
                 start = 0;
                 to = colors.length;
                 delta = to;
-                update = (entry === 'tint') ? ease => this.updateTint(ease, entry, colors) : ease => this.updateBlend(ease, entry, colors);
+                update = (entry === 'tint') ? ease => this.updateTint(ease, colors) : ease => this.updateBlend(ease, colors);
                 break
 
             case 'shake':
@@ -731,7 +731,7 @@ class Easing extends eventemitter3
         for (let i = 0; i < this.eases.length; i++)
         {
             const ease = this.eases[i];
-            if (ease.element === element && (params === false || params.indexOf(this.eases[i].entry) !== -1))
+            if (ease.element === element && (params === false || params.indexOf(ease.entry) !== -1))
             {
                 this.eases.splice(i, 1);
                 i--;
@@ -764,13 +764,13 @@ class Easing extends eventemitter3
         ease.element[name][coord] = this.options.ease(this.time, ease.start, ease.delta, this.options.duration);
     }
 
-    updateTint(ease, entry, colors)
+    updateTint(ease, colors)
     {
         const index = Math.floor(this.options.ease(this.time, ease.start, ease.delta, this.options.duration));
         ease.element.tint = colors[index];
     }
 
-    updateBlend(ease, entry, colors)
+    updateBlend(ease, colors)
     {
         const calc = this.options.ease(this.time, ease.start, ease.delta, this.options.duration);
         const index = Math.floor(calc);
