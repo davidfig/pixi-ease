@@ -1158,6 +1158,21 @@ class Ease extends eventemitter3
     }
 
     /**
+     * adds a EaseDisplayObject to a DisplayObject - useful for creating events on an element's eases that don't yet exist
+     * @param {PIXI.DisplayObject}
+     * @return EaseDisplayObject
+     */
+    create(element)
+    {
+        if (!element[this.key])
+        {
+            element[this.key] = new EaseDisplayObject(element, this);
+            element[this.key].connected = false;
+        }
+        return element[this.key]
+    }
+
+    /**
      * add animation(s) to a PIXI.DisplayObject element
      * @param {(PIXI.DisplayObject|PIXI.DisplayObject[])} element
      *

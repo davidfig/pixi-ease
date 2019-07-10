@@ -50,8 +50,6 @@ export class Ease extends Events
         super()
         this.options = Object.assign({}, easeOptions, options)
         this.list = []
-        this.waitRemoveEase = []
-        this.waitRemoveAllEases = []
         this.empty = true
         if (this.options.useTicker === true)
         {
@@ -89,6 +87,21 @@ export class Ease extends Events
         {
             this.ticker.remove(this.update, this)
         }
+    }
+
+    /**
+     * adds a EaseDisplayObject to a DisplayObject - useful for creating events on an element's eases that don't yet exist
+     * @param {PIXI.DisplayObject}
+     * @return EaseDisplayObject
+     */
+    create(element)
+    {
+        if (!element[this.key])
+        {
+            element[this.key] = new EaseDisplayObject(element, this)
+            element[this.key].connected = false
+        }
+        return element[this.key]
     }
 
     /**
