@@ -46195,14 +46195,22 @@
 
                 updateTint(ease, colors)
                 {
-                    const index = Math.floor(this.options.ease(this.time, ease.start, ease.delta, this.options.duration));
+                    let index = Math.floor(this.options.ease(this.time, ease.start, ease.delta, this.options.duration));
+                    if (index === colors.length)
+                    {
+                        index = colors.length - 1;
+                    }
                     ease.element.tint = colors[index];
                 }
 
                 updateBlend(ease, colors)
                 {
                     const calc = this.options.ease(this.time, ease.start, ease.delta, this.options.duration);
-                    const index = Math.floor(calc);
+                    let index = Math.floor(calc);
+                    if (index === colors.length)
+                    {
+                        index = colors.length - 1;
+                    }
                     let next = index + 1;
                     if (next === colors.length)
                     {
