@@ -139,7 +139,7 @@ export class Ease extends Events
         }
         else
         {
-            this.inUpdate.add(easing)
+            this.inUpdate.push(easing)
         }
         return easing
     }
