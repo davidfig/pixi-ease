@@ -1060,6 +1060,7 @@ class Ease extends eventemitter3
         this.options = Object.assign({}, easeOptions, options);
         this.easings = [];
         this.empty = true;
+        this.inUpdate = null;
         if (this.options.useTicker === true)
         {
             if (this.options.ticker)
@@ -1140,8 +1141,15 @@ class Ease extends eventemitter3
             options.ease = penner[options.ease];
         }
         const easing = new Easing(element, params, options);
-        this.easings.push(easing);
-        this.empty = false;
+        if (this.inUpdate === null)
+        {
+            this.easings.push(easing);
+            this.empty = false;
+        }
+        else
+        {
+            this.inUpdate.add(easing);
+        }
         return easing
     }
 
@@ -1254,6 +1262,7 @@ class Ease extends eventemitter3
     {
         if (!this.empty)
         {
+            this.inUpdate = [];
             const elapsed = Math.max(this.ticker.elapsedMS, this.options.maxFrame);
             for (let i = 0; i < this.easings.length; i++)
             {
@@ -1263,6 +1272,11 @@ class Ease extends eventemitter3
                     i--;
                 }
             }
+            for (let easing of this.inUpdate)
+            {
+                this.easings.push(easing);
+            }
+            this.inUpdate = null;
             this.emit('each', this);
             if (this.easings.length === 0)
             {
