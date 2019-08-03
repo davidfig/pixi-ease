@@ -46577,7 +46577,7 @@
                     }
                     else
                     {
-                        this.inUpdate.add(easing);
+                        this.inUpdate.push(easing);
                     }
                     return easing
                 }

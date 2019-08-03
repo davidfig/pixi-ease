@@ -1148,7 +1148,7 @@ class Ease extends eventemitter3
         }
         else
         {
-            this.inUpdate.add(easing);
+            this.inUpdate.push(easing);
         }
         return easing
     }
