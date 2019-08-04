@@ -131,19 +131,26 @@ export class Easing extends Events
 
     /**
      * remove all easings with matching element and params
-     * @param {PIXI.DisplayObject} element
+     * @param {PIXI.DisplayObject} [element] if not set, removes all elements in this easing
      * @param {(string|string[])} [params] if not set, removes all params for the element
      */
     remove(element, params)
     {
-        params = typeof params === 'undefined' ? false : typeof params === 'string' ? [params] : params
-        for (let i = 0; i < this.eases.length; i++)
+        if (arguments.length === 0)
         {
-            const ease = this.eases[i]
-            if (ease.element === element && (params === false || params.indexOf(ease.entry) !== -1))
+            this.eases = []
+        }
+        else
+        {
+            params = typeof params === 'undefined' ? false : typeof params === 'string' ? [params] : params
+            for (let i = 0; i < this.eases.length; i++)
             {
-                this.eases.splice(i, 1)
-                i--
+                const ease = this.eases[i]
+                if (ease.element === element && (params === false || params.indexOf(ease.entry) !== -1))
+                {
+                    this.eases.splice(i, 1)
+                    i--
+                }
             }
         }
         if (this.eases.length === 0)
@@ -295,6 +302,10 @@ export class Easing extends Events
 
     update(elapsed)
     {
+        if (this.eases.length === 0)
+        {
+            return true
+        }
         if (this.wait)
         {
             this.wait -= elapsed

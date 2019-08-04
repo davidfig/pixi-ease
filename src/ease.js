@@ -51,7 +51,6 @@ export class Ease extends Events
         this.options = Object.assign({}, easeOptions, options)
         this.easings = []
         this.empty = true
-        this.inUpdate = null
         if (this.options.useTicker === true)
         {
             if (this.options.ticker)
@@ -132,15 +131,8 @@ export class Ease extends Events
             options.ease = Penner[options.ease]
         }
         const easing = new Easing(element, params, options)
-        if (this.inUpdate === null)
-        {
-            this.easings.push(easing)
-            this.empty = false
-        }
-        else
-        {
-            this.inUpdate.push(easing)
-        }
+        this.easings.push(easing)
+        this.empty = false
         return easing
     }
 
@@ -193,31 +185,10 @@ export class Ease extends Events
     }
 
     /**
-     * remove all eases from a DisplayObject
-     * WARNING: 'complete' events will not fire for these removals
-     * @param {PIXI.DisplayObject} object
-     */
-    removeAllEases(element)
-    {
-        for (let i = 0; i < this.easings.length; i++)
-        {
-            if (this.easings[i].remove(element))
-            {
-                this.easings.splice(i, 1)
-                i--
-            }
-        }
-        if (this.easings.length === 0)
-        {
-            this.empty = true
-        }
-    }
-
-    /**
      * removes one or more eases from a DisplayObject
      * WARNING: 'complete' events will not fire for these removals
      * @param {PIXI.DisplayObject} element
-     * @param {(string|string[])} param
+     * @param {(string|string[])} [param] omit to remove all easings for an element
      */
     removeEase(element, param)
     {
@@ -253,21 +224,15 @@ export class Ease extends Events
     {
         if (!this.empty)
         {
-            this.inUpdate = []
             const elapsed = Math.max(this.ticker.elapsedMS, this.options.maxFrame)
-            for (let i = 0; i < this.easings.length; i++)
+            const list = this.easings.slice(0)
+            for (let easing of list)
             {
-                if (this.easings[i].update(elapsed))
+                if (easing.update(elapsed))
                 {
-                    this.easings.splice(i, 1)
-                    i--
+                    this.easings.splice(this.easings.indexOf(easing), 1)
                 }
             }
-            for (let easing of this.inUpdate)
-            {
-                this.easings.push(easing)
-            }
-            this.inUpdate = null
             this.emit('each', this)
             if (this.easings.length === 0)
             {
