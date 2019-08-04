@@ -371,16 +371,16 @@ describe('pixi-ease', () =>
         })
     })
 
-    it('removeAllEases', () => {
+    it('removeEase', () => {
         const ease = new Ease.Ease()
         const object1 = { x: 0, y: 0 }
         ease.add(object1, { x: 5 })
         ease.add(object1, { y: 5 })
         const object2 = { x: 0, y: 0 }
         ease.add(object2, { y: 5 })
-        ease.removeAllEases(object1)
+        ease.removeEase(object1)
         assert.equal(ease.count, 1)
-        ease.removeAllEases(object2)
+        ease.removeEase(object2)
         assert.equal(ease.count, 0)
         ease.destroy()
     })

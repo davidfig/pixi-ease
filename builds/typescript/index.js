@@ -46118,19 +46118,26 @@
 
                 /**
                  * remove all easings with matching element and params
-                 * @param {PIXI.DisplayObject} element
+                 * @param {PIXI.DisplayObject} [element] if not set, removes all elements in this easing
                  * @param {(string|string[])} [params] if not set, removes all params for the element
                  */
                 remove(element, params)
                 {
-                    params = typeof params === 'undefined' ? false : typeof params === 'string' ? [params] : params;
-                    for (let i = 0; i < this.eases.length; i++)
+                    if (arguments.length === 0)
                     {
-                        const ease = this.eases[i];
-                        if (ease.element === element && (params === false || params.indexOf(ease.entry) !== -1))
+                        this.eases = [];
+                    }
+                    else
+                    {
+                        params = typeof params === 'undefined' ? false : typeof params === 'string' ? [params] : params;
+                        for (let i = 0; i < this.eases.length; i++)
                         {
-                            this.eases.splice(i, 1);
-                            i--;
+                            const ease = this.eases[i];
+                            if (ease.element === element && (params === false || params.indexOf(ease.entry) !== -1))
+                            {
+                                this.eases.splice(i, 1);
+                                i--;
+                            }
                         }
                     }
                     if (this.eases.length === 0)
@@ -46282,6 +46289,10 @@
 
                 update(elapsed)
                 {
+                    if (this.eases.length === 0)
+                    {
+                        return true
+                    }
                     if (this.wait)
                     {
                         this.wait -= elapsed;
@@ -46456,7 +46467,6 @@
                     this.options = Object.assign({}, easeOptions, options);
                     this.easings = [];
                     this.empty = true;
-                    this.inUpdate = null;
                     if (this.options.useTicker === true)
                     {
                         if (this.options.ticker)
@@ -46537,15 +46547,8 @@
                         options.ease = penner[options.ease];
                     }
                     const easing = new Easing(element, params, options);
-                    if (this.inUpdate === null)
-                    {
-                        this.easings.push(easing);
-                        this.empty = false;
-                    }
-                    else
-                    {
-                        this.inUpdate.push(easing);
-                    }
+                    this.easings.push(easing);
+                    this.empty = false;
                     return easing
                 }
 
@@ -46598,31 +46601,10 @@
                 }
 
                 /**
-                 * remove all eases from a DisplayObject
-                 * WARNING: 'complete' events will not fire for these removals
-                 * @param {PIXI.DisplayObject} object
-                 */
-                removeAllEases(element)
-                {
-                    for (let i = 0; i < this.easings.length; i++)
-                    {
-                        if (this.easings[i].remove(element))
-                        {
-                            this.easings.splice(i, 1);
-                            i--;
-                        }
-                    }
-                    if (this.easings.length === 0)
-                    {
-                        this.empty = true;
-                    }
-                }
-
-                /**
                  * removes one or more eases from a DisplayObject
                  * WARNING: 'complete' events will not fire for these removals
                  * @param {PIXI.DisplayObject} element
-                 * @param {(string|string[])} param
+                 * @param {(string|string[])} [param] omit to remove all easings for an element
                  */
                 removeEase(element, param)
                 {
@@ -46658,21 +46640,15 @@
                 {
                     if (!this.empty)
                     {
-                        this.inUpdate = [];
                         const elapsed = Math.max(this.ticker.elapsedMS, this.options.maxFrame);
-                        for (let i = 0; i < this.easings.length; i++)
+                        const list = this.easings.slice(0);
+                        for (let easing of list)
                         {
-                            if (this.easings[i].update(elapsed))
+                            if (easing.update(elapsed))
                             {
-                                this.easings.splice(i, 1);
-                                i--;
+                                this.easings.splice(this.easings.indexOf(easing), 1);
                             }
                         }
-                        for (let easing of this.inUpdate)
-                        {
-                            this.easings.push(easing);
-                        }
-                        this.inUpdate = null;
                         this.emit('each', this);
                         if (this.easings.length === 0)
                         {
