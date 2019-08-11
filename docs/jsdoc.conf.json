@@ -1,7 +1,5 @@
 {
     "applicationName": "pixi-ease",
-    "disqus": "",
-    "googleAnalytics": "",
     "openGraph": {
         "title": "",
         "type": "website",
@@ -17,7 +15,8 @@
     "linenums": true,
     "source": {
         "include": [
-            "./src",
+            "./src/ease.js",
+            "./src/easing.js",
             "./node_modules/eventemitter3"
         ],
         "includePattern": ".+\\.js(doc)?$",
@@ -32,14 +31,15 @@
         "destination": "./docs/jsdoc",
         "template": "../yy-jsdoc-template/"
     },
+    "readmeShowNav": "Ease",
     "plugins": ["../yy-jsdoc-template/plugins/skip-node_modules"],
     "templates": {
         "default": {
             "outputSourceFiles": true
         },
         "applicationName": "pixi-ease",
-        "footer"        : "by YOPEY YOPEY LLC (yopeyopey.com)",
-        "copyright"     : "Copyright © 2019 YOPEY YOPEY LLC.",
+        "footer"        : "by David Figatner (yopeyopey.com)",
+        "copyright"     : "Copyright © 2019 David Figatner",
         "meta": {
             "title": "pixi-ease API Documentation",
             "description": "Documentation for pixi-ease library",

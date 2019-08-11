@@ -147,12 +147,18 @@
         </li>
     
         
-        <li class="item" data-name="Easing#Easing">
+        <li class="item" data-name="Easing">
             <span class="title  ">
                 
-                <a href="Easing_Easing.html">Easing#Easing</a>
+                <a href="Easing.html">Easing</a>
             </span>
             <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li class="parent " data-name="Easing#count"><a href="Easing.html#count">count</a></li>
+            
+                <li class="parent " data-name="Easing#elements"><a href="Easing.html#elements">elements</a></li>
             
             </ul>
             <ul class="typedefs itemMembers">
@@ -165,21 +171,23 @@
             
             <span class="subtitle">Methods</span>
             
-                <li class="  " data-name="Easing#Easing#emit~"><a href="Easing_Easing.html#emit">emit</a></li>
+                <li class="  " data-name="Easing#emit~"><a href="Easing.html#emit">emit</a></li>
             
-                <li class="  " data-name="Easing#Easing#eventNames~"><a href="Easing_Easing.html#eventNames">eventNames</a></li>
+                <li class="  " data-name="Easing#eventNames~"><a href="Easing.html#eventNames">eventNames</a></li>
             
-                <li class="  " data-name="Easing#Easing#listenerCount~"><a href="Easing_Easing.html#listenerCount">listenerCount</a></li>
+                <li class="  " data-name="Easing#listenerCount~"><a href="Easing.html#listenerCount">listenerCount</a></li>
             
-                <li class="  " data-name="Easing#Easing#listeners~"><a href="Easing_Easing.html#listeners">listeners</a></li>
+                <li class="  " data-name="Easing#listeners~"><a href="Easing.html#listeners">listeners</a></li>
             
-                <li class="  " data-name="Easing#Easing#once~"><a href="Easing_Easing.html#once">once</a></li>
+                <li class="  " data-name="Easing#once~"><a href="Easing.html#once">once</a></li>
             
-                <li class="  " data-name="Easing#Easing#on~"><a href="Easing_Easing.html#on">on</a></li>
+                <li class="  " data-name="Easing#on~"><a href="Easing.html#on">on</a></li>
             
-                <li class="  " data-name="Easing#Easing#removeAllListeners~"><a href="Easing_Easing.html#removeAllListeners">removeAllListeners</a></li>
+                <li class="parent  " data-name="Easing#remove"><a href="Easing.html#remove">remove</a></li>
             
-                <li class="  " data-name="Easing#Easing#removeListener~"><a href="Easing_Easing.html#removeListener">removeListener</a></li>
+                <li class="  " data-name="Easing#removeAllListeners~"><a href="Easing.html#removeAllListeners">removeAllListeners</a></li>
+            
+                <li class="  " data-name="Easing#removeListener~"><a href="Easing.html#removeListener">removeListener</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -206,6 +214,8 @@
         <h2>Easing
         </h2>
         
+            <div class="class-description">Controls a group of easings added by Ease.add()</div>
+        
     </div>
 </header>
 
@@ -231,7 +241,7 @@
 
         
         <div class="tag-source">
-            <a href="src_easing.js.html#line19">easing.js:19</a>
+            <a href="src_easing.js.html#line23">easing.js:23</a>
         </div>
         
     </div>
@@ -416,9 +426,122 @@
     
 
     
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl class="clearfix summary-list list-classes">
+            <dt class=""><a href="Easing.html">Easing</a></dt>
+            
+        </dl>
+    
 
     
 
+    
+        <h3 class="subsection-title">Members</h3>
+
+        <dl class="list-members">
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="count">
+            <a class="share-icon" href="#count"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">count</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        number of parameters being eased
+    </div>
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="elements">
+            <a class="share-icon" href="#elements"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">elements</span>
+            <span class="type-signature type">PIXI.DisplayObject | Array.&lt;PIXI.DisplayObject></span>
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        element(s) being eased
+    </div>
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+</dd>
+
+        </dl>
     
 
     
@@ -439,6 +562,8 @@
             
                 <span class="access-signature inherited">inherited</span>
             
+            
+                <span class="access-signature overrides">overrides</span>
             
         </h4>
 
@@ -595,6 +720,8 @@
                 <span class="access-signature inherited">inherited</span>
             
             
+                <span class="access-signature overrides">overrides</span>
+            
         </h4>
 
         
@@ -702,6 +829,8 @@ listeners.
             
                 <span class="access-signature inherited">inherited</span>
             
+            
+                <span class="access-signature overrides">overrides</span>
             
         </h4>
 
@@ -858,6 +987,8 @@ listeners.
                 <span class="access-signature inherited">inherited</span>
             
             
+                <span class="access-signature overrides">overrides</span>
+            
         </h4>
 
         
@@ -1012,6 +1143,8 @@ listeners.
             
                 <span class="access-signature inherited">inherited</span>
             
+            
+                <span class="access-signature overrides">overrides</span>
             
         </h4>
 
@@ -1247,6 +1380,8 @@ listeners.
                 <span class="access-signature inherited">inherited</span>
             
             
+                <span class="access-signature overrides">overrides</span>
+            
         </h4>
 
         
@@ -1469,6 +1604,167 @@ listeners.
             
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="remove">
+            <a class="share-icon" href="#remove"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                remove
+            </span>
+            <span class="signature">(<span class="optional">element</span>, <span class="optional">params</span>)</span>
+            
+            
+            
+            
+        </h4>
+
+        
+        <div class="tag-source">
+            <a href="src_easing.js.html#line142">easing.js:142</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        remove all easings with matching element and params
+    </div>
+    
+
+    
+
+    
+
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>element</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">PIXI.DisplayObject</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                if not set, removes all elements in this easing</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>params</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                if not set, removes all params for the element</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="removeAllListeners">
             <a class="share-icon" href="#removeAllListeners"><span class="glyphicon glyphicon-link"></span></a>
             <span class="">
@@ -1480,6 +1776,8 @@ listeners.
             
                 <span class="access-signature inherited">inherited</span>
             
+            
+                <span class="access-signature overrides">overrides</span>
             
         </h4>
 
@@ -1642,6 +1940,8 @@ listeners.
             
                 <span class="access-signature inherited">inherited</span>
             
+            
+                <span class="access-signature overrides">overrides</span>
             
         </h4>
 
@@ -1871,7 +2171,7 @@ listeners.
 
         <footer class="content-size">
             <div class="footer">
-                Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun Aug 11 2019 08:25:00 GMT+0800 (Taipei Standard Time)
+                Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun Aug 11 2019 08:26:23 GMT+0800 (Taipei Standard Time)
             </div>
         </footer>
     </div>
