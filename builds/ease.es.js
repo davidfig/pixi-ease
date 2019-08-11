@@ -591,6 +591,10 @@ EventEmitter.EventEmitter = EventEmitter;
 }
 });
 
+/**
+ * Controls a group of easings added by Ease.add()
+ * @extends EventEmitter
+ */
 class Easing extends eventemitter3
 {
     /**
@@ -702,6 +706,7 @@ class Easing extends eventemitter3
      * helper function to find closest angle to change between angle start and angle finish (used by face)
      * @param {number} start angle
      * @param {number} finish angle
+     * @private
      */
     static shortestAngle(start, finish)
     {
