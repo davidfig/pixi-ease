@@ -45725,7 +45725,7 @@
                 /**
                  * remove all easings with matching element and params
                  * @param {PIXI.DisplayObject} [element] if not set, removes all elements in this easing
-                 * @param {(string|string[])} [params] if not set, removes all params for the element
+                 * @param {(string|string[])} [params] if not set, removes all params for each element
                  */
                 remove(element, params)
                 {
@@ -45739,7 +45739,7 @@
                         for (let i = 0; i < this.eases.length; i++)
                         {
                             const ease = this.eases[i];
-                            if (ease.element === element && (params === false || params.indexOf(ease.entry) !== -1))
+                            if ((!element || ease.element === element) && (params === false || params.indexOf(ease.entry) !== -1))
                             {
                                 this.eases.splice(i, 1);
                                 i--;
