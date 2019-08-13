@@ -312,6 +312,20 @@ describe('pixi-ease', () =>
         })
     })
 
+    it('removeEase with multiple elements and one param', () => {
+        const ease = new Ease.Ease()
+        const object1 = { x: 0, y: 0 }
+        const object2 = { x: 10, y: 10 }
+        const e1 = ease.add(object1, { x: 20, y: 20 }, { ease: 'linear' })
+        const e2 = ease.add(object2, { x: 20, y: 20 }, { ease: 'linear' })
+        assert.equal(e1.count, 2)
+        assert.equal(e2.count, 2)
+        ease.removeEase(null, ['x'])
+        assert.equal(e1.count, 1)
+        assert.equal(e2.count, 1)
+        ease.destroy()
+    })
+
     it('Ease.list deprecated message', () => {
         new Ease.List()
     })
