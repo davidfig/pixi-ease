@@ -46062,8 +46062,8 @@
                  * @param {number} [options.duration=1000] default duration if not set
                  * @param {(string|function)} [options.ease=Penner.easeInOutSine] default ease function if not set (see {@link https://www.npmjs.com/package/penner} for names of easing functions)
                  * @param {boolean} [options.useTicker=true] attach updates to a PIXI.Ticker
-                 * @param {PIXI.Ticker} [options.ticker=PIXI.ticker.shared || PIXI.Ticker.shared] which PIXI.Ticker to use
-                 * @param {number} [options.maxFrame=1000/60] maximum frame time (set to Infinity to ignore)
+                 * @param {PIXI.Ticker} [options.ticker=PIXI.ticker.shared || PIXI.Ticker.shared] which PIXI.Ticker to use; only used if useTicker = true
+                 * @param {number} [options.maxFrame=1000/60] maximum frame time (set to Infinity to ignore); only used if useTicker = true
                  * @fires Ease#complete
                  * @fires Ease#each
                  */
@@ -46073,7 +46073,7 @@
                     this.options = Object.assign({}, easeOptions, options);
                     this.easings = [];
                     this.empty = true;
-                    if (this.options.useTicker === true)
+                    if (this.options.useTicker)
                     {
                         if (this.options.ticker)
                         {
@@ -46104,7 +46104,7 @@
                 destroy()
                 {
                     this.removeAll();
-                    if (this.options.useTicker === true)
+                    if (this.options.useTicker)
                     {
                         this.ticker.remove(this.update, this);
                     }
@@ -46240,13 +46240,17 @@
 
                 /**
                  * update frame; this is called automatically if options.useTicker !== false
-                 * @param {number} elapsed time in ms since last frame (capped at options.maxFrame)
+                 * @param {number} elapsed time in ms since last frame
                  */
-                update()
+                update(elapsed)
                 {
+                    if (this.options.useTicker)
+                    {
+                        elapsed = this.ticker.elapsedMS;
+                    }
+                    elapsed = Math.min(elapsed, this.options.maxFrame);
                     if (!this.empty)
                     {
-                        const elapsed = Math.max(this.ticker.elapsedMS, this.options.maxFrame);
                         const list = this.easings.slice(0);
                         for (let easing of list)
                         {
