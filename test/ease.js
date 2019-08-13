@@ -384,4 +384,8 @@ describe('pixi-ease', () =>
         assert.equal(ease.count, 0)
         ease.destroy()
     })
+
+    it('Cleaning up...', () => {
+        Ease.ease.destroy()
+    })
 })
