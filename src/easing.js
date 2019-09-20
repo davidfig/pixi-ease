@@ -31,7 +31,6 @@ export class Easing extends Events
         this.elements = Array.isArray(element) ? element : [element]
         this.eases = []
         this.options = options || {}
-        this.wait = options.wait || 0
         this.time = 0
         for (let param in params)
         {
@@ -311,18 +310,18 @@ export class Easing extends Events
         {
             return true
         }
-        if (this.wait)
+        if (this.options.wait)
         {
-            this.wait -= elapsed
-            if (this.wait >= 0)
+            this.options.wait -= elapsed
+            if (this.options.wait >= 0)
             {
                 this.emit('wait', this)
                 return
             }
-            if (this.wait <= 0)
+            if (this.options.wait <= 0)
             {
-                elapsed = -this.wait
-                this.wait = 0
+                elapsed = -this.options.wait
+                this.options.wait = 0
                 this.emit('wait-end', this)
             }
         }
