@@ -14,7 +14,7 @@ interface EaseParams
 {
      x?: number
      y?: number
-     position?: PIXI.DisplayObject | PIXI.Point
+     position?:  PIXI.DisplayObject | PIXI.Point
      width?: number
      height?: number
      scale?: number
@@ -29,7 +29,7 @@ interface EaseParams
      tint?: number | number[]
      blend?: number | number[]
      shake?: number
-     [generic: string]: number
+     [generic: string]: any
 }
 
 interface AddOptions
