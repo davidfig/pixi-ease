@@ -16,41 +16,10 @@ a simple and powerful pixi.js easing/tweening/animating library
 ## Live Demo
 [https://davidfig.github.io/pixi-ease/](https://davidfig.github.io/pixi-ease/)
 
-## Migrating from pixi-ease v1 to v2
-
-```js
-// v1 code
-// -------
-// const Ease = require('pixi-ease')
-// const ease = new Ease.list()
-// const moveSquare = ease.to(square, { x: 20, y: 55 }, 2000, { reverse: true })
-// moveSquare.on('done', () => console.log('ease complete.'))
-
-// v2 code
-//--------
-import { ease } from 'pixi-ease'
-// or const ease = require('pixi-ease').ease
-
-const moveSquare = ease.add(square, { x: 20, y: 55 }, { duration: 2000, reverse: true })
-moveSquare.on('complete', () => console.log('ease complete.'))
-
-// you can also create separate easing groups, similar to how Ease.List worked, and include default settings
-import { Ease } from 'pixi-ease'
-// or const Ease = require('pixi-ease').Ease
-
-const easeList = new Ease({ duration: 1000, ease: 'easeOutQuad' })
-easeList.add('square', { tintBlend: [0xff0000, 0x00ff00] })
-
-// DURATION MOVED INTO OPTIONS
-// -------------------------------
-// v1 code
-// -------
-// ease.to(square, { x: 20 }, 200, { ease: 'easeInOutSine' })
-
-// v2 code
-// -------
-ease.add(square, { x: 20 }, { duration: 200, ease: 'easeInOutSine' })
-```
+## Migrating to v3
+* changed default update loop to use requestAnimationFrame to remove the dependency on pixi.js
+* to use PIXI.Ticker (like in v2), pass `new Ease({ ticker: PIXI.Ticker.shared })`
+* ordinary usage should be unchanged
 
 ## Installation
 

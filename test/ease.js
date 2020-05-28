@@ -13,7 +13,8 @@ describe('pixi-ease', () =>
         const ease = new Ease.Ease()
         assert.equal(ease.options.duration, 1000)
         assert.isFunction(ease.options.ease)
-        assert.equal(ease.options.useTicker, true)
+        assert.equal(ease.options.useRAF, true)
+        assert.equal(ease.options.ticker, null)
         assert.equal(ease.options.maxFrame, 1000 / 60)
         ease.destroy()
     })
@@ -21,16 +22,16 @@ describe('pixi-ease', () =>
     it('constructor with options', () => {
         const penner = Penner.easeInOutQuad
         const ticker = { add: () => {}, remove: () => {} }
-        const ease = new Ease.Ease({ duration: 3000, ease: penner, useTicker: true, maxFrame: Infinity, ticker })
+        const ease = new Ease.Ease({ duration: 3000, ease: penner, maxFrame: Infinity, ticker })
         assert.equal(ease.options.duration, 3000)
         assert.equal(ease.options.ease, penner)
-        assert.equal(ease.options.useTicker, true)
+        assert.equal(ease.options.ticker, ticker)
         assert.equal(ease.options.maxFrame, Infinity)
         ease.destroy()
     })
 
     it('constructor with no ticker', () => {
-        const ease = new Ease.Ease({ useTicker: false })
+        const ease = new Ease.Ease({ useRAF: null })
         const e = ease.add({ x: 5 }, { x: 10 })
         let each = false
         e.on('each', () => each = true)
@@ -134,7 +135,7 @@ describe('pixi-ease', () =>
         })
     })
 
-    it('face', () => {
+    it('face-complicated', () => {
         const ease = new Ease.Ease({ ease: 'linear' })
         const object = { x: 0, y: 0, rotation: 0 }
         const target = { x: 20, y: 20 }
@@ -368,8 +369,8 @@ describe('pixi-ease', () =>
         const target = { x: 100, y: 100 }
         ease.target(object, target, 1)
         ease.once('each', () => {
-            assert.closeTo(object.x, 12, 2)
-            assert.closeTo(object.y, 12, 2)
+            assert.closeTo(object.x, 12, 3)
+            assert.closeTo(object.y, 12, 3)
             ease.destroy()
         })
     })
@@ -385,7 +386,7 @@ describe('pixi-ease', () =>
         })
     })
 
-    it('removeEase', () => {
+    it('removeEase-2', () => {
         const ease = new Ease.Ease()
         const object1 = { x: 0, y: 0 }
         ease.add(object1, { x: 5 })

@@ -5,7 +5,7 @@ interface EaseOptions
 {
     duration?: number
     ease?: string | Function
-    useTicker?: boolean
+    useRaf?: boolean
     ticker?: PIXI.Ticker
     maxFrame?: number
 }
@@ -56,10 +56,11 @@ export declare class Ease extends EventEmitter
     removeAllEases(element: PIXI.DisplayObject): void
     removeEase(element: PIXI.DisplayObject, param: string | string[]): void
     removeAll(force: boolean): void
-    update(): void
+    update(elapsed?: number): void
     countElements(): number
     countRunning(): number
 
+    on(event: 'each' | 'complete', fn: (ease: Ease) => void, context?: any): this
 }
 
 export declare class EaseDisplayObject extends EventEmitter
@@ -70,4 +71,17 @@ export declare class EaseDisplayObject extends EventEmitter
     remove(params: string | string[]): void
     add(params: EaseParams, options: AddOptions): void
     update(elapsed: number): void
+}
+
+export declare class Easing extends EventEmitter
+{
+    constructor(element: EaseDisplayObject | EaseDisplayObject[], params: EaseParams, options: EaseOptions)
+
+    addParam(element: EaseDisplayObject, entry: string, param: any): void
+    remove(element: EaseDisplayObject, params: string | string[]): void
+
+    update(elasped: number): void
+    count(): number
+
+    on(event: 'each' | 'complete' | 'repeat' | 'reverse' | 'wait' | 'wait-end', fn: (easing: Easing) => void, context?: any): this
 }

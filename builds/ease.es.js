@@ -1,6 +1,3 @@
-import * as PIXI from 'pixi.js';
-import { VERSION } from 'pixi.js';
-
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 function createCommonjsModule(fn, module) {
@@ -1031,8 +1028,9 @@ class Easing extends eventemitter3
 const easeOptions = {
     duration: 1000,
     ease: penner.easeInOutSine,
-    useTicker: true,
-    maxFrame: 1000 / 60
+    maxFrame: 1000 / 60,
+    ticker: null,
+    useRAF: true
 };
 
 /**
@@ -1063,8 +1061,8 @@ class Ease extends eventemitter3
      * @param {object} [options]
      * @param {number} [options.duration=1000] default duration if not set
      * @param {(string|function)} [options.ease=Penner.easeInOutSine] default ease function if not set (see {@link https://www.npmjs.com/package/penner} for names of easing functions)
-     * @param {boolean} [options.useTicker=true] attach updates to a PIXI.Ticker
-     * @param {PIXI.Ticker} [options.ticker=PIXI.ticker.shared || PIXI.Ticker.shared] which PIXI.Ticker to use; only used if useTicker = true
+     * @param {boolean} [option.useRAF=true] attach to a requestAnimationFrame listener
+     * @param {PIXI.Ticker} [options.ticker] attach to a PIXI.Ticker instead of RAF
      * @param {number} [options.maxFrame=1000/60] maximum frame time (set to Infinity to ignore); only used if useTicker = true
      * @fires Ease#complete
      * @fires Ease#each
@@ -1075,28 +1073,9 @@ class Ease extends eventemitter3
         this.options = Object.assign({}, easeOptions, options);
         this.easings = [];
         this.empty = true;
-        if (this.options.useTicker)
+        if (this.options.ticker)
         {
-            if (this.options.ticker)
-            {
-                this.ticker = this.options.ticker;
-            }
-            else
-            {
-                // weird code to ensure pixi.js v4 support (which changed from PIXI.ticker.shared to PIXI.Ticker.shared)
-                // to avoid Rollup transforming our import, save pixi namespace in a variable
-                // from here: https://github.com/pixijs/pixi.js/issues/5757
-                const pixiNS = PIXI;
-                if (parseInt(/^(\d+)\./.exec(VERSION)[1]) < 5)
-                {
-                    this.ticker = pixiNS.ticker.shared;
-                }
-                else
-                {
-                    this.ticker = pixiNS.Ticker.shared;
-                }
-            }
-            this.ticker.add(this.update, this);
+            this.options.ticker.add(this.update, this);
         }
     }
 
@@ -1109,6 +1088,11 @@ class Ease extends eventemitter3
         if (this.options.useTicker)
         {
             this.ticker.remove(this.update, this);
+        }
+        else if (this.options.useRAF)
+        {
+            cancelAnimationFrame(this.handleRAF);
+            this.handleRAF = null;
         }
     }
 
@@ -1156,6 +1140,11 @@ class Ease extends eventemitter3
         }
         const easing = new Easing(element, params, options);
         this.easings.push(easing);
+        if (this.empty && this.options.useRAF)
+        {
+            this.handleRAF = requestAnimationFrame(() => this.update());
+            this.lastTime = Date.now();
+        }
         this.empty = false;
         return easing
     }
@@ -1227,6 +1216,11 @@ class Ease extends eventemitter3
         if (this.easings.length === 0)
         {
             this.empty = true;
+            if (this.options.useRAF && this.handleRAF)
+            {
+                cancelAnimationFrame(this.handleRAF);
+                this.handleRAF = null;
+            }
         }
     }
 
@@ -1238,7 +1232,12 @@ class Ease extends eventemitter3
     {
         this.easings = [];
         this.empty = true;
-    }
+        if (this.options.useRAF && this.handleRAF)
+        {
+            cancelAnimationFrame(this.handleRAF);
+            this.handleRAF = null;
+        }
+}
 
     /**
      * update frame; this is called automatically if options.useTicker !== false
@@ -1249,6 +1248,12 @@ class Ease extends eventemitter3
         if (this.options.useTicker)
         {
             elapsed = this.ticker.elapsedMS;
+        }
+        else if (this.options.useRAF)
+        {
+            const now = Date.now();
+            elapsed = now - this.lastTime;
+            this.lastTime = now;
         }
         elapsed = Math.min(elapsed, this.options.maxFrame);
         if (!this.empty)
@@ -1267,6 +1272,14 @@ class Ease extends eventemitter3
                 this.empty = true;
                 this.emit('complete', this);
             }
+        }
+        if (this.options.useRAF && this.easings.length)
+        {
+            this.handleRAF = requestAnimationFrame(() => this.update());
+        }
+        else
+        {
+            this.handleRAF = null;
         }
     }
 
