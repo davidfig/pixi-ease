@@ -901,12 +901,12 @@ class Easing extends eventemitter3
         if (this.options.wait)
         {
             this.options.wait -= elapsed;
-            if (this.options.wait >= 0)
+            if (this.options.wait > 0)
             {
                 this.emit('wait', this);
                 return
             }
-            if (this.options.wait <= 0)
+            else
             {
                 elapsed = -this.options.wait;
                 this.options.wait = 0;
