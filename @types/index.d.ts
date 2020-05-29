@@ -52,7 +52,7 @@ export declare class Ease extends EventEmitter
     constructor(options: EaseOptions)
 
     destroy(): void
-    add(element: PIXI.DisplayObject, params: EaseParams, options: AddOptions): EaseDisplayObject | EaseDisplayObject[]
+    add(element: PIXI.DisplayObject, params: EaseParams, options: AddOptions): Easing
     removeAllEases(element: PIXI.DisplayObject): void
     removeEase(element: PIXI.DisplayObject, param: string | string[]): void
     removeAll(force: boolean): void
