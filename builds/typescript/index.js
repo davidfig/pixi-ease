@@ -38807,11 +38807,14 @@
                     }
                     else
                     {
-                        params = typeof params === 'undefined' ? false : typeof params === 'string' ? [params] : params;
+                        if (typeof params === 'string')
+                        {
+                            params = [params];
+                        }
                         for (let i = 0; i < this.eases.length; i++)
                         {
                             const ease = this.eases[i];
-                            if ((!element || ease.element === element) && (params === false || params.indexOf(ease.entry) !== -1))
+                            if ((!element || ease.element === element) && (!params || params.indexOf(ease.entry) !== -1))
                             {
                                 this.eases.splice(i, 1);
                                 i--;
