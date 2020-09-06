@@ -54,7 +54,7 @@ export declare class Ease extends EventEmitter
     destroy(): void
     add(element: PIXI.DisplayObject, params: EaseParams, options: AddOptions): Easing
     removeAllEases(element: PIXI.DisplayObject): void
-    removeEase(element: PIXI.DisplayObject, param: string | string[]): void
+    removeEase(element: PIXI.DisplayObject, param?: string | string[]): void
     removeAll(force: boolean): void
     update(elapsed?: number): void
     countElements(): number
@@ -78,7 +78,7 @@ export declare class Easing extends EventEmitter
     constructor(element: EaseDisplayObject | EaseDisplayObject[], params: EaseParams, options: EaseOptions)
 
     addParam(element: EaseDisplayObject, entry: string, param: any): void
-    remove(element: EaseDisplayObject, params: string | string[]): void
+    remove(element: EaseDisplayObject, params?: string | string[]): void
 
     update(elasped: number): void
     count(): number
