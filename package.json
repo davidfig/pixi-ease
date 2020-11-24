@@ -57,7 +57,7 @@
         "browserify": "^16.5.0",
         "chai": "^4.2.0",
         "fork-me-github": "^1.0.3",
-        "highlight.js": "^9.15.9",
+        "highlight.js": "^10.1.2",
         "jsdoc": "^3.6.3",
         "mocha": "^6.2.0",
         "pixi-ease": "1.3.0",
