@@ -3,6 +3,7 @@ import { EventEmitter } from 'eventemitter3'
 
 interface EaseOptions {
     duration?: number
+    wait?: number
     ease?: string | Function
     useRaf?: boolean
     ticker?: PIXI.Ticker

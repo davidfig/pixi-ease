@@ -5,6 +5,7 @@ import { Easing } from './easing'
 
 const easeOptions = {
     duration: 1000,
+    wait: 0,
     ease: Penner.easeInOutSine,
     maxFrame: 1000 / 60,
     ticker: null,
