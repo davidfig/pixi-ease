@@ -8,7 +8,7 @@ export class Easing extends Events
 {
     /**
      * an easing that acts on an element or an array of elements
-     * @param {(PIXI.DisplayObject|PIXI.DisplayObject[])} element
+     * @param {(PIXI.Container|PIXI.Container[])} element
      * @param {object} params
      * @param {object} options
      * @extends EventEmitter
@@ -26,7 +26,7 @@ export class Easing extends Events
 
         /**
          * element(s) being eased
-         * @member {(PIXI.DisplayObject|PIXI.DisplayObject[])}
+         * @member {(PIXI.Container|PIXI.Container[])}
          */
         this.elements = Array.isArray(element) ? element : [element]
         this.eases = []
@@ -66,9 +66,10 @@ export class Easing extends Events
 
             case 'tint':
             case 'blend':
-                const colors = Array.isArray(param) ? param : [element.tint, param]
+                const colors = Easing.toColors(element, Array.isArray(param) ? param : [element.tint, param])
                 start = 0
-                to = colors.length
+                // blend ends on the last color unless it repeats (without reverse) and wraps back to the first color
+                to = (entry === 'blend' && (!this.options.repeat || this.options.reverse)) ? colors.length - 1 : colors.length
                 delta = to
                 update = (entry === 'tint') ? ease => this.updateTint(ease, colors) : ease => this.updateBlend(ease, colors)
                 break
@@ -96,7 +97,7 @@ export class Easing extends Events
 
             case 'face':
                 start = element.rotation
-                to = Easing.shortestAngle(start, Math.atan2(param.y - element.y, param.x - element.x))
+                to = start + Easing.shortestAngle(start, Math.atan2(param.y - element.y, param.x - element.x))
                 delta = to - start
                 update = ease => this.updateOne(ease, 'rotation')
                 break
@@ -108,6 +109,29 @@ export class Easing extends Events
                 update = ease => this.updateOne(ease, entry)
         }
         this.eases.push({ element, entry, update, start, to, delta })
+    }
+
+    /**
+     * convert colors to numbers using the element's tint setter (pixi.js v8 accepts any ColorSource, e.g., 'red' or '#ff0000')
+     * @param {PIXI.Container} element
+     * @param {PIXI.ColorSource[]} colors
+     * @returns {number[]}
+     * @private
+     */
+    static toColors(element, colors)
+    {
+        if (colors.every(color => typeof color === 'number'))
+        {
+            return colors
+        }
+        const original = element.tint
+        const results = colors.map(color =>
+        {
+            element.tint = color
+            return element.tint
+        })
+        element.tint = original
+        return results
     }
 
     /**
@@ -135,7 +159,7 @@ export class Easing extends Events
 
     /**
      * remove all easings with matching element and params
-     * @param {PIXI.DisplayObject} [element] if not set, removes all elements in this easing
+     * @param {PIXI.Container} [element] if not set, removes all elements in this easing
      * @param {(string|string[])} [params] if not set, removes all params for each element
      */
     remove(element, params)
@@ -338,7 +362,7 @@ export class Easing extends Events
         for (let i = 0; i < this.eases.length; i++)
         {
             const ease = this.eases[i]
-            if (ease.element._destroyed)
+            if (ease.element.destroyed || ease.element._destroyed)
             {
                 this.eases.splice(i, 1)
                 i--
@@ -347,6 +371,10 @@ export class Easing extends Events
             {
                 ease.update(ease)
             }
+        }
+        if (this.eases.length === 0)
+        {
+            return true
         }
         this.emit('each', this)
         if (this.time >= this.options.duration)
@@ -409,7 +437,7 @@ export class Easing extends Events
  */
 
 /**
- * fires on each loop where there are easings
+ * fires on each frame where there are easings
  * @event EaseElement#each
  * @type {EaseElement}
  */

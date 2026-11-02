@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "noEmit": true,
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "target": "es2020",
+        "lib": ["es2020", "dom"],
+        "skipLibCheck": false,
+        "types": [],
+        "paths": { "pixi-ease": ["../@types/index.d.ts"] }
+    },
+    "files": ["types.ts"]
+}

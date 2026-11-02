@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js'
 import Random from 'yy-random'
-import FPS from 'yy-fps'
+import { FPS } from 'yy-fps'
 import fork from 'fork-me-github'
 
 import { html } from './html'
@@ -12,9 +12,10 @@ let app, y = 0,
     fps = new FPS(),
     boxes = []
 
-function setup()
+async function setup()
 {
-    app = new PIXI.Application({ view: document.querySelector('.view'), width: window.innerWidth, height: window.innerHeight, resolution: window.devicePixelRatio, autoResize: true, transparent: true })
+    app = new PIXI.Application()
+    await app.init({ canvas: document.querySelector('.view'), resizeTo: window, resolution: window.devicePixelRatio, autoDensity: true, backgroundAlpha: 0 })
     ease.duration = 2000
 
     // track fps in the ticker
@@ -63,7 +64,9 @@ function resetEases()
     while (boxes.length)
     {
         const box = boxes.pop()
-        app.stage.removeChild(box)
+        ease.removeEase(box)
+        ease.removeEase(box.sprite)
+        box.destroy({ children: true })
     }
 }
 
@@ -84,9 +87,9 @@ function setupButtons()
             ease.add(boxes[1], { scaleY: 2 }, { repeat: true, reverse: true })
             ease.add(boxes[2], { scale: 0 }, { repeat: true, reverse: true })
             ease.add(boxes[3], { x: window.innerWidth / 2, y: window.innerHeight / 2 }, { repeat: true, reverse: true })
-            ease.add(boxes[4], { target: { x: window.innerWidth / 2, y: 0 } }, { repeat: true, reverse: true })
+            ease.add(boxes[4], { position: { x: window.innerWidth / 2, y: 0 } }, { repeat: true, reverse: true })
             ease.add(boxes[5].sprite, { tint: [0xff0000, 0x00ff00, 0x0000ff] }, { repeat: true, ease: 'linear' })
-            ease.add(boxes[6].sprite, { tintBlend: [0xff0000, 0x00ff00, 0x0000ff] }, { repeat: true, duration: 5000, ease: 'linear' })
+            ease.add(boxes[6].sprite, { blend: [0xff0000, 0x00ff00, 0x0000ff] }, { repeat: true, duration: 5000, ease: 'linear' })
             ease.add(boxes[7], { shake: 5 }, { repeat: true })
             ease.add(boxes[8], { alpha: 0 }, { repeat: true, reverse: true })
             ease.add(boxes[9], { width: size * 2 }, { repeat: true, reverse: true })
@@ -95,7 +98,7 @@ function setupButtons()
             ease.add(boxes[12], { skew: 2 * Math.PI }, { repeat: true, reverse: true })
             ease.add(boxes[13], { skewX: 2 * Math.PI }, { repeat: true, reverse: true })
             ease.add(boxes[14], { skewY: 2 * Math.PI }, { repeat: true, reverse: true })
-            ease.add(boxes[15], { scale: 2, target: { x: window.innerWidth / 2, y: window.innerHeight / 2 }, alpha: 0.5, skew: 2 * Math.PI, rotation: 2 * Math.PI }, { repeat: true, reverse: true })
+            ease.add(boxes[15], { scale: 2, position: { x: window.innerWidth / 2, y: window.innerHeight / 2 }, alpha: 0.5, skew: 2 * Math.PI, rotation: 2 * Math.PI }, { repeat: true, reverse: true })
             remove.innerHTML = 'cancel all animations'
         }
     }
@@ -116,7 +119,7 @@ function box(words, change)
     sprite.tint = Random.color()
     if (words)
     {
-        const text = container.addChild(new PIXI.Text(words, { fill: 'white', fontSize: '1.25em' }))
+        const text = container.addChild(new PIXI.Text({ text: words, style: { fill: 'white', fontSize: size / 3 } }))
         text.anchor.set(0.5)
         text.position.set(box / 2, box / 2)
         container.text = text

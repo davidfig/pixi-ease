@@ -1,5 +1,6 @@
 const Penner = require('penner')
 const assert = require('chai').assert
+const PIXI = require('pixi.js')
 
 require('./node-shim')
 const Ease = require('../dist/ease.js')
@@ -364,26 +365,24 @@ describe('pixi-ease', () =>
     })
 
     it('target', () => {
-        const ease = new Ease.Ease({ ease: 'linear' })
+        const ease = new Ease.Ease({ ease: 'linear', useRAF: false })
         const object = { x: 0, y: 0 }
         const target = { x: 100, y: 100 }
         ease.target(object, target, 1)
-        ease.once('each', () => {
-            assert.closeTo(object.x, 12, 3)
-            assert.closeTo(object.y, 12, 3)
-            ease.destroy()
-        })
+        ease.update(1000 / 60)
+        assert.closeTo(object.x, 12, 3)
+        assert.closeTo(object.y, 12, 3)
+        ease.destroy()
     })
 
     it('face', () => {
-        const ease = new Ease.Ease({ ease: 'linear' })
+        const ease = new Ease.Ease({ ease: 'linear', useRAF: false })
         const object = { x: 0, y: 0, rotation: 0 }
         const target = { x: 100, y: 100 }
         ease.face(object, target, 0.01)
-        ease.once('each', () => {
-            assert.closeTo(object.rotation, 0.16, 0.1)
-            ease.destroy()
-        })
+        ease.update(1000 / 60)
+        assert.closeTo(object.rotation, 0.16, 0.1)
+        ease.destroy()
     })
 
     it('removeEase-2', () => {
@@ -397,6 +396,110 @@ describe('pixi-ease', () =>
         assert.equal(ease.count, 1)
         ease.removeEase(object2)
         assert.equal(ease.count, 0)
+        ease.destroy()
+    })
+
+    it('repeat event fires on each loop (#25)', () => {
+        const ease = new Ease.Ease({ useRAF: false, ease: 'linear', maxFrame: Infinity })
+        const object = { alpha: 1 }
+        const e = ease.add(object, { alpha: 0 }, { duration: 100, repeat: true })
+        let repeats = 0
+        e.on('repeat', () => repeats++)
+        for (let i = 0; i < 10; i++) ease.update(50)
+        assert.equal(repeats, 5)
+        ease.destroy()
+    })
+
+    it('removing an easing from another easing\'s complete event (#10)', () => {
+        const ease = new Ease.Ease({ useRAF: false, ease: 'linear', maxFrame: Infinity })
+        const a = { x: 0 }, b = { x: 0 }, c = { x: 0 }
+        const first = ease.add(a, { x: 10 }, { duration: 100 })
+        ease.add(b, { x: 10 }, { duration: 1000 })
+        ease.add(c, { x: 10 }, { duration: 1000 })
+        first.on('complete', () => ease.removeEase(b))
+        ease.update(100)
+        assert.equal(ease.count, 1)
+        assert.equal(ease.easings[0].elements[0], c)
+        ease.update(100)
+        assert.closeTo(c.x, 2, CLOSE_TO)
+        assert.equal(b.x, 0)
+        ease.destroy()
+    })
+
+    it('ticker option (#31)', () => {
+        const ticker = new PIXI.Ticker()
+        ticker.autoStart = false
+        const ease = new Ease.Ease({ ticker, ease: 'linear', maxFrame: Infinity })
+        assert.isFalse(ease.options.useRAF)
+        const object = { x: 0 }
+        ease.add(object, { x: 100 }, { duration: 100 })
+        ticker.lastTime = 1000
+        ticker.update(1025)
+        assert.closeTo(object.x, 25, CLOSE_TO)
+        ease.destroy()
+        ticker.update(1050)
+        assert.closeTo(object.x, 25, CLOSE_TO)
+        ticker.destroy()
+    })
+
+    it('default wait option', () => {
+        const ease = new Ease.Ease({ useRAF: false, ease: 'linear', wait: 100, maxFrame: Infinity })
+        const object = { x: 0 }
+        ease.add(object, { x: 100 }, { duration: 100 })
+        ease.update(50)
+        assert.equal(object.x, 0)
+        ease.update(100)
+        assert.closeTo(object.x, 50, CLOSE_TO)
+        ease.destroy()
+    })
+
+    it('pixi.js v8 Container: tint and blend with ColorSource', () => {
+        const ease = new Ease.Ease({ useRAF: false, ease: 'linear', maxFrame: Infinity })
+        const sprite = new PIXI.Sprite()
+        sprite.tint = 'red'
+        ease.add(sprite, { blend: '#0000ff' }, { duration: 100 })
+        assert.equal(sprite.tint, 0xff0000)
+        ease.update(50)
+        assert.equal(sprite.tint, 0x7f007f)
+        ease.update(50)
+        assert.equal(sprite.tint, 0x0000ff)
+        ease.add(sprite, { tint: ['red', 'lime'] }, { duration: 100 })
+        ease.update(25)
+        assert.equal(sprite.tint, 0xff0000)
+        ease.update(50)
+        assert.equal(sprite.tint, 0x00ff00)
+        ease.destroy()
+    })
+
+    it('pixi.js v8 Container: scale, skew, position and destroy', () => {
+        const ease = new Ease.Ease({ useRAF: false, ease: 'linear', maxFrame: Infinity })
+        const container = new PIXI.Container()
+        ease.add(container, { scale: 2, skewX: 1, position: { x: 10, y: 20 }, rotation: 1 }, { duration: 100 })
+        ease.update(50)
+        assert.closeTo(container.scale.x, 1.5, CLOSE_TO)
+        assert.closeTo(container.scale.y, 1.5, CLOSE_TO)
+        assert.closeTo(container.skew.x, 0.5, CLOSE_TO)
+        assert.closeTo(container.x, 5, CLOSE_TO)
+        assert.closeTo(container.y, 10, CLOSE_TO)
+        assert.closeTo(container.rotation, 0.5, CLOSE_TO)
+        container.destroy()
+        ease.update(10)
+        assert.equal(ease.count, 0)
+        ease.destroy()
+    })
+
+    it('face and face param with non-zero starting rotation', () => {
+        const ease = new Ease.Ease({ ease: 'linear', useRAF: false, maxFrame: Infinity })
+        const object = { x: 0, y: 0, rotation: 1 }
+        const target = { x: Math.cos(1.5) * 100, y: Math.sin(1.5) * 100 }
+        ease.face(object, target, 0.001)
+        assert.closeTo(ease.easings[0].options.duration, 500, CLOSE_TO)
+        ease.update(500)
+        assert.closeTo(object.rotation, 1.5, CLOSE_TO)
+        object.rotation = 1
+        ease.add(object, { face: target }, { duration: 100 })
+        ease.update(100)
+        assert.closeTo(object.rotation, 1.5, CLOSE_TO)
         ease.destroy()
     })
 

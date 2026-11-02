@@ -1,30 +1,21 @@
-import resolve from 'rollup-plugin-node-resolve'
-import commonjs from 'rollup-plugin-commonjs'
+import resolve from '@rollup/plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs'
 import serve from 'rollup-plugin-serve'
-import builtins from '@joseph184/rollup-plugin-node-builtins'
-import globals from 'rollup-plugin-node-globals'
 
 export default
 {
     input: 'docs/code.js',
     plugins: [
-        builtins(),
         resolve(
         {
             browser: true,
             preferBuiltins: false
         }),
-        commonjs(
-        {
-            namedExports:
-            {
-                'resource-loader': ['Resource']
-            }
-        }),
-        globals(),
+        commonjs(),
         serve(
         {
             contentBase: 'docs',
+            port: 10001,
             verbose: true
         })
     ],
@@ -33,6 +24,7 @@ export default
         name: 'Ease',
         file: 'docs/index.js',
         format: 'iife',
-        sourcemap: true
+        sourcemap: true,
+        inlineDynamicImports: true
     }
 }
