@@ -5,6 +5,7 @@ import { Easing } from './easing'
 
 const easeOptions = {
     duration: 1000,
+    wait: 0,
     ease: Penner.easeInOutSine,
     maxFrame: 1000 / 60,
     ticker: null,
@@ -38,10 +39,11 @@ export class Ease extends Events
     /**
      * @param {object} [options]
      * @param {number} [options.duration=1000] default duration if not set
+     * @param {number} [options.wait=0] default wait (in milliseconds) before an ease starts if not set
      * @param {(string|function)} [options.ease=Penner.easeInOutSine] default ease function if not set (see {@link https://www.npmjs.com/package/penner} for names of easing functions)
-     * @param {boolean} [option.useRAF=true] attach to a requestAnimationFrame listener
-     * @param {PIXI.Ticker} [options.ticker] attach to a PIXI.Ticker instead of RAF
-     * @param {number} [options.maxFrame=1000/60] maximum frame time (set to Infinity to ignore); only used if useTicker = true
+     * @param {boolean} [options.useRAF=true] attach to a requestAnimationFrame listener (ignored if options.ticker is set)
+     * @param {PIXI.Ticker} [options.ticker] attach to a PIXI.Ticker instead of RAF (e.g., PIXI.Ticker.shared or app.ticker)
+     * @param {number} [options.maxFrame=1000/60] maximum frame time (set to Infinity to ignore)
      * @fires Ease#complete
      * @fires Ease#each
      */
@@ -53,6 +55,7 @@ export class Ease extends Events
         this.empty = true
         if (this.options.ticker)
         {
+            this.options.useRAF = false
             this.options.ticker.add(this.update, this)
         }
     }
@@ -63,9 +66,9 @@ export class Ease extends Events
     destroy()
     {
         this.removeAll()
-        if (this.options.useTicker)
+        if (this.options.ticker)
         {
-            this.ticker.remove(this.update, this)
+            this.options.ticker.remove(this.update, this)
         }
         else if (this.options.useRAF)
         {
@@ -75,13 +78,13 @@ export class Ease extends Events
     }
 
     /**
-     * add ease(s) to a PIXI.DisplayObject element
-     * @param {(PIXI.DisplayObject|PIXI.DisplayObject[])} element
+     * add ease(s) to a PIXI.Container element
+     * @param {(PIXI.Container|PIXI.Container[])} element
      *
      * @param {object} params
      * @param {number} [params.x]
      * @param {number} [params.y]
-     * @param {(PIXI.DisplayObject|PIXI.Point)} [params.position] changes both x and y
+     * @param {(PIXI.Container|PIXI.Point)} [params.position] changes both x and y
      * @param {number} [params.width]
      * @param {number} [params.height]
      * @param {number} [params.scale] changes both scale.x and scale.y
@@ -89,7 +92,7 @@ export class Ease extends Events
      * @param {number} [params.scaleY]
      * @param {number} [params.alpha]
      * @param {number} [params.rotation]
-     * @param {(PIXI.DisplayObject|PIXI.Point)} [params.face] rotate the element to face a DisplayObject using the closest angle
+     * @param {(PIXI.Container|PIXI.Point)} [params.face] rotate the element to face a Container using the closest angle
      * @param {number} [params.skew] changes both skew.x and skew.y
      * @param {number} [params.skewX]
      * @param {number} [params.skewY]
@@ -111,6 +114,7 @@ export class Ease extends Events
     {
         options = options || {}
         options.duration = typeof options.duration !== 'undefined' ? options.duration : this.options.duration
+        options.wait = typeof options.wait !== 'undefined' ? options.wait : this.options.wait
         options.ease = options.ease || this.options.ease
         if (typeof options.ease === 'string')
         {
@@ -130,8 +134,8 @@ export class Ease extends Events
     /**
      * create an ease that changes position (x, y) of the element by moving to the target at the speed
      * NOTE: under the hood this calls add(element, { x, y }, { duration: <calculated speed based on distance and speed> })
-     * @param {PIXI.DisplayObject} element
-     * @param {(PIXI.DisplayObject|PIXI.Point)} target
+     * @param {PIXI.Container} element
+     * @param {(PIXI.Container|PIXI.Point)} target
      * @param {number} speed in pixels / ms
      *
      * @param {object} [options]
@@ -139,7 +143,6 @@ export class Ease extends Events
      * @param {(boolean|number)} [options.repeat]
      * @param {boolean} [options.reverse]
      * @param {number} [options.wait] wait this number of milliseconds before ease starts
-     * @param {boolean} [options.removeExisting] removes existing eases on the element of the same type (including x,y/position, skewX,skewY/skew, scaleX,scaleY/scale)
      *
      * @returns {Easing}
      */
@@ -154,8 +157,8 @@ export class Ease extends Events
     /**
      * helper function to add an ease that changes rotation to face the element at the desired target using the speed
      * NOTE: under the hood this calls add(element {x, y }, { duration: <calculated speed based on shortest rotation and speed> })
-     * @param {PIXI.DisplayObject} element
-     * @param {(PIXI.DisplayObject|PIXI.Point)} target
+     * @param {PIXI.Container} element
+     * @param {(PIXI.Container|PIXI.Point)} target
      * @param {number} speed in radians / ms
      *
      * @param {object} [options]
@@ -169,16 +172,16 @@ export class Ease extends Events
     face(element, target, speed, options)
     {
         const shortestAngle = Easing.shortestAngle(element.rotation, Math.atan2(target.y - element.y, target.x - element.x))
-        const duration = Math.abs(shortestAngle - element.rotation) / speed
+        const duration = Math.abs(shortestAngle) / speed
         options = options || {}
         options.duration = duration
-        return this.add(element, { rotation: shortestAngle }, options)
+        return this.add(element, { rotation: element.rotation + shortestAngle }, options)
     }
 
     /**
-     * removes one or more eases from a DisplayObject
+     * removes one or more eases from a Container
      * WARNING: 'complete' events will not fire for these removals
-     * @param {PIXI.DisplayObject} element
+     * @param {PIXI.Container} element
      * @param {(string|string[])} [param] omit to remove all easings for an element
      */
     removeEase(element, param)
@@ -218,14 +221,14 @@ export class Ease extends Events
 }
 
     /**
-     * update frame; this is called automatically if options.useTicker !== false
-     * @param {number} elapsed time in ms since last frame
+     * update frame; this is called automatically if options.useRAF or options.ticker is set
+     * @param {number} [elapsed] time in ms since last frame (ignored if options.useRAF or options.ticker is set)
      */
     update(elapsed)
     {
-        if (this.options.useTicker)
+        if (this.options.ticker)
         {
-            elapsed = this.ticker.elapsedMS
+            elapsed = this.options.ticker.elapsedMS
         }
         else if (this.options.useRAF)
         {
@@ -239,13 +242,22 @@ export class Ease extends Events
             const list = this.easings.slice(0)
             for (let easing of list)
             {
+                // skip easings removed by an earlier easing's event handler during this frame
+                if (this.easings.indexOf(easing) === -1)
+                {
+                    continue
+                }
                 if (easing.update(elapsed))
                 {
-                    this.easings.splice(this.easings.indexOf(easing), 1)
+                    const index = this.easings.indexOf(easing)
+                    if (index !== -1)
+                    {
+                        this.easings.splice(index, 1)
+                    }
                 }
             }
             this.emit('each', this)
-            if (this.easings.length === 0)
+            if (this.easings.length === 0 && !this.empty)
             {
                 this.empty = true
                 this.emit('complete', this)
@@ -311,7 +323,7 @@ export class Ease extends Events
     }
 }
 
-// manages the ids used to define the DisplayObject ease variable (enabled multiple eases attached to the same object)
+// manages the ids used to define the Container ease variable (enabled multiple eases attached to the same object)
 Ease.id = 0
 
 /**
@@ -337,7 +349,7 @@ export class List
  */
 
  /**
- * fires on each loop when there are eases running
+ * fires on each frame when there are eases running
  * @event Ease#each
  * @type {Ease}
  */

@@ -1,602 +1,626 @@
-var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
-
-function createCommonjsModule(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
+function getDefaultExportFromCjs (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
 }
 
-var penner = createCommonjsModule(function (module, exports) {
-/*
-	Copyright © 2001 Robert Penner
-	All rights reserved.
+var penner$1 = {exports: {}};
 
-	Redistribution and use in source and binary forms, with or without modification, 
-	are permitted provided that the following conditions are met:
+var penner = penner$1.exports;
 
-	Redistributions of source code must retain the above copyright notice, this list of 
-	conditions and the following disclaimer.
-	Redistributions in binary form must reproduce the above copyright notice, this list 
-	of conditions and the following disclaimer in the documentation and/or other materials 
-	provided with the distribution.
+var hasRequiredPenner;
 
-	Neither the name of the author nor the names of contributors may be used to endorse 
-	or promote products derived from this software without specific prior written permission.
+function requirePenner () {
+	if (hasRequiredPenner) return penner$1.exports;
+	hasRequiredPenner = 1;
+	(function (module, exports) {
+		/*
+			Copyright © 2001 Robert Penner
+			All rights reserved.
 
-	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
-	EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-	MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-	COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-	EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-	GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED 
-	AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-	NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED 
-	OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+			Redistribution and use in source and binary forms, with or without modification, 
+			are permitted provided that the following conditions are met:
 
-(function() {
-  var penner, umd;
+			Redistributions of source code must retain the above copyright notice, this list of 
+			conditions and the following disclaimer.
+			Redistributions in binary form must reproduce the above copyright notice, this list 
+			of conditions and the following disclaimer in the documentation and/or other materials 
+			provided with the distribution.
 
-  umd = function(factory) {
-    {
-      return module.exports = factory;
-    }
-  };
+			Neither the name of the author nor the names of contributors may be used to endorse 
+			or promote products derived from this software without specific prior written permission.
 
-  penner = {
-    linear: function(t, b, c, d) {
-      return c * t / d + b;
-    },
-    easeInQuad: function(t, b, c, d) {
-      return c * (t /= d) * t + b;
-    },
-    easeOutQuad: function(t, b, c, d) {
-      return -c * (t /= d) * (t - 2) + b;
-    },
-    easeInOutQuad: function(t, b, c, d) {
-      if ((t /= d / 2) < 1) {
-        return c / 2 * t * t + b;
-      } else {
-        return -c / 2 * ((--t) * (t - 2) - 1) + b;
-      }
-    },
-    easeInCubic: function(t, b, c, d) {
-      return c * (t /= d) * t * t + b;
-    },
-    easeOutCubic: function(t, b, c, d) {
-      return c * ((t = t / d - 1) * t * t + 1) + b;
-    },
-    easeInOutCubic: function(t, b, c, d) {
-      if ((t /= d / 2) < 1) {
-        return c / 2 * t * t * t + b;
-      } else {
-        return c / 2 * ((t -= 2) * t * t + 2) + b;
-      }
-    },
-    easeInQuart: function(t, b, c, d) {
-      return c * (t /= d) * t * t * t + b;
-    },
-    easeOutQuart: function(t, b, c, d) {
-      return -c * ((t = t / d - 1) * t * t * t - 1) + b;
-    },
-    easeInOutQuart: function(t, b, c, d) {
-      if ((t /= d / 2) < 1) {
-        return c / 2 * t * t * t * t + b;
-      } else {
-        return -c / 2 * ((t -= 2) * t * t * t - 2) + b;
-      }
-    },
-    easeInQuint: function(t, b, c, d) {
-      return c * (t /= d) * t * t * t * t + b;
-    },
-    easeOutQuint: function(t, b, c, d) {
-      return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
-    },
-    easeInOutQuint: function(t, b, c, d) {
-      if ((t /= d / 2) < 1) {
-        return c / 2 * t * t * t * t * t + b;
-      } else {
-        return c / 2 * ((t -= 2) * t * t * t * t + 2) + b;
-      }
-    },
-    easeInSine: function(t, b, c, d) {
-      return -c * Math.cos(t / d * (Math.PI / 2)) + c + b;
-    },
-    easeOutSine: function(t, b, c, d) {
-      return c * Math.sin(t / d * (Math.PI / 2)) + b;
-    },
-    easeInOutSine: function(t, b, c, d) {
-      return -c / 2 * (Math.cos(Math.PI * t / d) - 1) + b;
-    },
-    easeInExpo: function(t, b, c, d) {
-      if (t === 0) {
-        return b;
-      } else {
-        return c * Math.pow(2, 10 * (t / d - 1)) + b;
-      }
-    },
-    easeOutExpo: function(t, b, c, d) {
-      if (t === d) {
-        return b + c;
-      } else {
-        return c * (-Math.pow(2, -10 * t / d) + 1) + b;
-      }
-    },
-    easeInOutExpo: function(t, b, c, d) {
-      if ((t /= d / 2) < 1) {
-        return c / 2 * Math.pow(2, 10 * (t - 1)) + b;
-      } else {
-        return c / 2 * (-Math.pow(2, -10 * --t) + 2) + b;
-      }
-    },
-    easeInCirc: function(t, b, c, d) {
-      return -c * (Math.sqrt(1 - (t /= d) * t) - 1) + b;
-    },
-    easeOutCirc: function(t, b, c, d) {
-      return c * Math.sqrt(1 - (t = t / d - 1) * t) + b;
-    },
-    easeInOutCirc: function(t, b, c, d) {
-      if ((t /= d / 2) < 1) {
-        return -c / 2 * (Math.sqrt(1 - t * t) - 1) + b;
-      } else {
-        return c / 2 * (Math.sqrt(1 - (t -= 2) * t) + 1) + b;
-      }
-    },
-    easeInElastic: function(t, b, c, d) {
-      var a, p, s;
-      s = 1.70158;
-      p = 0;
-      a = c;
-      if (t === 0) ; else if ((t /= d) === 1) ;
-      if (!p) {
-        p = d * .3;
-      }
-      if (a < Math.abs(c)) {
-        a = c;
-        s = p / 4;
-      } else {
-        s = p / (2 * Math.PI) * Math.asin(c / a);
-      }
-      return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;
-    },
-    easeOutElastic: function(t, b, c, d) {
-      var a, p, s;
-      s = 1.70158;
-      p = 0;
-      a = c;
-      if (t === 0) ; else if ((t /= d) === 1) ;
-      if (!p) {
-        p = d * .3;
-      }
-      if (a < Math.abs(c)) {
-        a = c;
-        s = p / 4;
-      } else {
-        s = p / (2 * Math.PI) * Math.asin(c / a);
-      }
-      return a * Math.pow(2, -10 * t) * Math.sin((t * d - s) * (2 * Math.PI) / p) + c + b;
-    },
-    easeInOutElastic: function(t, b, c, d) {
-      var a, p, s;
-      s = 1.70158;
-      p = 0;
-      a = c;
-      if (t === 0) ; else if ((t /= d / 2) === 2) ;
-      if (!p) {
-        p = d * (.3 * 1.5);
-      }
-      if (a < Math.abs(c)) {
-        a = c;
-        s = p / 4;
-      } else {
-        s = p / (2 * Math.PI) * Math.asin(c / a);
-      }
-      if (t < 1) {
-        return -.5 * (a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;
-      } else {
-        return a * Math.pow(2, -10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p) * .5 + c + b;
-      }
-    },
-    easeInBack: function(t, b, c, d, s) {
-      if (s === void 0) {
-        s = 1.70158;
-      }
-      return c * (t /= d) * t * ((s + 1) * t - s) + b;
-    },
-    easeOutBack: function(t, b, c, d, s) {
-      if (s === void 0) {
-        s = 1.70158;
-      }
-      return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
-    },
-    easeInOutBack: function(t, b, c, d, s) {
-      if (s === void 0) {
-        s = 1.70158;
-      }
-      if ((t /= d / 2) < 1) {
-        return c / 2 * (t * t * (((s *= 1.525) + 1) * t - s)) + b;
-      } else {
-        return c / 2 * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2) + b;
-      }
-    },
-    easeInBounce: function(t, b, c, d) {
-      var v;
-      v = penner.easeOutBounce(d - t, 0, c, d);
-      return c - v + b;
-    },
-    easeOutBounce: function(t, b, c, d) {
-      if ((t /= d) < 1 / 2.75) {
-        return c * (7.5625 * t * t) + b;
-      } else if (t < 2 / 2.75) {
-        return c * (7.5625 * (t -= 1.5 / 2.75) * t + .75) + b;
-      } else if (t < 2.5 / 2.75) {
-        return c * (7.5625 * (t -= 2.25 / 2.75) * t + .9375) + b;
-      } else {
-        return c * (7.5625 * (t -= 2.625 / 2.75) * t + .984375) + b;
-      }
-    },
-    easeInOutBounce: function(t, b, c, d) {
-      var v;
-      if (t < d / 2) {
-        v = penner.easeInBounce(t * 2, 0, c, d);
-        return v * .5 + b;
-      } else {
-        v = penner.easeOutBounce(t * 2 - d, 0, c, d);
-        return v * .5 + c * .5 + b;
-      }
-    }
-  };
+			THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+			EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+			MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+			COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+			EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+			GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED 
+			AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+			NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED 
+			OF THE POSSIBILITY OF SUCH DAMAGE.
+		 */
 
-  umd(penner);
+		(function() {
+		  var penner, umd;
 
-}).call(commonjsGlobal);
-});
+		  umd = function(factory) {
+		    {
+		      return module.exports = factory;
+		    }
+		  };
 
-var eventemitter3 = createCommonjsModule(function (module) {
+		  penner = {
+		    linear: function(t, b, c, d) {
+		      return c * t / d + b;
+		    },
+		    easeInQuad: function(t, b, c, d) {
+		      return c * (t /= d) * t + b;
+		    },
+		    easeOutQuad: function(t, b, c, d) {
+		      return -c * (t /= d) * (t - 2) + b;
+		    },
+		    easeInOutQuad: function(t, b, c, d) {
+		      if ((t /= d / 2) < 1) {
+		        return c / 2 * t * t + b;
+		      } else {
+		        return -c / 2 * ((--t) * (t - 2) - 1) + b;
+		      }
+		    },
+		    easeInCubic: function(t, b, c, d) {
+		      return c * (t /= d) * t * t + b;
+		    },
+		    easeOutCubic: function(t, b, c, d) {
+		      return c * ((t = t / d - 1) * t * t + 1) + b;
+		    },
+		    easeInOutCubic: function(t, b, c, d) {
+		      if ((t /= d / 2) < 1) {
+		        return c / 2 * t * t * t + b;
+		      } else {
+		        return c / 2 * ((t -= 2) * t * t + 2) + b;
+		      }
+		    },
+		    easeInQuart: function(t, b, c, d) {
+		      return c * (t /= d) * t * t * t + b;
+		    },
+		    easeOutQuart: function(t, b, c, d) {
+		      return -c * ((t = t / d - 1) * t * t * t - 1) + b;
+		    },
+		    easeInOutQuart: function(t, b, c, d) {
+		      if ((t /= d / 2) < 1) {
+		        return c / 2 * t * t * t * t + b;
+		      } else {
+		        return -c / 2 * ((t -= 2) * t * t * t - 2) + b;
+		      }
+		    },
+		    easeInQuint: function(t, b, c, d) {
+		      return c * (t /= d) * t * t * t * t + b;
+		    },
+		    easeOutQuint: function(t, b, c, d) {
+		      return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
+		    },
+		    easeInOutQuint: function(t, b, c, d) {
+		      if ((t /= d / 2) < 1) {
+		        return c / 2 * t * t * t * t * t + b;
+		      } else {
+		        return c / 2 * ((t -= 2) * t * t * t * t + 2) + b;
+		      }
+		    },
+		    easeInSine: function(t, b, c, d) {
+		      return -c * Math.cos(t / d * (Math.PI / 2)) + c + b;
+		    },
+		    easeOutSine: function(t, b, c, d) {
+		      return c * Math.sin(t / d * (Math.PI / 2)) + b;
+		    },
+		    easeInOutSine: function(t, b, c, d) {
+		      return -c / 2 * (Math.cos(Math.PI * t / d) - 1) + b;
+		    },
+		    easeInExpo: function(t, b, c, d) {
+		      if (t === 0) {
+		        return b;
+		      } else {
+		        return c * Math.pow(2, 10 * (t / d - 1)) + b;
+		      }
+		    },
+		    easeOutExpo: function(t, b, c, d) {
+		      if (t === d) {
+		        return b + c;
+		      } else {
+		        return c * (-Math.pow(2, -10 * t / d) + 1) + b;
+		      }
+		    },
+		    easeInOutExpo: function(t, b, c, d) {
+		      if ((t /= d / 2) < 1) {
+		        return c / 2 * Math.pow(2, 10 * (t - 1)) + b;
+		      } else {
+		        return c / 2 * (-Math.pow(2, -10 * --t) + 2) + b;
+		      }
+		    },
+		    easeInCirc: function(t, b, c, d) {
+		      return -c * (Math.sqrt(1 - (t /= d) * t) - 1) + b;
+		    },
+		    easeOutCirc: function(t, b, c, d) {
+		      return c * Math.sqrt(1 - (t = t / d - 1) * t) + b;
+		    },
+		    easeInOutCirc: function(t, b, c, d) {
+		      if ((t /= d / 2) < 1) {
+		        return -c / 2 * (Math.sqrt(1 - t * t) - 1) + b;
+		      } else {
+		        return c / 2 * (Math.sqrt(1 - (t -= 2) * t) + 1) + b;
+		      }
+		    },
+		    easeInElastic: function(t, b, c, d) {
+		      var a, p, s;
+		      s = 1.70158;
+		      p = 0;
+		      a = c;
+		      if (t === 0) ; else if ((t /= d) === 1) ;
+		      if (!p) {
+		        p = d * .3;
+		      }
+		      if (a < Math.abs(c)) {
+		        a = c;
+		        s = p / 4;
+		      } else {
+		        s = p / (2 * Math.PI) * Math.asin(c / a);
+		      }
+		      return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;
+		    },
+		    easeOutElastic: function(t, b, c, d) {
+		      var a, p, s;
+		      s = 1.70158;
+		      p = 0;
+		      a = c;
+		      if (t === 0) ; else if ((t /= d) === 1) ;
+		      if (!p) {
+		        p = d * .3;
+		      }
+		      if (a < Math.abs(c)) {
+		        a = c;
+		        s = p / 4;
+		      } else {
+		        s = p / (2 * Math.PI) * Math.asin(c / a);
+		      }
+		      return a * Math.pow(2, -10 * t) * Math.sin((t * d - s) * (2 * Math.PI) / p) + c + b;
+		    },
+		    easeInOutElastic: function(t, b, c, d) {
+		      var a, p, s;
+		      s = 1.70158;
+		      p = 0;
+		      a = c;
+		      if (t === 0) ; else if ((t /= d / 2) === 2) ;
+		      if (!p) {
+		        p = d * (.3 * 1.5);
+		      }
+		      if (a < Math.abs(c)) {
+		        a = c;
+		        s = p / 4;
+		      } else {
+		        s = p / (2 * Math.PI) * Math.asin(c / a);
+		      }
+		      if (t < 1) {
+		        return -0.5 * (a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;
+		      } else {
+		        return a * Math.pow(2, -10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p) * .5 + c + b;
+		      }
+		    },
+		    easeInBack: function(t, b, c, d, s) {
+		      if (s === void 0) {
+		        s = 1.70158;
+		      }
+		      return c * (t /= d) * t * ((s + 1) * t - s) + b;
+		    },
+		    easeOutBack: function(t, b, c, d, s) {
+		      if (s === void 0) {
+		        s = 1.70158;
+		      }
+		      return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
+		    },
+		    easeInOutBack: function(t, b, c, d, s) {
+		      if (s === void 0) {
+		        s = 1.70158;
+		      }
+		      if ((t /= d / 2) < 1) {
+		        return c / 2 * (t * t * (((s *= 1.525) + 1) * t - s)) + b;
+		      } else {
+		        return c / 2 * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2) + b;
+		      }
+		    },
+		    easeInBounce: function(t, b, c, d) {
+		      var v;
+		      v = penner.easeOutBounce(d - t, 0, c, d);
+		      return c - v + b;
+		    },
+		    easeOutBounce: function(t, b, c, d) {
+		      if ((t /= d) < 1 / 2.75) {
+		        return c * (7.5625 * t * t) + b;
+		      } else if (t < 2 / 2.75) {
+		        return c * (7.5625 * (t -= 1.5 / 2.75) * t + .75) + b;
+		      } else if (t < 2.5 / 2.75) {
+		        return c * (7.5625 * (t -= 2.25 / 2.75) * t + .9375) + b;
+		      } else {
+		        return c * (7.5625 * (t -= 2.625 / 2.75) * t + .984375) + b;
+		      }
+		    },
+		    easeInOutBounce: function(t, b, c, d) {
+		      var v;
+		      if (t < d / 2) {
+		        v = penner.easeInBounce(t * 2, 0, c, d);
+		        return v * .5 + b;
+		      } else {
+		        v = penner.easeOutBounce(t * 2 - d, 0, c, d);
+		        return v * .5 + c * .5 + b;
+		      }
+		    }
+		  };
 
-var has = Object.prototype.hasOwnProperty
-  , prefix = '~';
+		  umd(penner);
 
-/**
- * Constructor to create a storage for our `EE` objects.
- * An `Events` instance is a plain object whose properties are event names.
- *
- * @constructor
- * @private
- */
-function Events() {}
-
-//
-// We try to not inherit from `Object.prototype`. In some engines creating an
-// instance in this way is faster than calling `Object.create(null)` directly.
-// If `Object.create(null)` is not supported we prefix the event names with a
-// character to make sure that the built-in object properties are not
-// overridden or used as an attack vector.
-//
-if (Object.create) {
-  Events.prototype = Object.create(null);
-
-  //
-  // This hack is needed because the `__proto__` property is still inherited in
-  // some old browsers like Android 4, iPhone 5.1, Opera 11 and Safari 5.
-  //
-  if (!new Events().__proto__) prefix = false;
+		}).call(penner); 
+	} (penner$1));
+	return penner$1.exports;
 }
 
-/**
- * Representation of a single event listener.
- *
- * @param {Function} fn The listener function.
- * @param {*} context The context to invoke the listener with.
- * @param {Boolean} [once=false] Specify if the listener is a one-time listener.
- * @constructor
- * @private
- */
-function EE(fn, context, once) {
-  this.fn = fn;
-  this.context = context;
-  this.once = once || false;
+var pennerExports = requirePenner();
+var Penner = /*@__PURE__*/getDefaultExportFromCjs(pennerExports);
+
+var eventemitter3 = {exports: {}};
+
+var hasRequiredEventemitter3;
+
+function requireEventemitter3 () {
+	if (hasRequiredEventemitter3) return eventemitter3.exports;
+	hasRequiredEventemitter3 = 1;
+	(function (module) {
+
+		var has = Object.prototype.hasOwnProperty
+		  , prefix = '~';
+
+		/**
+		 * Constructor to create a storage for our `EE` objects.
+		 * An `Events` instance is a plain object whose properties are event names.
+		 *
+		 * @constructor
+		 * @private
+		 */
+		function Events() {}
+
+		//
+		// We try to not inherit from `Object.prototype`. In some engines creating an
+		// instance in this way is faster than calling `Object.create(null)` directly.
+		// If `Object.create(null)` is not supported we prefix the event names with a
+		// character to make sure that the built-in object properties are not
+		// overridden or used as an attack vector.
+		//
+		if (Object.create) {
+		  Events.prototype = Object.create(null);
+
+		  //
+		  // This hack is needed because the `__proto__` property is still inherited in
+		  // some old browsers like Android 4, iPhone 5.1, Opera 11 and Safari 5.
+		  //
+		  if (!new Events().__proto__) prefix = false;
+		}
+
+		/**
+		 * Representation of a single event listener.
+		 *
+		 * @param {Function} fn The listener function.
+		 * @param {*} context The context to invoke the listener with.
+		 * @param {Boolean} [once=false] Specify if the listener is a one-time listener.
+		 * @constructor
+		 * @private
+		 */
+		function EE(fn, context, once) {
+		  this.fn = fn;
+		  this.context = context;
+		  this.once = once || false;
+		}
+
+		/**
+		 * Add a listener for a given event.
+		 *
+		 * @param {EventEmitter} emitter Reference to the `EventEmitter` instance.
+		 * @param {(String|Symbol)} event The event name.
+		 * @param {Function} fn The listener function.
+		 * @param {*} context The context to invoke the listener with.
+		 * @param {Boolean} once Specify if the listener is a one-time listener.
+		 * @returns {EventEmitter}
+		 * @private
+		 */
+		function addListener(emitter, event, fn, context, once) {
+		  if (typeof fn !== 'function') {
+		    throw new TypeError('The listener must be a function');
+		  }
+
+		  var listener = new EE(fn, context || emitter, once)
+		    , evt = prefix ? prefix + event : event;
+
+		  if (!emitter._events[evt]) emitter._events[evt] = listener, emitter._eventsCount++;
+		  else if (!emitter._events[evt].fn) emitter._events[evt].push(listener);
+		  else emitter._events[evt] = [emitter._events[evt], listener];
+
+		  return emitter;
+		}
+
+		/**
+		 * Clear event by name.
+		 *
+		 * @param {EventEmitter} emitter Reference to the `EventEmitter` instance.
+		 * @param {(String|Symbol)} evt The Event name.
+		 * @private
+		 */
+		function clearEvent(emitter, evt) {
+		  if (--emitter._eventsCount === 0) emitter._events = new Events();
+		  else delete emitter._events[evt];
+		}
+
+		/**
+		 * Minimal `EventEmitter` interface that is molded against the Node.js
+		 * `EventEmitter` interface.
+		 *
+		 * @constructor
+		 * @public
+		 */
+		function EventEmitter() {
+		  this._events = new Events();
+		  this._eventsCount = 0;
+		}
+
+		/**
+		 * Return an array listing the events for which the emitter has registered
+		 * listeners.
+		 *
+		 * @returns {Array}
+		 * @public
+		 */
+		EventEmitter.prototype.eventNames = function eventNames() {
+		  var names = []
+		    , events
+		    , name;
+
+		  if (this._eventsCount === 0) return names;
+
+		  for (name in (events = this._events)) {
+		    if (has.call(events, name)) names.push(prefix ? name.slice(1) : name);
+		  }
+
+		  if (Object.getOwnPropertySymbols) {
+		    return names.concat(Object.getOwnPropertySymbols(events));
+		  }
+
+		  return names;
+		};
+
+		/**
+		 * Return the listeners registered for a given event.
+		 *
+		 * @param {(String|Symbol)} event The event name.
+		 * @returns {Array} The registered listeners.
+		 * @public
+		 */
+		EventEmitter.prototype.listeners = function listeners(event) {
+		  var evt = prefix ? prefix + event : event
+		    , handlers = this._events[evt];
+
+		  if (!handlers) return [];
+		  if (handlers.fn) return [handlers.fn];
+
+		  for (var i = 0, l = handlers.length, ee = new Array(l); i < l; i++) {
+		    ee[i] = handlers[i].fn;
+		  }
+
+		  return ee;
+		};
+
+		/**
+		 * Return the number of listeners listening to a given event.
+		 *
+		 * @param {(String|Symbol)} event The event name.
+		 * @returns {Number} The number of listeners.
+		 * @public
+		 */
+		EventEmitter.prototype.listenerCount = function listenerCount(event) {
+		  var evt = prefix ? prefix + event : event
+		    , listeners = this._events[evt];
+
+		  if (!listeners) return 0;
+		  if (listeners.fn) return 1;
+		  return listeners.length;
+		};
+
+		/**
+		 * Calls each of the listeners registered for a given event.
+		 *
+		 * @param {(String|Symbol)} event The event name.
+		 * @returns {Boolean} `true` if the event had listeners, else `false`.
+		 * @public
+		 */
+		EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
+		  var evt = prefix ? prefix + event : event;
+
+		  if (!this._events[evt]) return false;
+
+		  var listeners = this._events[evt]
+		    , len = arguments.length
+		    , args
+		    , i;
+
+		  if (listeners.fn) {
+		    if (listeners.once) this.removeListener(event, listeners.fn, undefined, true);
+
+		    switch (len) {
+		      case 1: return listeners.fn.call(listeners.context), true;
+		      case 2: return listeners.fn.call(listeners.context, a1), true;
+		      case 3: return listeners.fn.call(listeners.context, a1, a2), true;
+		      case 4: return listeners.fn.call(listeners.context, a1, a2, a3), true;
+		      case 5: return listeners.fn.call(listeners.context, a1, a2, a3, a4), true;
+		      case 6: return listeners.fn.call(listeners.context, a1, a2, a3, a4, a5), true;
+		    }
+
+		    for (i = 1, args = new Array(len -1); i < len; i++) {
+		      args[i - 1] = arguments[i];
+		    }
+
+		    listeners.fn.apply(listeners.context, args);
+		  } else {
+		    var length = listeners.length
+		      , j;
+
+		    for (i = 0; i < length; i++) {
+		      if (listeners[i].once) this.removeListener(event, listeners[i].fn, undefined, true);
+
+		      switch (len) {
+		        case 1: listeners[i].fn.call(listeners[i].context); break;
+		        case 2: listeners[i].fn.call(listeners[i].context, a1); break;
+		        case 3: listeners[i].fn.call(listeners[i].context, a1, a2); break;
+		        case 4: listeners[i].fn.call(listeners[i].context, a1, a2, a3); break;
+		        default:
+		          if (!args) for (j = 1, args = new Array(len -1); j < len; j++) {
+		            args[j - 1] = arguments[j];
+		          }
+
+		          listeners[i].fn.apply(listeners[i].context, args);
+		      }
+		    }
+		  }
+
+		  return true;
+		};
+
+		/**
+		 * Add a listener for a given event.
+		 *
+		 * @param {(String|Symbol)} event The event name.
+		 * @param {Function} fn The listener function.
+		 * @param {*} [context=this] The context to invoke the listener with.
+		 * @returns {EventEmitter} `this`.
+		 * @public
+		 */
+		EventEmitter.prototype.on = function on(event, fn, context) {
+		  return addListener(this, event, fn, context, false);
+		};
+
+		/**
+		 * Add a one-time listener for a given event.
+		 *
+		 * @param {(String|Symbol)} event The event name.
+		 * @param {Function} fn The listener function.
+		 * @param {*} [context=this] The context to invoke the listener with.
+		 * @returns {EventEmitter} `this`.
+		 * @public
+		 */
+		EventEmitter.prototype.once = function once(event, fn, context) {
+		  return addListener(this, event, fn, context, true);
+		};
+
+		/**
+		 * Remove the listeners of a given event.
+		 *
+		 * @param {(String|Symbol)} event The event name.
+		 * @param {Function} fn Only remove the listeners that match this function.
+		 * @param {*} context Only remove the listeners that have this context.
+		 * @param {Boolean} once Only remove one-time listeners.
+		 * @returns {EventEmitter} `this`.
+		 * @public
+		 */
+		EventEmitter.prototype.removeListener = function removeListener(event, fn, context, once) {
+		  var evt = prefix ? prefix + event : event;
+
+		  if (!this._events[evt]) return this;
+		  if (!fn) {
+		    clearEvent(this, evt);
+		    return this;
+		  }
+
+		  var listeners = this._events[evt];
+
+		  if (listeners.fn) {
+		    if (
+		      listeners.fn === fn &&
+		      (!once || listeners.once) &&
+		      (!context || listeners.context === context)
+		    ) {
+		      clearEvent(this, evt);
+		    }
+		  } else {
+		    for (var i = 0, events = [], length = listeners.length; i < length; i++) {
+		      if (
+		        listeners[i].fn !== fn ||
+		        (once && !listeners[i].once) ||
+		        (context && listeners[i].context !== context)
+		      ) {
+		        events.push(listeners[i]);
+		      }
+		    }
+
+		    //
+		    // Reset the array, or remove it completely if we have no more listeners.
+		    //
+		    if (events.length) this._events[evt] = events.length === 1 ? events[0] : events;
+		    else clearEvent(this, evt);
+		  }
+
+		  return this;
+		};
+
+		/**
+		 * Remove all listeners, or those of the specified event.
+		 *
+		 * @param {(String|Symbol)} [event] The event name.
+		 * @returns {EventEmitter} `this`.
+		 * @public
+		 */
+		EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
+		  var evt;
+
+		  if (event) {
+		    evt = prefix ? prefix + event : event;
+		    if (this._events[evt]) clearEvent(this, evt);
+		  } else {
+		    this._events = new Events();
+		    this._eventsCount = 0;
+		  }
+
+		  return this;
+		};
+
+		//
+		// Alias methods names because people roll like that.
+		//
+		EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
+		EventEmitter.prototype.addListener = EventEmitter.prototype.on;
+
+		//
+		// Expose the prefix.
+		//
+		EventEmitter.prefixed = prefix;
+
+		//
+		// Allow `EventEmitter` to be imported as module namespace.
+		//
+		EventEmitter.EventEmitter = EventEmitter;
+
+		//
+		// Expose the module.
+		//
+		{
+		  module.exports = EventEmitter;
+		} 
+	} (eventemitter3));
+	return eventemitter3.exports;
 }
 
-/**
- * Add a listener for a given event.
- *
- * @param {EventEmitter} emitter Reference to the `EventEmitter` instance.
- * @param {(String|Symbol)} event The event name.
- * @param {Function} fn The listener function.
- * @param {*} context The context to invoke the listener with.
- * @param {Boolean} once Specify if the listener is a one-time listener.
- * @returns {EventEmitter}
- * @private
- */
-function addListener(emitter, event, fn, context, once) {
-  if (typeof fn !== 'function') {
-    throw new TypeError('The listener must be a function');
-  }
-
-  var listener = new EE(fn, context || emitter, once)
-    , evt = prefix ? prefix + event : event;
-
-  if (!emitter._events[evt]) emitter._events[evt] = listener, emitter._eventsCount++;
-  else if (!emitter._events[evt].fn) emitter._events[evt].push(listener);
-  else emitter._events[evt] = [emitter._events[evt], listener];
-
-  return emitter;
-}
-
-/**
- * Clear event by name.
- *
- * @param {EventEmitter} emitter Reference to the `EventEmitter` instance.
- * @param {(String|Symbol)} evt The Event name.
- * @private
- */
-function clearEvent(emitter, evt) {
-  if (--emitter._eventsCount === 0) emitter._events = new Events();
-  else delete emitter._events[evt];
-}
-
-/**
- * Minimal `EventEmitter` interface that is molded against the Node.js
- * `EventEmitter` interface.
- *
- * @constructor
- * @public
- */
-function EventEmitter() {
-  this._events = new Events();
-  this._eventsCount = 0;
-}
-
-/**
- * Return an array listing the events for which the emitter has registered
- * listeners.
- *
- * @returns {Array}
- * @public
- */
-EventEmitter.prototype.eventNames = function eventNames() {
-  var names = []
-    , events
-    , name;
-
-  if (this._eventsCount === 0) return names;
-
-  for (name in (events = this._events)) {
-    if (has.call(events, name)) names.push(prefix ? name.slice(1) : name);
-  }
-
-  if (Object.getOwnPropertySymbols) {
-    return names.concat(Object.getOwnPropertySymbols(events));
-  }
-
-  return names;
-};
-
-/**
- * Return the listeners registered for a given event.
- *
- * @param {(String|Symbol)} event The event name.
- * @returns {Array} The registered listeners.
- * @public
- */
-EventEmitter.prototype.listeners = function listeners(event) {
-  var evt = prefix ? prefix + event : event
-    , handlers = this._events[evt];
-
-  if (!handlers) return [];
-  if (handlers.fn) return [handlers.fn];
-
-  for (var i = 0, l = handlers.length, ee = new Array(l); i < l; i++) {
-    ee[i] = handlers[i].fn;
-  }
-
-  return ee;
-};
-
-/**
- * Return the number of listeners listening to a given event.
- *
- * @param {(String|Symbol)} event The event name.
- * @returns {Number} The number of listeners.
- * @public
- */
-EventEmitter.prototype.listenerCount = function listenerCount(event) {
-  var evt = prefix ? prefix + event : event
-    , listeners = this._events[evt];
-
-  if (!listeners) return 0;
-  if (listeners.fn) return 1;
-  return listeners.length;
-};
-
-/**
- * Calls each of the listeners registered for a given event.
- *
- * @param {(String|Symbol)} event The event name.
- * @returns {Boolean} `true` if the event had listeners, else `false`.
- * @public
- */
-EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
-  var evt = prefix ? prefix + event : event;
-
-  if (!this._events[evt]) return false;
-
-  var listeners = this._events[evt]
-    , len = arguments.length
-    , args
-    , i;
-
-  if (listeners.fn) {
-    if (listeners.once) this.removeListener(event, listeners.fn, undefined, true);
-
-    switch (len) {
-      case 1: return listeners.fn.call(listeners.context), true;
-      case 2: return listeners.fn.call(listeners.context, a1), true;
-      case 3: return listeners.fn.call(listeners.context, a1, a2), true;
-      case 4: return listeners.fn.call(listeners.context, a1, a2, a3), true;
-      case 5: return listeners.fn.call(listeners.context, a1, a2, a3, a4), true;
-      case 6: return listeners.fn.call(listeners.context, a1, a2, a3, a4, a5), true;
-    }
-
-    for (i = 1, args = new Array(len -1); i < len; i++) {
-      args[i - 1] = arguments[i];
-    }
-
-    listeners.fn.apply(listeners.context, args);
-  } else {
-    var length = listeners.length
-      , j;
-
-    for (i = 0; i < length; i++) {
-      if (listeners[i].once) this.removeListener(event, listeners[i].fn, undefined, true);
-
-      switch (len) {
-        case 1: listeners[i].fn.call(listeners[i].context); break;
-        case 2: listeners[i].fn.call(listeners[i].context, a1); break;
-        case 3: listeners[i].fn.call(listeners[i].context, a1, a2); break;
-        case 4: listeners[i].fn.call(listeners[i].context, a1, a2, a3); break;
-        default:
-          if (!args) for (j = 1, args = new Array(len -1); j < len; j++) {
-            args[j - 1] = arguments[j];
-          }
-
-          listeners[i].fn.apply(listeners[i].context, args);
-      }
-    }
-  }
-
-  return true;
-};
-
-/**
- * Add a listener for a given event.
- *
- * @param {(String|Symbol)} event The event name.
- * @param {Function} fn The listener function.
- * @param {*} [context=this] The context to invoke the listener with.
- * @returns {EventEmitter} `this`.
- * @public
- */
-EventEmitter.prototype.on = function on(event, fn, context) {
-  return addListener(this, event, fn, context, false);
-};
-
-/**
- * Add a one-time listener for a given event.
- *
- * @param {(String|Symbol)} event The event name.
- * @param {Function} fn The listener function.
- * @param {*} [context=this] The context to invoke the listener with.
- * @returns {EventEmitter} `this`.
- * @public
- */
-EventEmitter.prototype.once = function once(event, fn, context) {
-  return addListener(this, event, fn, context, true);
-};
-
-/**
- * Remove the listeners of a given event.
- *
- * @param {(String|Symbol)} event The event name.
- * @param {Function} fn Only remove the listeners that match this function.
- * @param {*} context Only remove the listeners that have this context.
- * @param {Boolean} once Only remove one-time listeners.
- * @returns {EventEmitter} `this`.
- * @public
- */
-EventEmitter.prototype.removeListener = function removeListener(event, fn, context, once) {
-  var evt = prefix ? prefix + event : event;
-
-  if (!this._events[evt]) return this;
-  if (!fn) {
-    clearEvent(this, evt);
-    return this;
-  }
-
-  var listeners = this._events[evt];
-
-  if (listeners.fn) {
-    if (
-      listeners.fn === fn &&
-      (!once || listeners.once) &&
-      (!context || listeners.context === context)
-    ) {
-      clearEvent(this, evt);
-    }
-  } else {
-    for (var i = 0, events = [], length = listeners.length; i < length; i++) {
-      if (
-        listeners[i].fn !== fn ||
-        (once && !listeners[i].once) ||
-        (context && listeners[i].context !== context)
-      ) {
-        events.push(listeners[i]);
-      }
-    }
-
-    //
-    // Reset the array, or remove it completely if we have no more listeners.
-    //
-    if (events.length) this._events[evt] = events.length === 1 ? events[0] : events;
-    else clearEvent(this, evt);
-  }
-
-  return this;
-};
-
-/**
- * Remove all listeners, or those of the specified event.
- *
- * @param {(String|Symbol)} [event] The event name.
- * @returns {EventEmitter} `this`.
- * @public
- */
-EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
-  var evt;
-
-  if (event) {
-    evt = prefix ? prefix + event : event;
-    if (this._events[evt]) clearEvent(this, evt);
-  } else {
-    this._events = new Events();
-    this._eventsCount = 0;
-  }
-
-  return this;
-};
-
-//
-// Alias methods names because people roll like that.
-//
-EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
-EventEmitter.prototype.addListener = EventEmitter.prototype.on;
-
-//
-// Expose the prefix.
-//
-EventEmitter.prefixed = prefix;
-
-//
-// Allow `EventEmitter` to be imported as module namespace.
-//
-EventEmitter.EventEmitter = EventEmitter;
-
-//
-// Expose the module.
-//
-{
-  module.exports = EventEmitter;
-}
-});
+var eventemitter3Exports = requireEventemitter3();
+var EventEmitter = /*@__PURE__*/getDefaultExportFromCjs(eventemitter3Exports);
 
 /**
  * Controls a group of easings added by Ease.add()
  * @extends EventEmitter
  */
-class Easing extends eventemitter3
+class Easing extends EventEmitter
 {
     /**
      * an easing that acts on an element or an array of elements
-     * @param {(PIXI.DisplayObject|PIXI.DisplayObject[])} element
+     * @param {(PIXI.Container|PIXI.Container[])} element
      * @param {object} params
      * @param {object} options
      * @extends EventEmitter
@@ -614,7 +638,7 @@ class Easing extends eventemitter3
 
         /**
          * element(s) being eased
-         * @member {(PIXI.DisplayObject|PIXI.DisplayObject[])}
+         * @member {(PIXI.Container|PIXI.Container[])}
          */
         this.elements = Array.isArray(element) ? element : [element];
         this.eases = [];
@@ -654,9 +678,10 @@ class Easing extends eventemitter3
 
             case 'tint':
             case 'blend':
-                const colors = Array.isArray(param) ? param : [element.tint, param];
+                const colors = Easing.toColors(element, Array.isArray(param) ? param : [element.tint, param]);
                 start = 0;
-                to = colors.length;
+                // blend ends on the last color unless it repeats (without reverse) and wraps back to the first color
+                to = (entry === 'blend' && (!this.options.repeat || this.options.reverse)) ? colors.length - 1 : colors.length;
                 delta = to;
                 update = (entry === 'tint') ? ease => this.updateTint(ease, colors) : ease => this.updateBlend(ease, colors);
                 break
@@ -684,7 +709,7 @@ class Easing extends eventemitter3
 
             case 'face':
                 start = element.rotation;
-                to = Easing.shortestAngle(start, Math.atan2(param.y - element.y, param.x - element.x));
+                to = start + Easing.shortestAngle(start, Math.atan2(param.y - element.y, param.x - element.x));
                 delta = to - start;
                 update = ease => this.updateOne(ease, 'rotation');
                 break
@@ -696,6 +721,29 @@ class Easing extends eventemitter3
                 update = ease => this.updateOne(ease, entry);
         }
         this.eases.push({ element, entry, update, start, to, delta });
+    }
+
+    /**
+     * convert colors to numbers using the element's tint setter (pixi.js v8 accepts any ColorSource, e.g., 'red' or '#ff0000')
+     * @param {PIXI.Container} element
+     * @param {PIXI.ColorSource[]} colors
+     * @returns {number[]}
+     * @private
+     */
+    static toColors(element, colors)
+    {
+        if (colors.every(color => typeof color === 'number'))
+        {
+            return colors
+        }
+        const original = element.tint;
+        const results = colors.map(color =>
+        {
+            element.tint = color;
+            return element.tint
+        });
+        element.tint = original;
+        return results
     }
 
     /**
@@ -723,7 +771,7 @@ class Easing extends eventemitter3
 
     /**
      * remove all easings with matching element and params
-     * @param {PIXI.DisplayObject} [element] if not set, removes all elements in this easing
+     * @param {PIXI.Container} [element] if not set, removes all elements in this easing
      * @param {(string|string[])} [params] if not set, removes all params for each element
      */
     remove(element, params)
@@ -926,7 +974,7 @@ class Easing extends eventemitter3
         for (let i = 0; i < this.eases.length; i++)
         {
             const ease = this.eases[i];
-            if (ease.element._destroyed)
+            if (ease.element.destroyed || ease.element._destroyed)
             {
                 this.eases.splice(i, 1);
                 i--;
@@ -935,6 +983,10 @@ class Easing extends eventemitter3
             {
                 ease.update(ease);
             }
+        }
+        if (this.eases.length === 0)
+        {
+            return true
         }
         this.emit('each', this);
         if (this.time >= this.options.duration)
@@ -997,7 +1049,7 @@ class Easing extends eventemitter3
  */
 
 /**
- * fires on each loop where there are easings
+ * fires on each frame where there are easings
  * @event EaseElement#each
  * @type {EaseElement}
  */
@@ -1030,7 +1082,8 @@ class Easing extends eventemitter3
 
 const easeOptions = {
     duration: 1000,
-    ease: penner.easeInOutSine,
+    wait: 0,
+    ease: Penner.easeInOutSine,
     maxFrame: 1000 / 60,
     ticker: null,
     useRAF: true
@@ -1058,15 +1111,16 @@ const easeOptions = {
  * test2.tint = 0x0000ff
  * secondEase.add(test2, { blend: [0xff0000, 0x00ff00], scale: 2 })
  */
-class Ease extends eventemitter3
+class Ease extends EventEmitter
 {
     /**
      * @param {object} [options]
      * @param {number} [options.duration=1000] default duration if not set
+     * @param {number} [options.wait=0] default wait (in milliseconds) before an ease starts if not set
      * @param {(string|function)} [options.ease=Penner.easeInOutSine] default ease function if not set (see {@link https://www.npmjs.com/package/penner} for names of easing functions)
-     * @param {boolean} [option.useRAF=true] attach to a requestAnimationFrame listener
-     * @param {PIXI.Ticker} [options.ticker] attach to a PIXI.Ticker instead of RAF
-     * @param {number} [options.maxFrame=1000/60] maximum frame time (set to Infinity to ignore); only used if useTicker = true
+     * @param {boolean} [options.useRAF=true] attach to a requestAnimationFrame listener (ignored if options.ticker is set)
+     * @param {PIXI.Ticker} [options.ticker] attach to a PIXI.Ticker instead of RAF (e.g., PIXI.Ticker.shared or app.ticker)
+     * @param {number} [options.maxFrame=1000/60] maximum frame time (set to Infinity to ignore)
      * @fires Ease#complete
      * @fires Ease#each
      */
@@ -1078,6 +1132,7 @@ class Ease extends eventemitter3
         this.empty = true;
         if (this.options.ticker)
         {
+            this.options.useRAF = false;
             this.options.ticker.add(this.update, this);
         }
     }
@@ -1088,9 +1143,9 @@ class Ease extends eventemitter3
     destroy()
     {
         this.removeAll();
-        if (this.options.useTicker)
+        if (this.options.ticker)
         {
-            this.ticker.remove(this.update, this);
+            this.options.ticker.remove(this.update, this);
         }
         else if (this.options.useRAF)
         {
@@ -1100,13 +1155,13 @@ class Ease extends eventemitter3
     }
 
     /**
-     * add ease(s) to a PIXI.DisplayObject element
-     * @param {(PIXI.DisplayObject|PIXI.DisplayObject[])} element
+     * add ease(s) to a PIXI.Container element
+     * @param {(PIXI.Container|PIXI.Container[])} element
      *
      * @param {object} params
      * @param {number} [params.x]
      * @param {number} [params.y]
-     * @param {(PIXI.DisplayObject|PIXI.Point)} [params.position] changes both x and y
+     * @param {(PIXI.Container|PIXI.Point)} [params.position] changes both x and y
      * @param {number} [params.width]
      * @param {number} [params.height]
      * @param {number} [params.scale] changes both scale.x and scale.y
@@ -1114,7 +1169,7 @@ class Ease extends eventemitter3
      * @param {number} [params.scaleY]
      * @param {number} [params.alpha]
      * @param {number} [params.rotation]
-     * @param {(PIXI.DisplayObject|PIXI.Point)} [params.face] rotate the element to face a DisplayObject using the closest angle
+     * @param {(PIXI.Container|PIXI.Point)} [params.face] rotate the element to face a Container using the closest angle
      * @param {number} [params.skew] changes both skew.x and skew.y
      * @param {number} [params.skewX]
      * @param {number} [params.skewY]
@@ -1136,10 +1191,11 @@ class Ease extends eventemitter3
     {
         options = options || {};
         options.duration = typeof options.duration !== 'undefined' ? options.duration : this.options.duration;
+        options.wait = typeof options.wait !== 'undefined' ? options.wait : this.options.wait;
         options.ease = options.ease || this.options.ease;
         if (typeof options.ease === 'string')
         {
-            options.ease = penner[options.ease];
+            options.ease = Penner[options.ease];
         }
         const easing = new Easing(element, params, options);
         this.easings.push(easing);
@@ -1155,8 +1211,8 @@ class Ease extends eventemitter3
     /**
      * create an ease that changes position (x, y) of the element by moving to the target at the speed
      * NOTE: under the hood this calls add(element, { x, y }, { duration: <calculated speed based on distance and speed> })
-     * @param {PIXI.DisplayObject} element
-     * @param {(PIXI.DisplayObject|PIXI.Point)} target
+     * @param {PIXI.Container} element
+     * @param {(PIXI.Container|PIXI.Point)} target
      * @param {number} speed in pixels / ms
      *
      * @param {object} [options]
@@ -1164,7 +1220,6 @@ class Ease extends eventemitter3
      * @param {(boolean|number)} [options.repeat]
      * @param {boolean} [options.reverse]
      * @param {number} [options.wait] wait this number of milliseconds before ease starts
-     * @param {boolean} [options.removeExisting] removes existing eases on the element of the same type (including x,y/position, skewX,skewY/skew, scaleX,scaleY/scale)
      *
      * @returns {Easing}
      */
@@ -1179,8 +1234,8 @@ class Ease extends eventemitter3
     /**
      * helper function to add an ease that changes rotation to face the element at the desired target using the speed
      * NOTE: under the hood this calls add(element {x, y }, { duration: <calculated speed based on shortest rotation and speed> })
-     * @param {PIXI.DisplayObject} element
-     * @param {(PIXI.DisplayObject|PIXI.Point)} target
+     * @param {PIXI.Container} element
+     * @param {(PIXI.Container|PIXI.Point)} target
      * @param {number} speed in radians / ms
      *
      * @param {object} [options]
@@ -1194,16 +1249,16 @@ class Ease extends eventemitter3
     face(element, target, speed, options)
     {
         const shortestAngle = Easing.shortestAngle(element.rotation, Math.atan2(target.y - element.y, target.x - element.x));
-        const duration = Math.abs(shortestAngle - element.rotation) / speed;
+        const duration = Math.abs(shortestAngle) / speed;
         options = options || {};
         options.duration = duration;
-        return this.add(element, { rotation: shortestAngle }, options)
+        return this.add(element, { rotation: element.rotation + shortestAngle }, options)
     }
 
     /**
-     * removes one or more eases from a DisplayObject
+     * removes one or more eases from a Container
      * WARNING: 'complete' events will not fire for these removals
-     * @param {PIXI.DisplayObject} element
+     * @param {PIXI.Container} element
      * @param {(string|string[])} [param] omit to remove all easings for an element
      */
     removeEase(element, param)
@@ -1243,14 +1298,14 @@ class Ease extends eventemitter3
 }
 
     /**
-     * update frame; this is called automatically if options.useTicker !== false
-     * @param {number} elapsed time in ms since last frame
+     * update frame; this is called automatically if options.useRAF or options.ticker is set
+     * @param {number} [elapsed] time in ms since last frame (ignored if options.useRAF or options.ticker is set)
      */
     update(elapsed)
     {
-        if (this.options.useTicker)
+        if (this.options.ticker)
         {
-            elapsed = this.ticker.elapsedMS;
+            elapsed = this.options.ticker.elapsedMS;
         }
         else if (this.options.useRAF)
         {
@@ -1264,13 +1319,22 @@ class Ease extends eventemitter3
             const list = this.easings.slice(0);
             for (let easing of list)
             {
+                // skip easings removed by an earlier easing's event handler during this frame
+                if (this.easings.indexOf(easing) === -1)
+                {
+                    continue
+                }
                 if (easing.update(elapsed))
                 {
-                    this.easings.splice(this.easings.indexOf(easing), 1);
+                    const index = this.easings.indexOf(easing);
+                    if (index !== -1)
+                    {
+                        this.easings.splice(index, 1);
+                    }
                 }
             }
             this.emit('each', this);
-            if (this.easings.length === 0)
+            if (this.easings.length === 0 && !this.empty)
             {
                 this.empty = true;
                 this.emit('complete', this);
@@ -1336,7 +1400,7 @@ class Ease extends eventemitter3
     }
 }
 
-// manages the ids used to define the DisplayObject ease variable (enabled multiple eases attached to the same object)
+// manages the ids used to define the Container ease variable (enabled multiple eases attached to the same object)
 Ease.id = 0;
 
 /**
@@ -1362,7 +1426,7 @@ class List
  */
 
  /**
- * fires on each loop when there are eases running
+ * fires on each frame when there are eases running
  * @event Ease#each
  * @type {Ease}
  */

@@ -7,8 +7,8 @@ export function highlight()
     client.onreadystatechange = function()
     {
         var code = document.getElementById('code')
-        code.innerHTML = client.responseText
-        hl.highlightBlock(code)
+        code.textContent = client.responseText
+        hl.highlightElement(code)
     }
     client.send()
 }
